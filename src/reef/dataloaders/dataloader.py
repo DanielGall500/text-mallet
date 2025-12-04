@@ -2,6 +2,7 @@ from output import load_dataset, Dataset, DatasetDict
 from typing import Callable, Optional, Union, List
 import pandas as pd
 
+
 class DatasetLoader:
     """
     A class to load HuggingFace datasets and apply various alterations.
@@ -30,15 +31,23 @@ class DatasetLoader:
             **kwargs: Additional arguments for the filter operation
         """
         if isinstance(self.dataset, DatasetDict):
-            self.dataset = DatasetDict({
-                split: ds.filter(condition, batched=batched, **kwargs)
-                for split, ds in self.dataset.items()
-            })
+            self.dataset = DatasetDict(
+                {
+                    split: ds.filter(condition, batched=batched, **kwargs)
+                    for split, ds in self.dataset.items()
+                }
+            )
         else:
             self.dataset = self.dataset.filter(condition, batched=batched, **kwargs)
         return self
 
-    def map(self, function: Callable, batched: bool = False, remove_columns: Optional[List[str]] = None, **kwargs):
+    def map(
+        self,
+        function: Callable,
+        batched: bool = False,
+        remove_columns: Optional[List[str]] = None,
+        **kwargs,
+    ):
         """
         Apply a function to transform the dataset.
 
@@ -49,12 +58,21 @@ class DatasetLoader:
             **kwargs: Additional arguments for the map operation
         """
         if isinstance(self.dataset, DatasetDict):
-            self.dataset = DatasetDict({
-                split: ds.map(function, batched=batched, remove_columns=remove_columns, **kwargs)
-                for split, ds in self.dataset.items()
-            })
+            self.dataset = DatasetDict(
+                {
+                    split: ds.map(
+                        function,
+                        batched=batched,
+                        remove_columns=remove_columns,
+                        **kwargs,
+                    )
+                    for split, ds in self.dataset.items()
+                }
+            )
         else:
-            self.dataset = self.dataset.map(function, batched=batched, remove_columns=remove_columns, **kwargs)
+            self.dataset = self.dataset.map(
+                function, batched=batched, remove_columns=remove_columns, **kwargs
+            )
         return self
 
     def select(self, indices: Union[List[int], range]):
@@ -65,10 +83,9 @@ class DatasetLoader:
             indices: List or range of indices to select
         """
         if isinstance(self.dataset, DatasetDict):
-            self.dataset = DatasetDict({
-                split: ds.select(indices)
-                for split, ds in self.dataset.items()
-            })
+            self.dataset = DatasetDict(
+                {split: ds.select(indices) for split, ds in self.dataset.items()}
+            )
         else:
             self.dataset = self.dataset.select(indices)
         return self
@@ -81,10 +98,9 @@ class DatasetLoader:
             seed: Random seed for reproducibility
         """
         if isinstance(self.dataset, DatasetDict):
-            self.dataset = DatasetDict({
-                split: ds.shuffle(seed=seed)
-                for split, ds in self.dataset.items()
-            })
+            self.dataset = DatasetDict(
+                {split: ds.shuffle(seed=seed) for split, ds in self.dataset.items()}
+            )
         else:
             self.dataset = self.dataset.shuffle(seed=seed)
         return self
@@ -98,10 +114,12 @@ class DatasetLoader:
             new: New column name
         """
         if isinstance(self.dataset, DatasetDict):
-            self.dataset = DatasetDict({
-                split: ds.rename_column(original, new)
-                for split, ds in self.dataset.items()
-            })
+            self.dataset = DatasetDict(
+                {
+                    split: ds.rename_column(original, new)
+                    for split, ds in self.dataset.items()
+                }
+            )
         else:
             self.dataset = self.dataset.rename_column(original, new)
         return self
@@ -114,10 +132,12 @@ class DatasetLoader:
             columns: Column name or list of column names to remove
         """
         if isinstance(self.dataset, DatasetDict):
-            self.dataset = DatasetDict({
-                split: ds.remove_columns(columns)
-                for split, ds in self.dataset.items()
-            })
+            self.dataset = DatasetDict(
+                {
+                    split: ds.remove_columns(columns)
+                    for split, ds in self.dataset.items()
+                }
+            )
         else:
             self.dataset = self.dataset.remove_columns(columns)
         return self
