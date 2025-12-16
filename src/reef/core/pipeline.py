@@ -6,15 +6,50 @@ from reef.obfuscators.scramble import (
     LinearScrambleObfuscator,
     HierarchicalScrambleObfuscator,
 )
+from datasets import load_dataset
+from reef.obfuscators.spacy_registry import get_spacy_nlp
+import spacy
 
 
 class ReefPipeline:
-    def run(self, path_to_dataset: str) -> bool:
+    def run(self, repo_name: str) -> None:
+        dataset = load_dataset(repo_name)
+
+        nlp = get_spacy_nlp("lemma")
+
+        # Create obfuscator once
+        lemma_obf = LemmaObfuscator()
+
+        def lemmatise_batch(batch):
+            texts = batch["text"]
+
+            docs = nlp.pipe(
+                texts,
+                batch_size=2000,
+            )
+
+            batch["text_lemmas"] = [
+                lemma_obf.obfuscate(doc) for doc in docs
+            ]
+            return batch
+
+        transformed_dataset = dataset.map(
+            lemmatise_batch,
+            batched=True,
+            batch_size=2000,
+            desc="Lemmatising..."
+        )
+
+        transformed_dataset.save_to_disk("transformed_dataset")
+
+
+    def run_test(self) -> bool:
+        path_to_dataset = "./datasets/leipzig.txt"
+
         txt_loader = TxtLoader()
         replace_obfuscator = ReplaceObfuscator()
 
         text = txt_loader.load(path_to_dataset)
-        obfuscate = replace_obfuscator.obfuscate(text)
 
         lemma_obf = LemmaObfuscator()
         output_lemma = lemma_obf.obfuscate(text)
@@ -32,11 +67,37 @@ class ReefPipeline:
         output_nouns_and_propn_only = replace_obfus.obfuscate(
             text, algorithm="nouns-and-prop-only"
         )
-        output_nouns_only = replace_obfus.obfuscate(text, algorithm="nouns-only")
+        output_nouns_only = replace_obfus.obfuscate(
+                text, algorithm="nouns-only"
+        )
         output_no_nouns_or_propn = replace_obfus.obfuscate(
             text, algorithm="no-nouns-or-prop"
         )
-        output_no_nouns = replace_obfus.obfuscate(text, algorithm="no-nouns")
+        output_no_nouns = replace_obfus.obfuscate(
+                text, 
+                algorithm="no-nouns"
+        )
+
+        output_nouns_and_propn_only_replace = replace_obfus.obfuscate(
+            text, 
+            algorithm="nouns-and-prop-only",
+            replace_with_pos=True
+        )
+        output_nouns_only_replace = replace_obfus.obfuscate(
+                text,
+                algorithm="nouns-only",
+                replace_with_pos=True
+        )
+        output_no_nouns_or_propn_replace = replace_obfus.obfuscate(
+                text, 
+                algorithm="no-nouns-or-prop",
+                replace_with_pos=True
+        )
+        output_no_nouns_replace = replace_obfus.obfuscate(
+                text, 
+                algorithm="no-nouns",
+                replace_with_pos=True
+        )
 
         obfuscations = {
             "Lemmas Only": output_lemma,
@@ -47,6 +108,10 @@ class ReefPipeline:
             "Nouns Only": output_nouns_only,
             "No Nouns": output_no_nouns,
             "No Nouns Nor Proper Nouns": output_no_nouns_or_propn,
+            "Nouns & Proper Nouns Only (incl. POS)": output_nouns_and_propn_only_replace,
+            "Nouns Only (incl. POS)": output_nouns_only_replace,
+            "No Nouns (incl. POS)": output_no_nouns_replace,
+            "No Nouns Nor Proper Nouns (incl. POS)": output_no_nouns_or_propn_replace
         }
 
         # Display results

@@ -5,8 +5,6 @@ class LemmaObfuscator(Obfuscator):
     def obfuscate(self, text: str) -> str:
         return self._lemmatise(text)
 
-    def _lemmatise(self, text: str) -> str:
-        nlp = self.spacy_nlp(spacy_type="lemma")
-        doc = nlp(text)
+    def _lemmatise(self, doc) -> str:
         lemmatised_text = "".join([token.lemma_ + token.whitespace_ for token in doc])
         return lemmatised_text
