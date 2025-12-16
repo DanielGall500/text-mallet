@@ -1,14 +1,16 @@
-from obfuscators.base import Obfuscator
-from obfuscators.spacy_registry import get_spacy_nlp
+from reef.obfuscators.base import Obfuscator
+from reef.obfuscators.spacy_registry import get_spacy_nlp
 from nltk.tokenize.treebank import TreebankWordDetokenizer
 from spacy.tokens import Token
 import random
 
-def get_nested_dict_from_list(l: list[str]) -> dict:
+
+def get_nested_dict_from_list(l: list[tuple]) -> dict:
     nested = {}
     for item in reversed(l):
-        nested = {item : nested}
+        nested = {item: nested}
     return nested
+
 
 def deep_update(main_dict, update_dict):
     for k, v in update_dict.items():
@@ -16,13 +18,14 @@ def deep_update(main_dict, update_dict):
             deep_update(main_dict[k], v)
         else:
             main_dict[k] = v
-            
+
+
 def linearise_sentence(tree, reverse=False):
     sentence = []
 
     for (word, direction), children in tree.items():
-        left_children = {k: v for k, v in children.items() if k[1] == 'L'}
-        right_children = {k: v for k, v in children.items() if k[1] == 'R'}
+        left_children = {k: v for k, v in children.items() if k[1] == "L"}
+        right_children = {k: v for k, v in children.items() if k[1] == "R"}
 
         if reverse:
             tmp = left_children
@@ -33,11 +36,7 @@ def linearise_sentence(tree, reverse=False):
         sentence.append(word)
         sentence.extend(linearise_sentence(right_children))
 
-
     return sentence
-
-
-import random
 
 
 def shuffle_siblings(tree):
@@ -47,33 +46,30 @@ def shuffle_siblings(tree):
         shuffled_children = shuffle_siblings(children)
         shuffled_tree[(word, direction)] = shuffled_children
 
-    l_siblings = [(k, v) for k, v in shuffled_tree.items() if k[1] == 'L']
-    r_siblings = [(k, v) for k, v in shuffled_tree.items() if k[1] == 'R']
+    l_siblings = [(k, v) for k, v in shuffled_tree.items() if k[1] == "L"]
+    r_siblings = [(k, v) for k, v in shuffled_tree.items() if k[1] == "R"]
 
     random.shuffle(l_siblings)
     random.shuffle(r_siblings)
 
     return dict(l_siblings + r_siblings)
 
+
 def swap_head_directions(tree):
     swapped_tree = {}
 
     for (word, direction), children in tree.items():
-        new_direction = 'L' if direction == 'R' else 'R'
+        new_direction = "L" if direction == "R" else "R"
 
         swapped_children = swap_head_directions(children)
         swapped_tree[(word, new_direction)] = swapped_children
 
     return swapped_tree
 
-def shuffle_items(items: list[tuple]) -> list:
-    indices = [x[1] for x in items]
-    random.shuffle(indices)
-    return [{item: i} for item,i in zip(items, indices)]
 
 class ScrambleObfuscator(Obfuscator):
     def spacy_nlp(self, spacy_type: str = "full"):
-        if not hasattr(self, "_nlp"):
+        if not hasattr(self, "_spacy_nlp"):
             self._spacy_nlp = get_spacy_nlp(spacy_type)
         return self._spacy_nlp
 
@@ -92,7 +88,39 @@ class ScrambleObfuscator(Obfuscator):
         scrambled_words = " ".join(words)
         return scrambled_words
 
-    def _get_route_to_root(self, token: Token, curr_pos: int = 0, curr_list: list = None) -> list[str]:
+    def _hierarchical_scramble(self, text: str, type: str = "shuffle-siblings") -> str:
+        nlp = self.spacy_nlp(spacy_type="full")
+        doc = nlp(text)
+
+        d = {}
+        for token in doc:
+            print("Checking token ", token.text)
+            path_to_root = self._get_route_to_root(token)
+            print("====")
+            print(path_to_root)
+            print("====")
+            d_from_l = get_nested_dict_from_list(path_to_root)
+            deep_update(d, d_from_l)
+
+        if type == "shuffle-siblings":
+            shuffled = shuffle_siblings(d)
+            linearised = linearise_sentence(shuffled)
+        elif type == "head-direction":
+            linearised = linearise_sentence(d, reverse=True)
+        else:
+            raise ValueError("Invalid scramble type.")
+
+        linearised = TreebankWordDetokenizer().detokenize(linearised)
+        return linearised
+
+    def _get_route_to_root(
+        self, token: Token, curr_pos: int = 0, curr_list: list[tuple] = []
+    ) -> list[tuple]:
+        """
+        Find the path from a token to the eventual root of a sentence.
+        This includes head information e.g. 'L' if a token is left-branching or 'R' if right-branching.
+        E.g.
+        """
         is_root = lambda token, head: token.text == head.text
 
         curr_head = token.head
@@ -107,30 +135,3 @@ class ScrambleObfuscator(Obfuscator):
             return curr_list
         else:
             return self._get_route_to_root(curr_head, curr_pos + 1, curr_list)
-
-    def _hierarchical_scramble(self, text: str, type: str = "scramble") -> str:
-        nlp = self.spacy_nlp(spacy_type="full")
-        doc = nlp(text)
-
-        d = {}
-        for token in doc:
-            print("Checking token ", token.text)
-            path_to_root = self._get_route_to_root(token)
-            d_from_l = get_nested_dict_from_list(path_to_root)
-            deep_update(d, d_from_l)
-        print(d)
-
-        if type == "shuffle-siblings":
-            shuffled = shuffle_siblings(d)
-            linearised = linearise_sentence(shuffled)
-        elif type == "head-direction":
-            linearised = linearise_sentence(d, reverse=True)
-        else:
-            raise ValueError("Invalid scramble type.")
-
-        linearised = TreebankWordDetokenizer().detokenize(linearised)
-        return linearised
-
-
-
-
