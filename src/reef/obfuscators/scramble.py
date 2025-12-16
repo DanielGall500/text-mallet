@@ -48,7 +48,7 @@ class HierarchicalScrambleObfuscator(Obfuscator):
             shuffled = shuffle_siblings(d)
             linearised = linearise_sentence(shuffled)
         elif algorithm == "reverse-head-direction":
-            swapped = swap_head_directions(d)
+            swapped = swap_head_directions(d,swap_probability=0.7)
             linearised = linearise_sentence(swapped, reverse=True)
 
         linearised = TreebankWordDetokenizer().detokenize(linearised)
@@ -109,7 +109,7 @@ def shuffle_siblings(tree):
 
     return dict(l_siblings + r_siblings)
 
-def swap_head_directions(tree, swap_probability=1):
+def swap_head_directions(tree, swap_probability:float=1.0):
     swapped_tree = {}
     for (word, direction), children in tree.items():
         # Randomly decide whether to swap this node's direction

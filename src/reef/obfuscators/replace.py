@@ -1,19 +1,24 @@
-from obfuscators.base import Obfuscator
-from obfuscators.spacy_registry import get_spacy_nlp
+from reef.obfuscators.base import Obfuscator
+from reef.obfuscators.spacy_registry import get_spacy_nlp
 
 
 class ReplaceObfuscator(Obfuscator):
-    @property
-    def spacy_nlp(self):
-        if not hasattr(self, "_nlp"):
-            self._spacy_nlp = get_spacy_nlp("ner")
-        return self._spacy_nlp
 
-    def obfuscate(self, text: str) -> str:
+    def obfuscate(self, text: str, algorithm="nouns-only") -> str:
         return self._to_nouns(text)
 
-    def _to_nouns(self, text: str) -> str:
-        nlp = self.spacy_nlp
+    def _keep_only(self, text: str, pos_tags: list[str]) -> str:
+        nlp = self.spacy_nlp("ner")
+        doc = nlp(text)
+        remaining_tokens = []
+        for token in doc:
+            is_valid_pos = token.pos_ in pos_tags
+            if is_valid_pos:
+                remaining_tokens.append(token.text)
+        return " ".join(remaining_tokens)
+
+
+    def _nouns_only(self, text: str) -> str:
         doc = nlp(text)
         nouns = []
         for token in doc:
