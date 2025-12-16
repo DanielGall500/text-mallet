@@ -4,9 +4,9 @@ from spacy.tokens import Token
 from typing import Literal
 import random
 
+
 class LinearScrambleObfuscator(Obfuscator):
-    def obfuscate(self, text: str, 
-                  seed: int = 100) -> str:
+    def obfuscate(self, text: str, seed: int = 100) -> str:
 
         random.seed(seed)
         return self._linear_scramble(text)
@@ -22,9 +22,12 @@ class HierarchicalScrambleObfuscator(Obfuscator):
 
     HierarchicalAlgorithm = Literal["shuffle-siblings", "reverse-head-direction"]
 
-    def obfuscate(self, text: str, 
-                  algorithm: HierarchicalAlgorithm="shuffle-siblings",
-                  seed: int = 100) -> str:
+    def obfuscate(
+        self,
+        text: str,
+        algorithm: HierarchicalAlgorithm = "shuffle-siblings",
+        seed: int = 100,
+    ) -> str:
 
         random.seed(seed)
 
@@ -33,7 +36,9 @@ class HierarchicalScrambleObfuscator(Obfuscator):
         elif algorithm == "reverse-head-direction":
             return self._hierarchical_scramble(text, algorithm=algorithm)
 
-    def _hierarchical_scramble(self, text: str, algorithm: HierarchicalAlgorithm = "shuffle-siblings") -> str:
+    def _hierarchical_scramble(
+        self, text: str, algorithm: HierarchicalAlgorithm = "shuffle-siblings"
+    ) -> str:
         nlp = self.spacy_nlp(spacy_type="full")
         doc = nlp(text)
 
@@ -48,17 +53,19 @@ class HierarchicalScrambleObfuscator(Obfuscator):
             shuffled = shuffle_siblings(d)
             linearised = linearise_sentence(shuffled)
         elif algorithm == "reverse-head-direction":
-            swapped = swap_head_directions(d,swap_probability=0.7)
+            swapped = swap_head_directions(d, swap_probability=0.7)
             linearised = linearise_sentence(swapped, reverse=True)
 
         linearised = TreebankWordDetokenizer().detokenize(linearised)
         return linearised
 
-    def _get_route_to_root(self, token: Token, curr_pos: int = 0, curr_list: list[tuple]=[]) -> list[tuple]:
+    def _get_route_to_root(
+        self, token: Token, curr_pos: int = 0, curr_list: list[tuple] = []
+    ) -> list[tuple]:
         """
         Find the path from a token to the eventual root of a sentence.
         This includes head information e.g. 'L' if a token is left-branching or 'R' if right-branching.
-        E.g. 
+        E.g.
         """
         is_root = lambda token, head: token.text == head.text
 
@@ -74,13 +81,14 @@ class HierarchicalScrambleObfuscator(Obfuscator):
             return curr_list
         else:
             return self._get_route_to_root(curr_head, curr_pos + 1, curr_list)
-            
+
+
 def linearise_sentence(tree, reverse=False):
     sentence = []
 
     for (word, direction), children in tree.items():
-        left_children = {k: v for k, v in children.items() if k[1] == 'L'}
-        right_children = {k: v for k, v in children.items() if k[1] == 'R'}
+        left_children = {k: v for k, v in children.items() if k[1] == "L"}
+        right_children = {k: v for k, v in children.items() if k[1] == "R"}
 
         if reverse:
             tmp = left_children
@@ -91,8 +99,8 @@ def linearise_sentence(tree, reverse=False):
         sentence.append(word)
         sentence.extend(linearise_sentence(right_children))
 
-
     return sentence
+
 
 def shuffle_siblings(tree):
     shuffled_tree = {}
@@ -101,32 +109,35 @@ def shuffle_siblings(tree):
         shuffled_children = shuffle_siblings(children)
         shuffled_tree[(word, direction)] = shuffled_children
 
-    l_siblings = [(k, v) for k, v in shuffled_tree.items() if k[1] == 'L']
-    r_siblings = [(k, v) for k, v in shuffled_tree.items() if k[1] == 'R']
+    l_siblings = [(k, v) for k, v in shuffled_tree.items() if k[1] == "L"]
+    r_siblings = [(k, v) for k, v in shuffled_tree.items() if k[1] == "R"]
 
     random.shuffle(l_siblings)
     random.shuffle(r_siblings)
 
     return dict(l_siblings + r_siblings)
 
-def swap_head_directions(tree, swap_probability:float=1.0):
+
+def swap_head_directions(tree, swap_probability: float = 1.0):
     swapped_tree = {}
     for (word, direction), children in tree.items():
         # Randomly decide whether to swap this node's direction
         if random.random() < swap_probability:
-            new_direction = 'L' if direction == 'R' else 'R'
+            new_direction = "L" if direction == "R" else "R"
         else:
             new_direction = direction
-        
+
         swapped_children = swap_head_directions(children, swap_probability)
         swapped_tree[(word, new_direction)] = swapped_children
     return swapped_tree
 
+
 def get_nested_dict_from_list(l: list[tuple]) -> dict:
     nested = {}
     for item in reversed(l):
-        nested = {item : nested}
+        nested = {item: nested}
     return nested
+
 
 def deep_update(main_dict, update_dict):
     for k, v in update_dict.items():

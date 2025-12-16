@@ -5,11 +5,12 @@ from typing import Literal
 
 class ReplaceObfuscator(Obfuscator):
 
-    POS = Literal["NOUN","PROPN"]
-    Algorithm = Literal["nouns-only", "nouns-and-prop-only",
-                        "no-nouns", "no-nouns-or-prop"]
+    POS = Literal["NOUN", "PROPN"]
+    Algorithm = Literal[
+        "nouns-only", "nouns-and-prop-only", "no-nouns", "no-nouns-or-prop"
+    ]
 
-    def obfuscate(self, text: str, algorithm:Algorithm="nouns-only") -> str:
+    def obfuscate(self, text: str, algorithm: Algorithm = "nouns-only") -> str:
         self.nlp = self.spacy_nlp("ner")
         if algorithm == "nouns-only":
             return self._nouns_only(text)
@@ -49,4 +50,3 @@ class ReplaceObfuscator(Obfuscator):
             if not is_to_be_removed:
                 remaining_tokens.append(token.text)
         return TreebankWordDetokenizer().detokenize(remaining_tokens)
-

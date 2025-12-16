@@ -1,5 +1,6 @@
 from reef.obfuscators.spacy_registry import get_spacy_nlp
 
+
 class Obfuscator:
     def spacy_nlp(self, spacy_type: str = "full"):
         if not hasattr(self, "_spacy_nlp"):
