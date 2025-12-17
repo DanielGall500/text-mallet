@@ -6,41 +6,78 @@ from reef.obfuscators.scramble import (
     LinearScrambleObfuscator,
     HierarchicalScrambleObfuscator,
 )
-from datasets import load_dataset
+from datasets import load_from_disk, load_dataset, DatasetDict, concatenate_datasets
 from reef.obfuscators.spacy_registry import get_spacy_nlp
-import spacy
+import os
+import torch
 
+torch.set_num_threads(1)
+
+nlp = get_spacy_nlp("ner")
+replace_obfus = ReplaceObfuscator()
+MAP_BATCH_SIZE = 10     # spaCy batch size
+def process_batch(batch):
+    texts = batch["text"]
+
+    docs = nlp.pipe(
+        texts,
+        batch_size=MAP_BATCH_SIZE,
+        n_process=2
+    )
+
+    batch["text_lemmas"] = [
+        replace_obfus.obfuscate(doc, algorithm="nouns-only", replace_with_pos=True) for doc in docs
+    ]
+    return batch
 
 class ReefPipeline:
     def run(self, repo_name: str) -> None:
         dataset = load_dataset(repo_name)
 
-        nlp = get_spacy_nlp("lemma")
 
-        # Create obfuscator once
-        lemma_obf = LemmaObfuscator()
+        CHECKPOINT_DIR = "new_checkpoints/replace_nouns_with_pos"
+        FINAL_DIR = "new_checkpoints/transformed_dataset_replace/"
+        CHUNK_SIZE = 5_000       # examples per checkpoint
 
-        def lemmatise_batch(batch):
-            texts = batch["text"]
+        os.makedirs(CHECKPOINT_DIR, exist_ok=True)
 
-            docs = nlp.pipe(
-                texts,
-                batch_size=2000,
-            )
+        final_splits = {}
 
-            batch["text_lemmas"] = [
-                lemma_obf.obfuscate(doc) for doc in docs
-            ]
-            return batch
+        for split_name, split_ds in dataset.items():
+            print(f"\nProcessing split: {split_name}")
+            processed_chunks = []
 
-        transformed_dataset = dataset.map(
-            lemmatise_batch,
-            batched=True,
-            batch_size=2000,
-            desc="Lemmatising..."
-        )
+            for start in range(0, len(split_ds), CHUNK_SIZE):
+                end = min(start + CHUNK_SIZE, len(split_ds))
+                ckpt_path = f"{CHECKPOINT_DIR}/{split_name}_{start}"
 
-        transformed_dataset.save_to_disk("transformed_dataset")
+                if os.path.exists(ckpt_path):
+                    print(f"  ↳ Loading checkpoint {ckpt_path}")
+                    chunk = load_from_disk(ckpt_path)
+                else:
+                    print(f"  ↳ Processing examples {start}:{end}")
+                    chunk = split_ds.select(range(start, end))
+
+                    chunk = chunk.map(
+                        process_batch,
+                        batched=True,
+                        batch_size=MAP_BATCH_SIZE,
+                        desc=f"Lemmatising {split_name} [{start}:{end}]",
+                        num_proc=8,
+                        cache_file_name=None
+                    )
+
+                    chunk.save_to_disk(ckpt_path)
+
+                processed_chunks.append(chunk)
+
+            final_splits[split_name] = concatenate_datasets(processed_chunks)
+
+        # Reassemble DatasetDict
+        from datasets import DatasetDict
+        final_dataset = DatasetDict(final_splits)
+
+        final_dataset.save_to_disk(FINAL_DIR)
 
 
     def run_test(self) -> bool:
@@ -128,8 +165,6 @@ class ReefPipeline:
             print(obfuscated_text)
             print("\n")
 
-        # issue: needs to be an element of randomness in the algorithms
-        # for reconstructability to be more difficult.
         return True
 
     def load(self):
