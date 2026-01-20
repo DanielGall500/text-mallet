@@ -16,7 +16,8 @@
     <a href="https://github.com/DanielGall500/text-hammer/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
   </p>
 </div>
-A package for the smashing of text into ![derived](https://text-plus.org/en/themen-dokumentation/atf/) formats, aimed at reducing the possibility of privacy or copyright infringement while maintaining the text utility for certain tasks e.g. classification, retrieval.
+
+A package for the smashing of text into [derived](https://text-plus.org/en/themen-dokumentation/atf) formats, aimed at reducing the possibility of privacy or copyright infringement while maintaining the text utility for certain tasks e.g. classification, retrieval.
 
 When we think about how strings can be altered for obfuscation, we can look at the following aspects:
 * Word Forms (the character sequence)
