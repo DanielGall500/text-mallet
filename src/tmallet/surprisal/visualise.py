@@ -1,4 +1,6 @@
 from typing import List, Dict, Optional
+from IPython.display import HTML
+import numpy as np
 import pandas as pd
 from plotnine import (
     ggplot,
@@ -117,34 +119,35 @@ class SurprisalVisualiser:
 
         return plot
 
-    def plot_grouped_density(
-        self,
-        alpha: float = 0.5,
-        title: str = "Surprisal Density by Group",
-        xlabel: str = "Surprisal",
-        ylabel: str = "Density",
-    ):
+    def display_sentence_heatmap(self, words, surprisals, colormap="Reds"):
         """
-        Create overlaid density plots by group.
-
-        Args:
-            alpha: Transparency level
-            title: Plot title
-            xlabel: X-axis label
-            ylabel: Y-axis label
-
-        Returns:
-            plotnine plot object
+        Display a sentence with words highlighted by surprisal intensity.
+        
+        words: list of str
+        surprisals: list or array of floats
+        colormap: matplotlib colormap name
         """
-        if self.data is None or "group" not in self.data.columns:
-            raise ValueError("No grouped data available.")
+        import matplotlib.cm as cm
+        import matplotlib.colors as mcolors
 
-        plot = (
-            ggplot(self.data, aes(x="surprisal", fill="group"))
-            + geom_density(alpha=alpha)
-            + labs(title=title, x=xlabel, y=ylabel)
-            + theme_minimal()
-            + scale_fill_brewer(type="qual", palette="Set2")
-        )
+        words = list(words)
+        surprisals = np.array(surprisals)
+        
+        # normalize to 0–1
+        norm = (surprisals - surprisals.min()) / (surprisals.max() - surprisals.min() + 1e-10)
+        
+        # pick a colormap from matplotlib
+        cmap = cm.get_cmap(colormap)
+        
+        spans = []
+        for w, v in zip(words, norm):
+            # get rgba color
+            r, g, b, a = cmap(v)
+            # convert to 0–255 and format rgba
+            color = f"rgba({int(r*255)},{int(g*255)},{int(b*255)},{a:.2f})"
+            spans.append(f"<span style='background-color:{color};padding:0 2px'>{w}</span>")
+        
+        html_str = " ".join(spans)
+        return HTML(html_str)
 
-        return plot
+
