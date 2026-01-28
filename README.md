@@ -1,3 +1,5 @@
+[![Powered by spaCy](https://img.shields.io/badge/Powered%20by-spaCy-09a3d5?logo=spacy&logoColor=white)](https://spacy.io)
+
 <br />
 <div align="center">
   <img src="assets/mallet.svg" alt="Logo" width="200" height="200">
