@@ -6,22 +6,15 @@ from tmallet.obfuscators import (
     SurprisalObfuscator,
     get_spacy_nlp,
 )
-from tmallet.obfuscators.base import SpaCyObfuscator
 from datasets import load_from_disk, concatenate_datasets
+from tmallet.obfuscators.base import Obfuscator, SpaCyObfuscator
+from typing import Literal,Dict,Union,List,Optional
 from functools import partial
 from pathlib import Path
-from typing import Literal
-import os
 import torch
+import os
 
 torch.set_num_threads(1)
-
-nlp = get_spacy_nlp("full")
-replace_obfus = ReplaceObfuscator()
-lemma_obfus = LemmaObfuscator()
-
-hierarchical_scramble_obfus = HierarchicalScrambleObfuscator()
-linear_scramble_obfus = LinearScrambleObfuscator()
 
 ObfuscationTechnique = Literal[
     "noun",
@@ -33,72 +26,97 @@ ObfuscationTechnique = Literal[
     "scramble-BoW-by-sentence",
     "scramble-shuffle-siblings",
     "scramble-reverse-head",
-    "surprisal",
+    "mutual-information",
 ]
 
 
-def obfuscate_batch(
-    batch, algorithm: ObfuscationTechnique, obfuscated_column_name: str
-):
-    texts = batch["text"]
+"""
+Config Examples
 
-    match algorithm:
-        case "noun" | "noun-propn" | "noun-pos" | "noun-propn-pos":
-            obfuscator = ReplaceObfuscator()
-        case "lemmatization":
-            obfuscator = LemmaObfuscator()
-        case "scramble-BoW" | "scramble-BoW-by-sentence":
-            obfuscator = LinearScrambleObfuscator()
-            config = {"algorithm": algorithm}
-        case "scramble-shuffle-siblings" | "scramble-reverse-head":
-            obfuscator = HierarchicalScrambleObfuscator()
-            config = {"algorithm": algorithm}
-        case "surprisal":
-            obfuscator = SurprisalObfuscator()
-            config = {"threshold": 4}
+config = {"algorithm": algorithm}
+config = {"threshold": 4}
+"""
 
-    is_using_spacy = issubclass(type(obfuscator), SpaCyObfuscator)
-    if is_using_spacy:
-        texts = nlp.pipe(texts)
+class TMallet:
+    def __init__(self):
+        self.nlp = None
 
-    batch[obfuscated_column_name] = [
-        obfuscator.obfuscate(text, config=config) for text in texts
-    ]
+    def obfuscate(self, text: Union[List[str],str], config: Dict) -> Union[List[str],str]:
+        algorithm = config["algorithm"]
+        obfuscator = self._get_obfuscator(algorithm)
+        return obfuscator.obfuscate(text, config)
 
-    return batch
+    def _get_obfuscator(self, algorithm: ObfuscationTechnique) -> Union[Obfuscator,SpaCyObfuscator]:
+        match algorithm:
+            case "noun" | "noun-propn" | "noun-pos" | "noun-propn-pos":
+                self.nlp = get_spacy_nlp("ner")
+                return ReplaceObfuscator()
+            case "lemmatization":
+                self.nlp = get_spacy_nlp("lemma")
+                return LemmaObfuscator()
+            case "scramble-BoW" | "scramble-BoW-by-sentence":
+                return LinearScrambleObfuscator()
+            case "scramble-shuffle-siblings" | "scramble-reverse-head":
+                self.nlp = get_spacy_nlp("full")
+                return HierarchicalScrambleObfuscator()
+            case "mutual-information":
+                return SurprisalObfuscator()
+            case _:
+                raise ValueError("Please provide a valid obfuscation algorithm.")
 
+    def _obfuscate_batch(
+            self, batch, column: str, column_obfuscated: str, 
+            obfuscator: Union[Obfuscator|SpaCyObfuscator], 
+            config: Dict, 
+    ):
+        if column not in batch.columns:
+            raise KeyError(f"Invalid column provided. Please choose one of {batch.columns}")
+        texts = batch[column]
 
-class TextMallet:
-    def run(
+        is_using_spacy = issubclass(type(obfuscator), SpaCyObfuscator)
+        if is_using_spacy:
+            texts = self.nlp.pipe(texts)
+
+        batch[column_obfuscated] = [
+            obfuscator.obfuscate(text, config=config) for text in texts
+        ]
+        return batch
+
+    def obfuscate_dataset(
         self,
         dataset,
-        algorithm: ObfuscationTechnique,
-        obfuscated_column_name: str,
+        column: str,
+        column_obfuscated: str,
+        config: Dict,
         batch_size: int = 100,
+        num_proc:Optional[int]=None
     ):
         obfuscated_dataset = dataset.map(
             partial(
-                obfuscate_batch,
-                algorithm=algorithm,
-                obfuscated_column_name=obfuscated_column_name,
+                self._obfuscate_batch,
+                column=column,
+                column_obfuscated=column_obfuscated,
+                config=config,
             ),
             batched=True,
             batch_size=batch_size,
             desc="Obfuscating...",
-            num_proc=None,
+            num_proc=num_proc,
             cache_file_name=None,
             load_from_cache_file=False,
         )
         return obfuscated_dataset
 
-    def run_in_chunks(
+    def obfuscate_dataset_by_chunk(
         self,
         dataset,
-        algorithm: ObfuscationTechnique,
-        obfuscated_column_name: str,
+        column: str,
+        column_obfuscated: str,
+        config: Dict,
         save_chunks_to_folder: Path,
-        batch_size: int = 100,
         chunk_size: int = 5_000,
+        batch_size: int = 100,
+        num_proc:Optional[int]=None
     ) -> None:
         processed_chunks = []
         num_samples = len(dataset)
@@ -114,18 +132,13 @@ class TextMallet:
                 print(f"Processing examples {start}:{end}")
                 chunk = dataset.select(range(start, end))
 
-                chunk = chunk.map(
-                    partial(
-                        obfuscate_batch,
-                        algorithm=algorithm,
-                        obfuscated_column_name=obfuscated_column_name,
-                    ),
-                    batched=True,
+                chunk = self.obfuscate_dataset(
+                    chunk,
+                    column=column,
+                    column_obfuscated=column_obfuscated,
+                    config=config,
                     batch_size=batch_size,
-                    desc=f"Obfuscating [{start}:{end}]...",
-                    num_proc=None,
-                    cache_file_name=None,
-                    load_from_cache_file=False,
+                    num_proc=num_proc
                 )
 
                 chunk.save_to_disk(ckpt_path)
