@@ -122,7 +122,7 @@ class SurprisalVisualiser:
     def display_sentence_heatmap(self, words, surprisals, colormap="Reds"):
         """
         Display a sentence with words highlighted by surprisal intensity.
-        
+
         words: list of str
         surprisals: list or array of floats
         colormap: matplotlib colormap name
@@ -132,22 +132,24 @@ class SurprisalVisualiser:
 
         words = list(words)
         surprisals = np.array(surprisals)
-        
+
         # normalize to 0–1
-        norm = (surprisals - surprisals.min()) / (surprisals.max() - surprisals.min() + 1e-10)
-        
+        norm = (surprisals - surprisals.min()) / (
+            surprisals.max() - surprisals.min() + 1e-10
+        )
+
         # pick a colormap from matplotlib
         cmap = cm.get_cmap(colormap)
-        
+
         spans = []
         for w, v in zip(words, norm):
             # get rgba color
             r, g, b, a = cmap(v)
             # convert to 0–255 and format rgba
-            color = f"rgba({int(r*255)},{int(g*255)},{int(b*255)},{a:.2f})"
-            spans.append(f"<span style='background-color:{color};padding:0 2px'>{w}</span>")
-        
+            color = f"rgba({int(r * 255)},{int(g * 255)},{int(b * 255)},{a:.2f})"
+            spans.append(
+                f"<span style='background-color:{color};padding:0 2px'>{w}</span>"
+            )
+
         html_str = " ".join(spans)
         return HTML(html_str)
-
-

@@ -14,9 +14,7 @@ class SurprisalAnalyser:
     def get_median(self, texts: Union[List[str], str]):
         return self.calculator.get_average_surprisal(texts, average_type="median")
 
-    def get_surprisal_by_token(
-        self, texts: Union[List[str], str]
-    ):
+    def get_surprisal_by_token(self, texts: Union[List[str], str]):
         if type(texts) is List[str]:
             processed_texts = self.calculator.calculate_surprisal_batch(texts)
         elif type(texts) is str:
@@ -25,9 +23,7 @@ class SurprisalAnalyser:
             raise ValueError("Please provide a string or list of strings.")
         return processed_texts
 
-    def get_surprisal_by_word(
-        self, texts: Union[List[str], str]
-    ):
+    def get_surprisal_by_word(self, texts: Union[List[str], str]):
         if type(texts) is List[str]:
             processed_texts = None
         elif type(texts) is str:

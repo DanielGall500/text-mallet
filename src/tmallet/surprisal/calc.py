@@ -114,16 +114,14 @@ class SurprisalCalculator:
 
         for sentence in text_by_sent:
             enc = self.tokenizer(
-                sentence,
-                return_tensors="pt",
-                return_offsets_mapping=True
+                sentence, return_tensors="pt", return_offsets_mapping=True
             )
 
             input_ids = enc["input_ids"][0]
             offsets = enc["offset_mapping"][0]
             word_ids = enc.word_ids()
 
-            # compute surprisals for each word 
+            # compute surprisals for each word
             surprisals = torch.zeros(len(input_ids))
             with torch.no_grad():
                 for i, wid in enumerate(word_ids):
@@ -150,7 +148,9 @@ class SurprisalCalculator:
                 word_spans[wid][0] = min(word_spans[wid][0], offsets[i][0])
                 word_spans[wid][1] = max(word_spans[wid][1], offsets[i][1])
 
-            words_in_sent = [sentence[start:end] for wid,(start,end) in word_spans.items()]
+            words_in_sent = [
+                sentence[start:end] for wid, (start, end) in word_spans.items()
+            ]
             # word_ids_in_sent = word_spans.keys()
             word_surp_in_sent = [word_surprisal[wid] for wid in word_spans.keys()]
 
@@ -159,7 +159,6 @@ class SurprisalCalculator:
 
         result = {"surprisals": all_surprisals, "words": all_words}
         return result
-
 
     def calculate_surprisal_batch(
         self,
