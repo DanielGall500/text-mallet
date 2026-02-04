@@ -1,3 +1,6 @@
+helper/
+*.egg-info
 *.idea*
 *.venv*
 *cache*
+sync.sh
