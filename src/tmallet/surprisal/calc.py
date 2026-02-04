@@ -1,16 +1,14 @@
-from transformers import BertTokenizer, BertForMaskedLM
+from typing import List, Optional
+from dataclasses import dataclass
+import math
 from tqdm import tqdm
 from transformers import AutoTokenizer, AutoModelForMaskedLM
-from typing import List, Dict, Union, Optional
-from nltk.tokenize import sent_tokenize
 import torch.nn.functional as F
 from datasets import Dataset
-import numpy as np
 import torch
 import nltk
-import math
 from wordfreq import word_frequency
-from dataclasses import dataclass
+from nltk.tokenize import sent_tokenize
 
 nltk.download("punkt_tab")
 DEFAULT_LANG = "en"
