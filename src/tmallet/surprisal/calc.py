@@ -18,11 +18,12 @@ DEFAULT_LANG = "en"
 @dataclass
 class WordStat:
     word: str
-    contextual_prob: float
+    contextual_surprisal: float
 
     @property
-    def contextual_surprisal(self):
-        return -math.log2(self.prob_in_context)
+    def contextual_probability(self):
+        # P(X) = 2 ^ -S(X)
+        return 2 ** -self.contextual_surprisal
 
     @property
     def mutual_information(self):
@@ -34,31 +35,38 @@ class WordStat:
         return MI
 
 @dataclass
-class SentenceInfo:
-    sentence: str
-    tokens: List[TokenStat]
+class TextStat:
+    text: str
+    word_stats: List[WordStat]
 
-class SurprisalCalculator:
+class ShannonBERT:
     """
-    A class for calculating token-level surprisal values using BERT models.
+    A class for analysing text the way Claude Shannon did so quite enjoy.
+    Allows for easy computation of surprisal and mutual information.
 
-    Surprisal is defined as the negative log probability of a token:
-    surprisal = -log(P(token|context))
+    Surprisal is defined as the negative log probability of a word.
+    In this case, we're usually taking that to mean either P(word|context) or P(word).
+    It can be useful for identifying rare words or constructions.
+
+    Mutual information tells us how much 'information' the context tells us about the word. 
+    I(word; context) = Surprisal(word) - Surprisal(word|context).
+    It is a bit more useful in this context. Take a dummy example where Surprisal(word) = 10 bits.
+    If the context makes the word much more likely, I(word; context) = 10 - 0 = 10 bits of Mutual Information.
+    If the context does nothing to help, I(word; context) = 10 bits - 10 bits = 0 bits of Mutual Information
+    It measures the change in our uncertainty about a word occurring after we see the context.
+    It is high for words which are rare but make sense in the context. These are often content words.
 
     Args:
         model_name: Name of the pretrained BERT model (default: 'bert-base-cased')
         device: Device to run the model on ('cuda', 'cpu', or None for auto-detection)
-        batch_size: Batch size for processing multiple examples (default: 8)
     """
 
     def __init__(
         self,
         model_name: str = "bert-base-cased",
         device: Optional[str] = None,
-        batch_size: int = 8,
     ):
         self.model_name = model_name
-        self.batch_size = batch_size
 
         if device is None:
             self.device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -70,7 +78,11 @@ class SurprisalCalculator:
         self.model.to(self.device)
         self.model.eval()
 
-    def calculate_surprisal(self, text: str):
+    def calculate_mutual_info(self, text: str):
+        word_stats = self.get_text_stats(text)
+        return [word.mutual_information for word in word_stats]
+
+    def get_text_stats(self, text: str):
         text_by_sent = sent_tokenize(text)
 
         for sentence in text_by_sent:
@@ -138,24 +150,21 @@ class SurprisalCalculator:
                     all_words.append(word_stat)
             else:
                 raise ValueError("Words does not match surprisal calculations.")
-        return all_words
 
-    def calculate_surprisal_batch(
+        return TextStat(
+            text=text,
+            word_stats=all_words
+        )
+
+    def get_text_stats_batch(
         self,
         texts: List[str],
-        level: str, # 'token' or word'
-        return_tokens: bool = True,
-        skip_special_tokens: bool = True,
-        show_progress: bool = False,
-    ) -> List[Dict[str, List]]:
+    ) -> List[TextStat]:
         """
         Calculate surprisal for multiple texts.
 
         Args:
             texts: List of input texts
-            return_tokens: Whether to return tokens alongside surprisals
-            skip_special_tokens: Whether to skip [CLS] and [SEP] tokens
-            show_progress: Whether to show progress bar (requires tqdm)
 
         Returns:
             List of dictionaries, one per input text
@@ -163,34 +172,23 @@ class SurprisalCalculator:
         results = []
 
         iterator = texts
-        if show_progress:
-            try:
-                iterator = tqdm(texts, desc="Calculating surprisal")
-            except ImportError:
-                pass
+        try:
+            iterator = tqdm(texts, desc="Calculating surprisal...")
+        except ImportError:
+            pass
 
         for text in iterator:
-            if level == "token":
-                result = self.calculate_surprisal(
-                    text,
-                    return_tokens=return_tokens,
-                    skip_special_tokens=skip_special_tokens,
-                )
-            elif level == "word":
-                result = self.calculate_surprisal_by_word(
-                    text,
-                )
+            result = self.get_text_stats(
+                text,
+            )
             results.append(result)
 
         return results
 
-    def calculate_surprisal_dataset(
+    def get_text_stats_dataset(
         self,
         dataset: Dataset,
         text_column: str = "text",
-        return_tokens: bool = True,
-        skip_special_tokens: bool = True,
-        show_progress: bool = True,
     ) -> Dataset:
         """
         Calculate surprisal for all examples in a HuggingFace dataset.
@@ -198,50 +196,31 @@ class SurprisalCalculator:
         Args:
             dataset: HuggingFace Dataset object
             text_column: Name of the column containing text
-            return_tokens: Whether to include tokens in output
-            skip_special_tokens: Whether to skip [CLS] and [SEP] tokens
-            show_progress: Whether to show progress bar
 
         Returns:
-            Dataset with added columns for surprisals (and optionally tokens)
+            Dataset with added columns for surprisals 
         """
-
         def process_example(example):
             text = example[text_column]
-            result = self.calculate_surprisal(
+            result = self.get_text_stats(
                 text,
-                return_tokens=return_tokens,
-                skip_special_tokens=skip_special_tokens,
             )
-
-            output = {"surprisals": result["surprisals"]}
-            if return_tokens:
-                output["tokens"] = result["tokens"]
-
-            return output
+            surprisal_column = {"surprisals": [word.contextual_surprisal for word in result]}
+            return surprisal_column
 
         processed = dataset.map(
-            process_example, desc="Calculating surprisal" if show_progress else None
+            process_example, desc="Calculating surprisal" 
         )
 
         return processed
 
+    """
     def get_average_surprisal(
         self,
         texts: Union[List[str], str],
         average_type: str = "mean",
         skip_special_tokens: bool = True,
     ) -> float:
-        """
-        Calculate mean surprisal for a text.
-
-        Args:
-            text: Input text
-            skip_special_tokens: Whether to skip special tokens
-
-        Returns:
-            Mean surprisal value
-        """
         all_surprisals = []
         if type(texts) is str:
             result = self.calculate_surprisal(
@@ -266,81 +245,7 @@ class SurprisalCalculator:
             return np.median(all_surprisals)
         else:
             raise ValueError(f"Invalid average type given: {average_type}")
-
-    def get_total_surprisal(self, text: str, skip_special_tokens: bool = True) -> float:
         """
-        Calculate total surprisal for a text (sum of all token surprisals).
-
-        Args:
-            text: Input text
-            skip_special_tokens: Whether to skip special tokens
-
-        Returns:
-            Total surprisal value
-        """
-        result = self.calculate_surprisal(
-            text, return_tokens=False, skip_special_tokens=skip_special_tokens
-        )
-        return np.sum(result["surprisals"])
-
-class MutualInfoCalculator(SurprisalCalculator):
-    def __init__(self,
-            model_name: str = "bert-base-cased",
-            device: Optional[str] = None,
-            batch_size: int = 8,
-        ):
-        super().__init__(model_name, device, batch_size)
-
-    def calculate_MI(
-        self, text: str, 
-    ) -> Dict[str, List]:
-        results = self.calculate_surprisal_by_word(text)
-
-        for word, s_w_C in zip(results["words"], results["surprisals"]):
-            p_w = word_frequency(word, "en")
-            s_w = - math.log2(p_w)
-
-            # Pointwise I(X;Y) = S(X) - S(X|Y) 
-            MI = s_w - s_w_C
-            print(f"Mutual Information of {word}: ", round(MI,2))
-
-        return results
-
-    def calculate_MI_batch(
-        self,
-        texts: List[str],
-        return_tokens: bool = True,
-        skip_special_tokens: bool = True,
-        show_progress: bool = False,
-    ) -> List[Dict[str, List]]:
-        default_MI_level = "word"
-        results = self.calculate_surprisal_batch(texts, default_MI_level, return_tokens, skip_special_tokens, show_progress)
-        print(results)
-        return results
-
-
-def main():
-    micalc = MutualInfoCalculator(device="cpu")
-    results = micalc.calculate_MI("The IBAN of Daniel Gallagher is 5556000")
-    for key,value in results.items():
-        print(key,value)
-
-    test_batch = [
-        "My IBAN is sensitive.",
-        "I enjoy playing the xylophone.",
-        "The best bank is DKB."
-    ]
-    results_batch = micalc.calculate_MI_batch(test_batch)
-    for result in results_batch:
-        print(result)
-
-if __name__ == "__main__":
-    main()
-
-
-
-
-
 
 
 
