@@ -1,4 +1,5 @@
 from transformers import BertTokenizer, BertForMaskedLM
+from tqdm import tqdm
 from transformers import AutoTokenizer, AutoModelForMaskedLM
 from typing import List, Dict, Union, Optional
 from nltk.tokenize import sent_tokenize
@@ -7,9 +8,35 @@ from datasets import Dataset
 import numpy as np
 import torch
 import nltk
+import math
+from wordfreq import word_frequency
+from dataclasses import dataclass
 
 nltk.download("punkt_tab")
+DEFAULT_LANG = "en"
 
+@dataclass
+class WordStat:
+    word: str
+    contextual_prob: float
+
+    @property
+    def contextual_surprisal(self):
+        return -math.log2(self.prob_in_context)
+
+    @property
+    def mutual_information(self):
+        prior_prob = word_frequency(self.word, DEFAULT_LANG)
+        prior_surprisal = - math.log2(prior_prob)
+
+        # Pointwise I(X;Y) = S(X) - S(X|Y) 
+        MI = prior_surprisal - self.contextual_surprisal
+        return MI
+
+@dataclass
+class SentenceInfo:
+    sentence: str
+    tokens: List[TokenStat]
 
 class SurprisalCalculator:
     """
@@ -43,74 +70,8 @@ class SurprisalCalculator:
         self.model.to(self.device)
         self.model.eval()
 
-    def calculate_surprisal(
-        self, text: str, return_tokens: bool = True, skip_special_tokens: bool = True
-    ) -> Dict[str, List]:
-        """
-        Calculate surprisal for all tokens in a single text.
-        The text is first split into sentences and surprisal is calculated on the sentence-level.
-
-        Args:
-            text: Input text to analyze
-            return_tokens: Whether to return the tokens alongside surprisals
-            skip_special_tokens: Whether to skip [CLS] and [SEP] tokens
-
-        Returns:
-            Dictionary containing:
-                - 'surprisals': List of surprisal values
-                - 'tokens': List of tokens (if return_tokens=True)
-                - 'token_ids': List of token IDs
-        """
+    def calculate_surprisal(self, text: str):
         text_by_sent = sent_tokenize(text)
-
-        all_surprisals = []
-        all_token_ids = []
-
-        for sentence in text_by_sent:
-            inputs = self.tokenizer(sentence, return_tensors="pt")
-            tokens = self.tokenizer.convert_ids_to_tokens(inputs["input_ids"][0])
-
-            input_ids = inputs["input_ids"].to(self.device)
-
-            start_idx = 1 if skip_special_tokens else 0
-            end_idx = (
-                input_ids.size(1) - 1 if skip_special_tokens else input_ids.size(1)
-            )
-
-            surprisals_by_sent = []
-
-            with torch.no_grad():
-                for i in range(start_idx, end_idx):
-                    masked_input = input_ids.clone()
-                    masked_input[0, i] = self.tokenizer.mask_token_id
-
-                    outputs = self.model(masked_input)
-                    logits = outputs.logits[0, i]
-
-                    probs = torch.softmax(logits, dim=-1)
-                    token_id = input_ids[0, i].item()
-                    token_prob = probs[token_id]
-
-                    surprisal = -torch.log(token_prob).item()
-                    surprisals_by_sent.append(surprisal)
-                print([round(s, 4) for s in surprisals_by_sent])
-
-            all_surprisals.extend(surprisals_by_sent)
-            all_token_ids.extend(input_ids[0, start_idx:end_idx].cpu().tolist())
-
-        result = {"surprisals": all_surprisals, "token_ids": all_token_ids}
-
-        if return_tokens:
-            tokens = self.tokenizer.convert_ids_to_tokens(result["token_ids"])
-            result["tokens"] = tokens
-
-        return result
-
-    def calculate_word_level_surprisal(self, text: str):
-        text_by_sent = sent_tokenize(text)
-
-        all_surprisals = []
-        all_words = []
 
         for sentence in text_by_sent:
             enc = self.tokenizer(
@@ -125,20 +86,35 @@ class SurprisalCalculator:
             surprisals = torch.zeros(len(input_ids))
             with torch.no_grad():
                 for i, wid in enumerate(word_ids):
+                    # ignore special tokens
                     if wid is None:
                         continue
+
+                    # list of token IDs from the input
                     masked = input_ids.clone()
+
+                    # set one to [MASK]
                     masked[i] = self.tokenizer.mask_token_id
+
+                    # get logits for the word ID
                     logits = self.model(masked.unsqueeze(0)).logits[0, i]
                     log_probs = F.log_softmax(logits, dim=-1)
+
+                    # get the -logp (i.e. surprisal) for token ID 
+                    # found in input ids at ith element
                     surprisals[i] = -log_probs[input_ids[i]]
 
             word_surprisal = {}
             word_spans = {}
 
             for i, wid in enumerate(word_ids):
+                # again, ignore special tokens
                 if wid is None:
                     continue
+
+                # wid is NOT the ID in a tokeniser, it's an index assigned to
+                # each token that maps it to a specific word.
+                # e.g. [0,0,1,1,1,2] -> Six tokens but three words
                 word_surprisal.setdefault(wid, 0.0)
                 word_surprisal[wid] += surprisals[i].item()
 
@@ -148,21 +124,26 @@ class SurprisalCalculator:
                 word_spans[wid][0] = min(word_spans[wid][0], offsets[i][0])
                 word_spans[wid][1] = max(word_spans[wid][1], offsets[i][1])
 
+            all_words = []
             words_in_sent = [
                 sentence[start:end] for wid, (start, end) in word_spans.items()
             ]
-            # word_ids_in_sent = word_spans.keys()
             word_surp_in_sent = [word_surprisal[wid] for wid in word_spans.keys()]
 
-            all_words.extend(words_in_sent)
-            all_surprisals.extend(word_surp_in_sent)
-
-        result = {"surprisals": all_surprisals, "words": all_words}
-        return result
+            if len(words_in_sent) == len(word_surp_in_sent):
+                for word, word_contextual_surprisal in zip(words_in_sent, word_surp_in_sent):
+                    word_stat = WordStat()
+                    word_stat.word = word
+                    word_stat.contextual_surprisal = word_contextual_surprisal
+                    all_words.append(word_stat)
+            else:
+                raise ValueError("Words does not match surprisal calculations.")
+        return all_words
 
     def calculate_surprisal_batch(
         self,
         texts: List[str],
+        level: str, # 'token' or word'
         return_tokens: bool = True,
         skip_special_tokens: bool = True,
         show_progress: bool = False,
@@ -184,18 +165,21 @@ class SurprisalCalculator:
         iterator = texts
         if show_progress:
             try:
-                from tqdm import tqdm
-
                 iterator = tqdm(texts, desc="Calculating surprisal")
             except ImportError:
                 pass
 
         for text in iterator:
-            result = self.calculate_surprisal(
-                text,
-                return_tokens=return_tokens,
-                skip_special_tokens=skip_special_tokens,
-            )
+            if level == "token":
+                result = self.calculate_surprisal(
+                    text,
+                    return_tokens=return_tokens,
+                    skip_special_tokens=skip_special_tokens,
+                )
+            elif level == "word":
+                result = self.calculate_surprisal_by_word(
+                    text,
+                )
             results.append(result)
 
         return results
@@ -298,3 +282,89 @@ class SurprisalCalculator:
             text, return_tokens=False, skip_special_tokens=skip_special_tokens
         )
         return np.sum(result["surprisals"])
+
+class MutualInfoCalculator(SurprisalCalculator):
+    def __init__(self,
+            model_name: str = "bert-base-cased",
+            device: Optional[str] = None,
+            batch_size: int = 8,
+        ):
+        super().__init__(model_name, device, batch_size)
+
+    def calculate_MI(
+        self, text: str, 
+    ) -> Dict[str, List]:
+        results = self.calculate_surprisal_by_word(text)
+
+        for word, s_w_C in zip(results["words"], results["surprisals"]):
+            p_w = word_frequency(word, "en")
+            s_w = - math.log2(p_w)
+
+            # Pointwise I(X;Y) = S(X) - S(X|Y) 
+            MI = s_w - s_w_C
+            print(f"Mutual Information of {word}: ", round(MI,2))
+
+        return results
+
+    def calculate_MI_batch(
+        self,
+        texts: List[str],
+        return_tokens: bool = True,
+        skip_special_tokens: bool = True,
+        show_progress: bool = False,
+    ) -> List[Dict[str, List]]:
+        default_MI_level = "word"
+        results = self.calculate_surprisal_batch(texts, default_MI_level, return_tokens, skip_special_tokens, show_progress)
+        print(results)
+        return results
+
+
+def main():
+    micalc = MutualInfoCalculator(device="cpu")
+    results = micalc.calculate_MI("The IBAN of Daniel Gallagher is 5556000")
+    for key,value in results.items():
+        print(key,value)
+
+    test_batch = [
+        "My IBAN is sensitive.",
+        "I enjoy playing the xylophone.",
+        "The best bank is DKB."
+    ]
+    results_batch = micalc.calculate_MI_batch(test_batch)
+    for result in results_batch:
+        print(result)
+
+if __name__ == "__main__":
+    main()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
