@@ -13,8 +13,7 @@ class ReplaceObfuscator(SpaCyObfuscator):
     def obfuscate(
         self,
         doc: Doc,
-        config: Dict = {"algorithm": "nouns-only"},
-        replace_with_pos: bool = False,
+        config: Dict = {"algorithm": "noun", "replace_with_pos": True},
     ) -> str:
         if "algorithm" not in config.keys():
             raise ValueError(
@@ -22,15 +21,16 @@ class ReplaceObfuscator(SpaCyObfuscator):
             )
 
         algorithm = config["algorithm"]
+        replace_with_pos = config["replace_with_pos"]
 
         match algorithm:
-            case "nouns-only":
+            case "noun":
                 return self._nouns_only(doc, replace_with_pos)
-            case "nouns-and-prop-only":
+            case "noun-propn":
                 return self._nouns_and_prop_only(doc, replace_with_pos)
-            case "no-nouns":
+            case "no-noun":
                 return self._no_nouns(doc, replace_with_pos)
-            case "no-nouns-or-prop":
+            case "no-noun-propn":
                 return self._no_nouns_or_propn(doc, replace_with_pos)
             case _:
                 raise ValueError("Please provide a valid algorithm.")

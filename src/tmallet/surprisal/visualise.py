@@ -8,7 +8,6 @@ from plotnine import (
     geom_density,
     labs,
     theme_minimal,
-    scale_fill_brewer,
     geom_vline,
     scale_x_continuous,
     annotate,

@@ -71,12 +71,14 @@ class HierarchicalScrambleObfuscator(SpaCyObfuscator):
             d_from_l = get_nested_dict_from_list(path_to_root)
             deep_update(d, d_from_l)
 
-        if algorithm == "shuffle-siblings":
+        if algorithm == "scramble-shuffle-siblings":
             shuffled = shuffle_siblings(d)
             linearised = linearise_sentence(shuffled)
-        elif algorithm == "reverse-head-direction":
+        elif algorithm == "scramble-reverse-head":
             swapped = swap_head_directions(d, swap_probability=0.7)
             linearised = linearise_sentence(swapped, reverse=True)
+        else:
+            raise ValueError(f"Invalid hierarchical scramble algorithm: {algorithm}.")
 
         linearised = TreebankWordDetokenizer().detokenize(linearised)
         return linearised

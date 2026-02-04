@@ -3,7 +3,7 @@ from tmallet.obfuscators import (
     LemmaObfuscator,
     LinearScrambleObfuscator,
     HierarchicalScrambleObfuscator,
-    SurprisalObfuscator,
+    ShannonObfuscator,
     get_spacy_nlp,
 )
 from datasets import load_from_disk, concatenate_datasets
@@ -19,14 +19,14 @@ torch.set_num_threads(1)
 ObfuscationTechnique = Literal[
     "noun",
     "noun-pos",
-    "noun-propn",
-    "noun-propn-pos",
+    "no-noun",
+    "no-noun-propn",
     "lemmatization",
     "scramble-BoW",
     "scramble-BoW-by-sentence",
     "scramble-shuffle-siblings",
     "scramble-reverse-head",
-    "mutual-information",
+    "shannon",
 ]
 
 
@@ -47,27 +47,34 @@ class TMallet:
     ) -> Union[List[str], str]:
         algorithm = config["algorithm"]
         obfuscator = self._get_obfuscator(algorithm)
-        return obfuscator.obfuscate(text, config)
+        if self.nlp:
+            text = self.nlp(text)
+        # todo: add config:
+        return obfuscator.obfuscate(text)
 
     def _get_obfuscator(
         self, algorithm: ObfuscationTechnique
     ) -> Union[Obfuscator, SpaCyObfuscator]:
         match algorithm:
-            case "noun" | "noun-propn" | "noun-pos" | "noun-propn-pos":
+            case "noun" | "noun-propn" | "no-noun" | "no-noun-propn":
                 self.nlp = get_spacy_nlp("ner")
                 return ReplaceObfuscator()
             case "lemmatization":
                 self.nlp = get_spacy_nlp("lemma")
                 return LemmaObfuscator()
             case "scramble-BoW" | "scramble-BoW-by-sentence":
+                self.nlp = None
                 return LinearScrambleObfuscator()
             case "scramble-shuffle-siblings" | "scramble-reverse-head":
                 self.nlp = get_spacy_nlp("full")
                 return HierarchicalScrambleObfuscator()
-            case "mutual-information":
-                return SurprisalObfuscator()
+            case "shannon":
+                self.nlp = None
+                return ShannonObfuscator()
             case _:
-                raise ValueError("Please provide a valid obfuscation algorithm.")
+                raise ValueError(
+                    f"Input {algorithm} invalid. Please provide a valid obfuscation algorithm."
+                )
 
     def _obfuscate_batch(
         self,

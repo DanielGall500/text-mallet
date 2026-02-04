@@ -1,6 +1,6 @@
 from tmallet.obfuscators.replace import ReplaceObfuscator
 from tmallet.obfuscators.lemmatise import LemmaObfuscator
-from tmallet.obfuscators.information_reduction import SurprisalObfuscator
+from tmallet.obfuscators.shannon import ShannonObfuscator
 from tmallet.obfuscators.spacy_registry import get_spacy_nlp
 from tmallet.obfuscators.scramble import (
     LinearScrambleObfuscator,
@@ -10,7 +10,7 @@ from tmallet.obfuscators.scramble import (
 __all__ = [
     "ReplaceObfuscator",
     "LemmaObfuscator",
-    "SurprisalObfuscator",
+    "ShannonObfuscator",
     "get_spacy_nlp",
     "LinearScrambleObfuscator",
     "HierarchicalScrambleObfuscator",

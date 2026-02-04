@@ -7,7 +7,7 @@ spacy_transformer_en = "en_core_web_trf"
 spacy_transformer_de = "de_dep_news_trf"
 
 
-def get_spacy_nlp(pipeline="ner", prefer_gpu: bool = True) -> Language:
+def get_spacy_nlp(pipeline="ner", prefer_gpu: bool = False) -> Language:
     if prefer_gpu:
         spacy.prefer_gpu()
 

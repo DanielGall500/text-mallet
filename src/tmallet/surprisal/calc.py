@@ -15,6 +15,7 @@ from dataclasses import dataclass
 nltk.download("punkt_tab")
 DEFAULT_LANG = "en"
 
+
 @dataclass
 class WordStat:
     word: str
@@ -23,21 +24,27 @@ class WordStat:
     @property
     def contextual_probability(self):
         # P(X) = 2 ^ -S(X)
-        return 2 ** -self.contextual_surprisal
+        return 2**-self.contextual_surprisal
 
     @property
     def mutual_information(self):
-        prior_prob = word_frequency(self.word, DEFAULT_LANG)
-        prior_surprisal = - math.log2(prior_prob)
+        try:
+            prior_prob = word_frequency(self.word, DEFAULT_LANG)
+            prior_surprisal = -math.log2(prior_prob)
+        except ValueError:
+            print("Couldn't compute MI: ", self.word)
+            return 0
 
-        # Pointwise I(X;Y) = S(X) - S(X|Y) 
+        # Pointwise I(X;Y) = S(X) - S(X|Y)
         MI = prior_surprisal - self.contextual_surprisal
         return MI
+
 
 @dataclass
 class TextStat:
     text: str
     word_stats: List[WordStat]
+
 
 class ShannonBERT:
     """
@@ -48,7 +55,7 @@ class ShannonBERT:
     In this case, we're usually taking that to mean either P(word|context) or P(word).
     It can be useful for identifying rare words or constructions.
 
-    Mutual information tells us how much 'information' the context tells us about the word. 
+    Mutual information tells us how much 'information' the context tells us about the word.
     I(word; context) = Surprisal(word) - Surprisal(word|context).
     It is a bit more useful in this context. Take a dummy example where Surprisal(word) = 10 bits.
     If the context makes the word much more likely, I(word; context) = 10 - 0 = 10 bits of Mutual Information.
@@ -79,8 +86,8 @@ class ShannonBERT:
         self.model.eval()
 
     def calculate_mutual_info(self, text: str):
-        word_stats = self.get_text_stats(text)
-        return [word.mutual_information for word in word_stats]
+        text_stats = self.get_text_stats(text)
+        return [word.mutual_information for word in text_stats.word_stats]
 
     def get_text_stats(self, text: str):
         text_by_sent = sent_tokenize(text)
@@ -112,7 +119,7 @@ class ShannonBERT:
                     logits = self.model(masked.unsqueeze(0)).logits[0, i]
                     log_probs = F.log_softmax(logits, dim=-1)
 
-                    # get the -logp (i.e. surprisal) for token ID 
+                    # get the -logp (i.e. surprisal) for token ID
                     # found in input ids at ith element
                     surprisals[i] = -log_probs[input_ids[i]]
 
@@ -143,18 +150,17 @@ class ShannonBERT:
             word_surp_in_sent = [word_surprisal[wid] for wid in word_spans.keys()]
 
             if len(words_in_sent) == len(word_surp_in_sent):
-                for word, word_contextual_surprisal in zip(words_in_sent, word_surp_in_sent):
-                    word_stat = WordStat()
-                    word_stat.word = word
-                    word_stat.contextual_surprisal = word_contextual_surprisal
+                for word, word_contextual_surprisal in zip(
+                    words_in_sent, word_surp_in_sent
+                ):
+                    word_stat = WordStat(
+                        word=word, contextual_surprisal=word_contextual_surprisal
+                    )
                     all_words.append(word_stat)
             else:
                 raise ValueError("Words does not match surprisal calculations.")
 
-        return TextStat(
-            text=text,
-            word_stats=all_words
-        )
+        return TextStat(text=text, word_stats=all_words)
 
     def get_text_stats_batch(
         self,
@@ -198,19 +204,20 @@ class ShannonBERT:
             text_column: Name of the column containing text
 
         Returns:
-            Dataset with added columns for surprisals 
+            Dataset with added columns for surprisals
         """
+
         def process_example(example):
             text = example[text_column]
             result = self.get_text_stats(
                 text,
             )
-            surprisal_column = {"surprisals": [word.contextual_surprisal for word in result]}
+            surprisal_column = {
+                "surprisals": [word.contextual_surprisal for word in result]
+            }
             return surprisal_column
 
-        processed = dataset.map(
-            process_example, desc="Calculating surprisal" 
-        )
+        processed = dataset.map(process_example, desc="Calculating surprisal")
 
         return processed
 
@@ -246,30 +253,3 @@ class ShannonBERT:
         else:
             raise ValueError(f"Invalid average type given: {average_type}")
         """
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
