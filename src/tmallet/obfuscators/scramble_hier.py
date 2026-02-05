@@ -1,44 +1,11 @@
-from tmallet.obfuscators.base import Obfuscator, SpaCyObfuscator
+from tmallet.obfuscators.base import SpaCyObfuscator
 from nltk.tokenize.treebank import TreebankWordDetokenizer
-from nltk.tokenize import sent_tokenize
 from spacy.tokens import Token, Doc
 from typing import Dict
 import random
 
-DEFAULT_LINEAR_CONFIG = {"scramble_within_sentence": False}
-
-DEFAULT_HIERARCHICAL_CONFIG = {"algorithm": "scramble-shuffle-siblings"}
-
-
-# the linear scrambler does not use SpaCy
-class LinearScrambleObfuscator(Obfuscator):
-    def obfuscate(
-        self,
-        text: str,
-        config: Dict = DEFAULT_LINEAR_CONFIG,
-        seed: int = 100,
-    ) -> str:
-        random.seed(seed)
-
-        if "scramble_within_sentence" not in config.keys():
-            raise ValueError(
-                "Please pass a configuration with the 'algorithm' parameter."
-            )
-
-        scramble_within_sentence = config["scramble_within_sentence"]
-
-        if scramble_within_sentence:
-            sentences = sent_tokenize(text)
-            scrambled_sentences = [self._linear_scramble(s) for s in sentences]
-            return " ".join(scrambled_sentences)
-        else:
-            return self._linear_scramble(text)
-
-    def _linear_scramble(self, text) -> str:
-        words = text.split()
-        random.shuffle(words)
-        scrambled_words = " ".join(words)
-        return scrambled_words
+DEFAULT_HIERARCHICAL_CONFIG = {"algorithm": "scramble-shuffle-siblings", "seed": 100}
+DEFAULT_SEED = 100
 
 
 class HierarchicalScrambleObfuscator(SpaCyObfuscator):
@@ -46,16 +13,19 @@ class HierarchicalScrambleObfuscator(SpaCyObfuscator):
         self,
         doc: Doc,
         config: Dict = DEFAULT_HIERARCHICAL_CONFIG,
-        seed: int = 100,
     ) -> str:
-        random.seed(seed)
 
         if "algorithm" not in config.keys():
             raise ValueError(
                 "Please pass a configuration with the 'algorithm' parameter."
             )
-
         algorithm = config["algorithm"]
+
+        if "seed" not in config.keys():
+            seed = DEFAULT_SEED
+        else:
+            seed = config["seed"]
+        random.seed(seed)
 
         if algorithm == "scramble-shuffle-siblings":
             return self._hierarchical_scramble(doc, algorithm=algorithm)

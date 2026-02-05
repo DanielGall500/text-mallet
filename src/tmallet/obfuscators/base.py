@@ -1,4 +1,3 @@
-from tmallet.obfuscators.spacy_registry import get_spacy_nlp
 from spacy.tokens import Doc
 
 
