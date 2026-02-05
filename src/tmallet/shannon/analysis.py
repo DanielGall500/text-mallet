@@ -1,60 +1,30 @@
-from tmallet.surprisal.calc import SurprisalCalculator
-from tmallet.surprisal.visualise import SurprisalVisualiser
+from tmallet.shannon.calc import ShannonBERT
+from tmallet.shannon.visualise import ShannonVisualiser
 from typing import Union, List, Optional
 
 
-class SurprisalAnalyser:
+class ShannonAnalyser:
     def __init__(self, device: str = "cpu"):
-        self.calculator = SurprisalCalculator(device=device)
-        self.visualiser = SurprisalVisualiser()
+        self.calculator = ShannonBERT(device=device)
+        self.visualiser = ShannonVisualiser()
 
-    def get_mean(self, texts: Union[List[str], str]):
-        return self.calculator.get_average_surprisal(texts, average_type="mean")
-
-    def get_median(self, texts: Union[List[str], str]):
-        return self.calculator.get_average_surprisal(texts, average_type="median")
-
-    def get_surprisal_by_token(self, texts: Union[List[str], str]):
-        if type(texts) is List[str]:
-            processed_texts = self.calculator.calculate_surprisal_batch(texts)
-        elif type(texts) is str:
-            processed_texts = self.calculator.calculate_surprisal_batch([texts])
-        else:
-            raise ValueError("Please provide a string or list of strings.")
-        return processed_texts
-
-    def get_surprisal_by_word(self, texts: Union[List[str], str]):
-        if type(texts) is List[str]:
-            processed_texts = None
-        elif type(texts) is str:
-            processed_texts = self.calculator.calculate_word_level_surprisal(texts)
-        else:
-            raise ValueError("Please provide a string or list of strings.")
-        return processed_texts
-
-    def get_distribution_surprisal_by_token(
+    def get_distribution_by_word(
         self, texts: Union[List[str], str], plot_to: Optional[str] = None
     ):
-        processed_texts = self.calculator.calculate_surprisal(texts)
+        if type(texts) is List:
+            processed_texts = [self.calculator.get_text_stats(t) for t in texts]
+            mi = [
+                [word.mutual_information for word in t.get_words()]
+                for t in processed_texts
+            ]
+        elif type(texts) is str:
+            processed_texts = self.calculator.get_text_stats(texts)
+            mi = [word.mutual_information for word in processed_texts.get_words()]
 
         if plot_to:
-            surprisals = [text["surprisals"] for text in processed_texts]
             self.visualiser.prepare_data(
-                surprisals=surprisals,
-            )
-            density = self.visualiser.plot_density(show_median=True)
-            density.save(plot_to)
-        return processed_texts
-
-    def get_distribution_surprisal_by_word(
-        self, texts: Union[List[str], str], plot_to: Optional[str] = None
-    ):
-        processed_texts = self.get_surprisal_by_word(texts)
-
-        if plot_to:
-            surprisals = [text["surprisals"] for text in processed_texts]
-            self.visualiser.prepare_data(
-                surprisals=surprisals,
+                mutual_information=mi,
+                flatten=False,
             )
             density = self.visualiser.plot_density(show_median=True)
             density.save(plot_to)

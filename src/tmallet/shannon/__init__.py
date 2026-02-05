@@ -1,4 +1,5 @@
 from tmallet.shannon.calc import ShannonBERT
-from tmallet.shannon.visualise import SurprisalVisualiser
+from tmallet.shannon.visualise import ShannonVisualiser
+from tmallet.shannon.analysis import ShannonAnalyser
 
-__all__ = ["SurprisalVisualiser", "ShannonBERT"]
+__all__ = ["ShannonVisualiser", "ShannonAnalyser", "ShannonBERT"]

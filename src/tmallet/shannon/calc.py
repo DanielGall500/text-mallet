@@ -233,36 +233,3 @@ class ShannonBERT:
         processed = dataset.map(process_example, desc="Calculating surprisal")
 
         return processed
-
-    """
-    def get_average_surprisal(
-        self,
-        texts: Union[List[str], str],
-        average_type: str = "mean",
-        skip_special_tokens: bool = True,
-    ) -> float:
-        all_surprisals = []
-        if type(texts) is str:
-            result = self.calculate_surprisal(
-                texts, return_tokens=False, skip_special_tokens=skip_special_tokens
-            )
-            all_surprisals = result["surprisals"]
-            return np.mean(result["surprisals"])
-        elif type(texts) is List[str]:
-            for t in texts:
-                surprisals = self.calculate_surprisal(
-                    texts, return_tokens=False, skip_special_tokens=skip_special_tokens
-                )["surprisals"]
-                mean_text_surp = np.mean(surprisals)
-                all_surprisals.append(mean_text_surp)
-
-        else:
-            raise ValueError("Please provide either a string or list of strings.")
-
-        if average_type == "mean":
-            return np.mean(all_surprisals)
-        elif average_type == "median":
-            return np.median(all_surprisals)
-        else:
-            raise ValueError(f"Invalid average type given: {average_type}")
-        """

@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional
+from typing import List, Optional
 from IPython.display import HTML
 import numpy as np
 import pandas as pd
@@ -14,18 +14,13 @@ from plotnine import (
 )
 
 
-class SurprisalVisualiser:
+class ShannonVisualiser:
     """
-    A class for visualizing surprisal distributions using plotnine.
+    A class for visualising mutual information distributions.
 
     Args:
-        data: Dictionary containing surprisal data or pandas DataFrame
+        data: Dictionary containing mutual information data or pandas DataFrame
         style: Plot style theme (default: 'minimal')
-
-    Example:
-        >>> plotter = SurprisalPlotter(surprisal_data)
-        >>> plot = plotter.plot_histogram()
-        >>> plot.save('surprisal_dist.png')
     """
 
     def __init__(self, data: Optional[pd.DataFrame] = None, style: str = "minimal"):
@@ -34,7 +29,7 @@ class SurprisalVisualiser:
 
     def prepare_data(
         self,
-        surprisals: List[List[float]],
+        mutual_information: List[List[float]],
         labels: Optional[List[str]] = None,
         flatten: bool = True,
     ) -> pd.DataFrame:
@@ -42,7 +37,7 @@ class SurprisalVisualiser:
         Prepare surprisal data for plotting.
 
         Args:
-            surprisals: List of surprisal lists (one per text/sample)
+            mutual_information: List of mutual information scores (one per text/sample)
             labels: Optional labels for each text/sample
             flatten: Whether to flatten all surprisals into single distribution
 
@@ -50,18 +45,18 @@ class SurprisalVisualiser:
             DataFrame ready for plotting
         """
         if flatten:
-            flat_surprisals = [s for sublist in surprisals for s in sublist]
+            flat_surprisals = [s for sublist in mutual_information for s in sublist]
             df = pd.DataFrame({"surprisal": flat_surprisals})
 
             if labels:
                 text_labels = []
-                for i, sublist in enumerate(surprisals):
+                for i, sublist in enumerate(mutual_information):
                     label = labels[i] if i < len(labels) else f"Text {i + 1}"
                     text_labels.extend([label] * len(sublist))
                 df["group"] = text_labels
         else:
             records = []
-            for i, surp_list in enumerate(surprisals):
+            for i, surp_list in enumerate(mutual_information):
                 label = labels[i] if labels and i < len(labels) else f"Text {i + 1}"
                 for s in surp_list:
                     records.append({"surprisal": s, "group": label})
@@ -118,7 +113,7 @@ class SurprisalVisualiser:
 
         return plot
 
-    def display_sentence_heatmap(self, words, surprisals, colormap="Reds"):
+    def display_sentence_heatmap(self, words, mutual_information, colormap="Reds"):
         """
         Display a sentence with words highlighted by surprisal intensity.
 
@@ -130,11 +125,11 @@ class SurprisalVisualiser:
         import matplotlib.colors as mcolors
 
         words = list(words)
-        surprisals = np.array(surprisals)
+        mutual_information = np.array(mutual_information)
 
         # normalize to 0–1
-        norm = (surprisals - surprisals.min()) / (
-            surprisals.max() - surprisals.min() + 1e-10
+        norm = (mutual_information - mutual_information.min()) / (
+            mutual_information.max() - mutual_information.min() + 1e-10
         )
 
         # pick a colormap from matplotlib
