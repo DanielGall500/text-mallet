@@ -105,11 +105,11 @@ There are four primary means of obfuscation provided:
 3. Replacement (obfuscates word types; medium-strong)
 4. Mutual Information (obfuscates based on Shannon-based metrics; adjustable).
 
-#### **1. Lemmatisation**
+#### 1. Lemmatisation
 **Description**: Reduces words to their base or dictionary form. A very light form of obfuscation, particularly to remove shallow elements of writing style.
 To use it pass a `config` with `algorithm` set to `lemmatise`.
 
-#### **2. Scrambling**
+#### 2. Scrambling
 **Description**: Scrambling involves jumbling the words in a sentence or text. You can choose from the following scrambling algorithms:
 - `scramble-BoW`: Without concern for language structure.
 - `scramble-shuffle-siblings`: Parse text into a dependency tree and randomly shuffling words that are sibling nodes.
@@ -119,7 +119,7 @@ To use it pass a `config` with `algorithm` set to `lemmatise`.
 |----------------------------|---------|--------------------------------------------------|---------------|
 | `scramble_within_sentence` | bool    | If `True`, scrambles words within sentences. If `False`, scrambles across the entire text. | `False`       |
 
-#### **3. Replacement of Nouns / Proper Nouns **
+#### 3. Replacement of Nouns / Proper Nouns
 **Description**: Adjusts different word types by either deleting them or replacing them with POS tags.
 Algorithms
 - `noun`: Keep only nouns.
@@ -132,7 +132,7 @@ Additional Configuration Options:
 |----------------------|---------|--------------------------------------------------|---------------|
 | `replace_with_pos`   | bool    | If `True`, replaces with the specified POS.      | `True`        |
 
-#### **4. Mutual Information Obfuscation **
+#### 4. Mutual Information Obfuscation
 **Description**: Applies Shannon entropy-based text transformation, replacing words based on a threshold of Mutual Information. To use this pass `shannon` to the `algorithm` parameter in the configuration.
 
 Additional Configuration Options:
