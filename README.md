@@ -95,13 +95,51 @@ obfuscated_dataset = mallet.obfuscate_dataset_by_chunk(
 )
 ```
 
-### Available Algorithms
+Here’s a structured markdown description of the algorithms and their parameters based on your provided config examples:
 
-- `"noun"`, `"noun-propn"`, `"noun-pos"`, `"noun-propn-pos"`
-- `"lemmatization"`
-- `"scramble-BoW"`, `"scramble-BoW-by-sentence"`
-- `"scramble-shuffle-siblings"`, `"scramble-reverse-head"`
-- `"mutual-information"`
+### **Configuration Guide**
+
+There are four primary means of obfuscation provided:
+1. Lemmatisation (somewhat obfuscates writing style; very light)
+2. Scrambling (obfuscates language structure and to a lesser extent meaning; light)
+3. Replacement (obfuscates word types; medium-strong)
+4. Mutual Information (obfuscates based on Shannon-based metrics; adjustable).
+
+#### **1. Lemmatisation**
+**Description**: Reduces words to their base or dictionary form. A very light form of obfuscation, particularly to remove shallow elements of writing style.
+To use it pass a `config` with `algorithm` set to `lemmatise`.
+
+#### **2. Scrambling**
+**Description**: Scrambling involves jumbling the words in a sentence or text. You can choose from the following scrambling algorithms:
+- `scramble-BoW`: Without concern for language structure.
+- `scramble-shuffle-siblings`: Parse text into a dependency tree and randomly shuffling words that are sibling nodes.
+- `scramble-reverse-head`: Parse text into a dependency structure and randomly reverse the order of head nodes in relation to their siblings.
+
+| Parameter                  | Type    | Description                                      | Default Value |
+|----------------------------|---------|--------------------------------------------------|---------------|
+| `scramble_within_sentence` | bool    | If `True`, scrambles words within sentences. If `False`, scrambles across the entire text. | `False`       |
+
+#### **3. Replacement of Nouns / Proper Nouns **
+**Description**: Adjusts different word types by either deleting them or replacing them with POS tags.
+Algorithms
+- `noun`: Keep only nouns.
+- `noun-propn`: Keep only nouns and proper nouns.
+- `no-noun`: Keep everything but nouns.
+- `no-noun-propn`: Keep everything but nouns and proper nouns.
+
+Additional Configuration Options:
+| Parameter            | Type    | Description                                      | Default Value |
+|----------------------|---------|--------------------------------------------------|---------------|
+| `replace_with_pos`   | bool    | If `True`, replaces with the specified POS.      | `True`        |
+
+#### **4. Mutual Information Obfuscation **
+**Description**: Applies Shannon entropy-based text transformation, replacing words based on a threshold of Mutual Information. To use this pass `shannon` to the `algorithm` parameter in the configuration.
+
+Additional Configuration Options:
+| Parameter      | Type    | Description                                      | Default Value |
+|----------------|---------|--------------------------------------------------|---------------|
+| `threshold`    | int     | Threshold for character replacement.             | `10`          |
+| `replace_with` | str     | Character used for replacement.                  | `"_"`         |
 
 #### Acknowledgements
 Part of this work was conducted within the [CORAL project](https://coral-nlp.github.io) funded by the German Federal Ministry of Research, Technology, and Space (BMFTR) under the grant number 16IS24077A. Responsibility for the content of this publication lies with the authors. 
