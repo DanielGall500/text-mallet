@@ -1,5 +1,5 @@
 from tmallet.obfuscators.base import SpaCyObfuscator
-from nltk.tokenize.treebank import TreebankWordDetokenizer, TreebankWordTokenizer
+from nltk.tokenize.treebank import TreebankWordDetokenizer
 from typing import Literal, Dict
 from spacy.tokens import Doc
 
@@ -9,6 +9,9 @@ class ReplaceObfuscator(SpaCyObfuscator):
     Algorithm = Literal[
         "nouns-only", "nouns-and-prop-only", "no-nouns", "no-nouns-or-prop"
     ]
+
+    def __init__(self):
+        self.detok = TreebankWordDetokenizer()
 
     def obfuscate(
         self,
@@ -62,7 +65,7 @@ class ReplaceObfuscator(SpaCyObfuscator):
 
         if len(remaining_tokens) == 0:
             print("INVALID No remaining tokens for: ", doc)
-        return TreebankWordDetokenizer().detokenize(remaining_tokens)
+        return self.detok.detokenize(remaining_tokens)
 
     def _keep_all_except(
         self, doc: Doc, pos_tags: list[POS], replace_with_pos: bool = False
@@ -74,4 +77,4 @@ class ReplaceObfuscator(SpaCyObfuscator):
                 remaining_tokens.append(token.text)
             elif replace_with_pos:
                 remaining_tokens.append(token.pos_)
-        return TreebankWordDetokenizer().detokenize(remaining_tokens)
+        return self.detok.detokenize(remaining_tokens)
