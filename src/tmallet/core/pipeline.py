@@ -79,7 +79,7 @@ class TMallet:
         obfuscator: Union[Obfuscator | SpaCyObfuscator],
         config: Dict,
     ):
-        if column not in batch.columns:
+        if column not in batch.keys():
             raise KeyError(
                 f"Invalid column provided. Please choose one of {batch.columns}"
             )
@@ -100,21 +100,26 @@ class TMallet:
         column: str,
         column_obfuscated: str,
         config: Dict,
-        batch_size: int = 100,
+        batch_size: int = 10,
         num_proc: Optional[int] = None,
+        device: str = "cuda"
     ):
+        algorithm = config["algorithm"]
+        obfuscator = self._get_obfuscator(algorithm, device)
+
         obfuscated_dataset = dataset.map(
             partial(
                 self._obfuscate_batch,
                 column=column,
                 column_obfuscated=column_obfuscated,
+                obfuscator=obfuscator,
                 config=config,
             ),
             batched=True,
             batch_size=batch_size,
             desc="Obfuscating...",
             num_proc=num_proc,
-            cache_file_name=None,
+            # cache_file_name=None,
             load_from_cache_file=False,
         )
         return obfuscated_dataset

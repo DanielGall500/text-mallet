@@ -3,9 +3,11 @@ from tmallet.shannon.calc import ShannonBERT
 from tmallet.shannon.analysis import ShannonAnalyser
 from typing import Dict, Union, List
 from nltk.tokenize.treebank import TreebankWordDetokenizer
+import logging
+
+logging.getLogger("transformers").setLevel(logging.ERROR)
 
 DEFAULT_MODEL = "bert-base-cased"
-
 DEFAULT_THRESHOLD = 10
 DEFAULT_OBFUSCATORY_TOKEN = "_"
 DEFAULT_CONFIG = {

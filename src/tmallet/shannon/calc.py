@@ -10,7 +10,7 @@ import nltk
 from wordfreq import word_frequency
 from nltk.tokenize import sent_tokenize
 
-nltk.download("punkt_tab")
+nltk.download("punkt_tab", quiet=True)
 DEFAULT_LANG = "en"
 
 
@@ -33,7 +33,8 @@ class WordStat:
             prior_prob = word_frequency(self.word, DEFAULT_LANG)
             prior_surprisal = -math.log2(prior_prob)
         except ValueError:
-            print("Couldn't compute MI: ", self.word)
+            # TODO: Handle unknowns
+            # print("Couldn't compute MI: ", self.word)
             return 0
 
         # Pointwise I(X;Y) = S(X) - S(X|Y)
