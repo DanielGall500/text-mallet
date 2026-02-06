@@ -20,7 +20,7 @@ class WordStat:
     contextual_surprisal: float
 
     def __str__(self) -> str:
-        return f"(w: {self.word}, I(w): {round(self.mutual_information,4)}"
+        return f"(w: {self.word}, I(w): {round(self.mutual_information,4)})"
 
     @property
     def contextual_probability(self):
@@ -105,17 +105,20 @@ class ShannonBERT:
     def get_text_stats(self, text: str):
         text_by_sent = sent_tokenize(text)
 
+        # stores results for all words in the entire text, though
+        # individual MI scores are computed at the sentence level.
+        all_words = []
         for sentence in text_by_sent:
             enc = self.tokenizer(
                 sentence, return_tensors="pt", return_offsets_mapping=True
             )
 
-            input_ids = enc["input_ids"][0]
+            input_ids = enc["input_ids"][0].to(self.device)
             offsets = enc["offset_mapping"][0]
             word_ids = enc.word_ids()
 
             # compute surprisals for each word
-            surprisals = torch.zeros(len(input_ids))
+            surprisals = torch.zeros(len(input_ids), device=self.device)
             with torch.no_grad():
                 for i, wid in enumerate(word_ids):
                     # ignore special tokens
@@ -129,7 +132,7 @@ class ShannonBERT:
                     masked[i] = self.tokenizer.mask_token_id
 
                     # get logits for the word ID
-                    logits = self.model(masked.unsqueeze(0)).logits[0, i]
+                    logits = self.model(masked.unsqueeze(0).to(self.device)).logits[0, i]
                     log_probs = F.log_softmax(logits, dim=-1)
 
                     # get the -logp (i.e. surprisal) for token ID
@@ -161,7 +164,6 @@ class ShannonBERT:
             ]
             word_surp_in_sent = [word_surprisal[wid] for wid in word_spans.keys()]
 
-            all_words = []
             if len(words_in_sent) == len(word_surp_in_sent):
                 for word, word_contextual_surprisal in zip(
                     words_in_sent, word_surp_in_sent
