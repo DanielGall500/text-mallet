@@ -64,7 +64,7 @@ dataset = load_dataset("your_huggingface_dataset")
 
 # Obfuscate a column
 mallet = TMallet()
-config = {"algorithm": "lemmatization"}
+config = {"algorithm": "lemmatize"}
 
 obfuscated_dataset = mallet.obfuscate_dataset(
     dataset=dataset,
@@ -107,7 +107,7 @@ There are four primary means of obfuscation provided:
 
 #### 1. Lemmatisation
 **Description**: Reduces words to their base or dictionary form. A very light form of obfuscation, particularly to remove shallow elements of writing style.
-To use it pass a `config` with `algorithm` set to `lemmatise`.
+To use it pass a `config` with `algorithm` set to `lemmatize`.
 
 #### 2. Scrambling
 **Description**: Scrambling involves jumbling the words in a sentence or text. You can choose from the following scrambling algorithms:

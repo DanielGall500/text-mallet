@@ -21,7 +21,7 @@ ObfuscationTechnique = Literal[
     "noun-pos",
     "no-noun",
     "no-noun-propn",
-    "lemmatization",
+    "lemmatize",
     "scramble-BoW",
     "scramble-BoW-by-sentence",
     "scramble-shuffle-siblings",
@@ -54,7 +54,7 @@ class TMallet:
             case "noun" | "noun-propn" | "no-noun" | "no-noun-propn":
                 self.nlp = get_spacy_nlp("ner", prefer_gpu=prefer_gpu)
                 return ReplaceObfuscator(device=device)
-            case "lemmatization":
+            case "lemmatize":
                 self.nlp = get_spacy_nlp("lemma", prefer_gpu=prefer_gpu)
                 return LemmaObfuscator()
             case "scramble-BoW" | "scramble-BoW-by-sentence":
@@ -78,6 +78,7 @@ class TMallet:
         column_obfuscated: str,
         obfuscator: Union[Obfuscator | SpaCyObfuscator],
         config: Dict,
+        multi:bool=True
     ):
         if column not in batch.keys():
             raise KeyError(
@@ -89,9 +90,24 @@ class TMallet:
         if is_using_spacy:
             texts = self.nlp.pipe(texts)
 
-        batch[column_obfuscated] = [
-            obfuscator.obfuscate(text, config=config) for text in texts
-        ]
+        if not multi:
+            batch[column_obfuscated] = [
+                obfuscator.obfuscate(text, config=config) for text in texts
+            ]
+        else:
+            # a list of dictionaries, each containing the obfuscated formats under a key
+            obfuscation_output = [obfuscator.obfuscate(text,config=config) for text in texts]
+
+            # for each dictionary (one per sample)
+            for output in obfuscation_output:
+                # get the individual column suffix and obfuscated string
+                for col, obfuscated_form in output.items():
+                    key = f"{column_obfuscated}_{col}"
+
+                    if key not in batch.keys():
+                        batch[f"{column_obfuscated}_{col}"] = [obfuscated_form]
+                    else:
+                        batch[f"{column_obfuscated}_{col}"].append(obfuscated_form)
         return batch
 
     def obfuscate_dataset(
@@ -134,6 +150,7 @@ class TMallet:
         chunk_size: int = 5_000,
         batch_size: int = 100,
         num_proc: Optional[int] = None,
+        device:str="cuda"
     ) -> None:
         processed_chunks = []
         num_samples = len(dataset)
@@ -156,6 +173,7 @@ class TMallet:
                     config=config,
                     batch_size=batch_size,
                     num_proc=num_proc,
+                    device=device
                 )
 
                 chunk.save_to_disk(ckpt_path)
