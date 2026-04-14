@@ -1,9 +1,9 @@
 from tmallet.obfuscators import (
-    ReplaceObfuscator,
+    POSFilter,
     LemmaObfuscator,
     LinearScrambleObfuscator,
     HierarchicalScrambleObfuscator,
-    ShannonObfuscator,
+    ShannonFilter,
 )
 from tmallet.utils import get_spacy_nlp
 from datasets import load_from_disk, concatenate_datasets
@@ -17,16 +17,19 @@ import os
 torch.set_num_threads(1)
 
 ObfuscationTechnique = Literal[
-    "noun",
-    "noun-pos",
-    "no-noun",
-    "no-noun-propn",
-    "lemmatize",
-    "scramble-BoW",
-    "scramble-BoW-by-sentence",
-    "scramble-shuffle-siblings",
-    "scramble-reverse-head",
-    "shannon",
+    "lemmatize", # convert words to their roots
+
+    "noun-retain", # part-of-speech filtering
+    "noun-propn-retain", # part-of-speech filtering
+    "noun-remove", # part-of-speech filtering
+    "noun-propn-remove", # part-of-speech filtering
+
+    "scramble-hier-weak", # dependency-parsing structural obfuscation
+    "scramble-hier-strong", # dependency-parsing structural obfuscation
+    "scramble-BoW-sentence", # randomly shuffle words at the sentence level 
+    "scramble-BoW-document", # randomly shuffle words at the document level
+
+    "shannon", # filter based on an approximation of word importance
 ]
 
 
@@ -51,21 +54,21 @@ class TMallet:
         prefer_gpu = (device == "cuda")
 
         match algorithm:
-            case "noun" | "noun-propn" | "no-noun" | "no-noun-propn":
-                self.nlp = get_spacy_nlp("ner", prefer_gpu=prefer_gpu)
-                return ReplaceObfuscator(device=device)
             case "lemmatize":
                 self.nlp = get_spacy_nlp("lemma", prefer_gpu=prefer_gpu)
                 return LemmaObfuscator()
-            case "scramble-BoW" | "scramble-BoW-by-sentence":
-                self.nlp = None
-                return LinearScrambleObfuscator(device=device)
-            case "scramble-shuffle-siblings" | "scramble-reverse-head":
+            case "noun-retain" | "noun-propn-retain" | "noun-remove" | "noun-propn-remove":
+                self.nlp = get_spacy_nlp("ner", prefer_gpu=prefer_gpu)
+                return POSFilter()
+            case "scramble-hier-weak" | "scramble-hier-strong":
                 self.nlp = get_spacy_nlp("full", prefer_gpu=prefer_gpu)
-                return HierarchicalScrambleObfuscator(device=device)
-            case "shannon":
+                return HierarchicalScrambleObfuscator()
+            case "scramble-BoW-sentence" | "scramble-BoW-document":
                 self.nlp = None
-                return ShannonObfuscator(device=device)
+                return LinearScrambleObfuscator()
+            case "shannon":
+                self.nlp = get_spacy_nlp("ner", prefer_gpu=prefer_gpu)
+                return ShannonFilter(device=device)
             case _:
                 raise ValueError(
                     f"Input {algorithm} invalid. Please provide a valid obfuscation algorithm."
