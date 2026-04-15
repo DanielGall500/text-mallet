@@ -7,6 +7,7 @@ from typing import List, Optional
 from dataclasses import dataclass
 from datasets import Dataset
 from tqdm import tqdm
+import numpy as np
 import math
 import torch
 import torch.nn.functional as F
@@ -15,7 +16,7 @@ import string
 
 nltk.download("punkt_tab", quiet=True)
 DEFAULT_LANG = "en"
-freq_dict = get_frequency_dict(DEFAULT_LANG,"best")
+freq_dict = get_frequency_dict(DEFAULT_LANG, "best")
 
 # get 25th percentile frequency for cases
 # where the word is not found inthe corpus.
@@ -45,7 +46,7 @@ class WordStat:
             return 0
 
         # get P(word) in lookup
-        # if not found, then it's likely names, dialectal spellings, etc, 
+        # if not found, then it's likely names, dialectal spellings, etc,
         # give default 25th percentile freq (low)
         prior_prob = freq_dict.get(self.word, FREQ_P25)
         prior_surprisal = -math.log2(prior_prob)
@@ -125,7 +126,11 @@ class ShannonBERT:
         for sentence in text_by_sent:
             # TODO: Look into truncation aspect
             enc = self.tokenizer(
-                sentence, truncation=True, max_length=512, return_tensors="pt", return_offsets_mapping=True
+                sentence,
+                truncation=True,
+                max_length=512,
+                return_tensors="pt",
+                return_offsets_mapping=True,
             )
 
             input_ids = enc["input_ids"][0].to(self.device)
@@ -147,7 +152,9 @@ class ShannonBERT:
                     masked[i] = self.tokenizer.mask_token_id
 
                     # get logits for the word ID
-                    logits = self.model(masked.unsqueeze(0).to(self.device)).logits[0, i]
+                    logits = self.model(masked.unsqueeze(0).to(self.device)).logits[
+                        0, i
+                    ]
                     log_probs = F.log_softmax(logits, dim=-1)
 
                     # get the -logp (i.e. surprisal) for token ID

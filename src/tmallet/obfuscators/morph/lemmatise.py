@@ -4,7 +4,7 @@ from typing import Dict
 
 
 class LemmaObfuscator(SpaCyObfuscator):
-    def obfuscate(self, doc: Doc, config: Dict={}) -> str:
+    def obfuscate(self, doc: Doc, config: Dict = {}) -> str:
         return self._lemmatise(doc)
 
     def _lemmatise(self, doc: Doc) -> str:

@@ -17,19 +17,16 @@ import os
 torch.set_num_threads(1)
 
 ObfuscationTechnique = Literal[
-    "lemmatize", # convert words to their roots
-
-    "noun-retain", # part-of-speech filtering
-    "noun-propn-retain", # part-of-speech filtering
-    "noun-remove", # part-of-speech filtering
-    "noun-propn-remove", # part-of-speech filtering
-
-    "scramble-hier-weak", # dependency-parsing structural obfuscation
-    "scramble-hier-strong", # dependency-parsing structural obfuscation
-    "scramble-BoW-sentence", # randomly shuffle words at the sentence level 
-    "scramble-BoW-document", # randomly shuffle words at the document level
-
-    "shannon", # filter based on an approximation of word importance
+    "lemmatize",  # convert words to their roots
+    "noun-retain",  # part-of-speech filtering
+    "noun-propn-retain",  # part-of-speech filtering
+    "noun-remove",  # part-of-speech filtering
+    "noun-propn-remove",  # part-of-speech filtering
+    "scramble-hier-weak",  # dependency-parsing structural obfuscation
+    "scramble-hier-strong",  # dependency-parsing structural obfuscation
+    "scramble-BoW-sentence",  # randomly shuffle words at the sentence level
+    "scramble-BoW-document",  # randomly shuffle words at the document level
+    "shannon",  # filter based on an approximation of word importance
 ]
 
 
@@ -38,7 +35,7 @@ class TMallet:
         self.nlp = None
 
     def obfuscate(
-            self, text: Union[List[str], str], config: Dict, device: str = "cpu"
+        self, text: Union[List[str], str], config: Dict, device: str = "cpu"
     ) -> Union[List[str], str]:
         algorithm = config["algorithm"]
         obfuscator = self._get_obfuscator(algorithm, device)
@@ -51,13 +48,18 @@ class TMallet:
     def _get_obfuscator(
         self, algorithm: ObfuscationTechnique, device
     ) -> Union[Obfuscator, SpaCyObfuscator]:
-        prefer_gpu = (device == "cuda")
+        prefer_gpu = device == "cuda"
 
         match algorithm:
             case "lemmatize":
                 self.nlp = get_spacy_nlp("lemma", prefer_gpu=prefer_gpu)
                 return LemmaObfuscator()
-            case "noun-retain" | "noun-propn-retain" | "noun-remove" | "noun-propn-remove":
+            case (
+                "noun-retain"
+                | "noun-propn-retain"
+                | "noun-remove"
+                | "noun-propn-remove"
+            ):
                 self.nlp = get_spacy_nlp("ner", prefer_gpu=prefer_gpu)
                 return POSFilter()
             case "scramble-hier-weak" | "scramble-hier-strong":
@@ -67,7 +69,7 @@ class TMallet:
                 self.nlp = None
                 return LinearScrambleObfuscator()
             case "shannon":
-                self.nlp = get_spacy_nlp("ner", prefer_gpu=prefer_gpu)
+                # todo: spacy
                 return ShannonFilter(device=device)
             case _:
                 raise ValueError(
@@ -81,7 +83,7 @@ class TMallet:
         column_obfuscated: str,
         obfuscator: Union[Obfuscator | SpaCyObfuscator],
         config: Dict,
-        multi:bool=True
+        multi: bool = True,
     ):
         if column not in batch.keys():
             raise KeyError(
@@ -99,7 +101,9 @@ class TMallet:
             ]
         else:
             # a list of dictionaries, each containing the obfuscated formats under a key
-            obfuscation_output = [obfuscator.obfuscate(text,config=config) for text in texts]
+            obfuscation_output = [
+                obfuscator.obfuscate(text, config=config) for text in texts
+            ]
 
             # for each dictionary (one per sample)
             for output in obfuscation_output:
@@ -121,7 +125,7 @@ class TMallet:
         config: Dict,
         batch_size: int = 10,
         num_proc: Optional[int] = None,
-        device: str = "cuda"
+        device: str = "cuda",
     ):
         algorithm = config["algorithm"]
         obfuscator = self._get_obfuscator(algorithm, device)
@@ -153,7 +157,7 @@ class TMallet:
         chunk_size: int = 5_000,
         batch_size: int = 100,
         num_proc: Optional[int] = None,
-        device:str="cuda"
+        device: str = "cuda",
     ) -> None:
         processed_chunks = []
         num_samples = len(dataset)
@@ -176,7 +180,7 @@ class TMallet:
                     config=config,
                     batch_size=batch_size,
                     num_proc=num_proc,
-                    device=device
+                    device=device,
                 )
 
                 chunk.save_to_disk(ckpt_path)

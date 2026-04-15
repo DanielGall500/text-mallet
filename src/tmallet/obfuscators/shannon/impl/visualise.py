@@ -121,9 +121,13 @@ class ShannonVisualiser:
             # Multiple sentences: words and mutual_info are lists of lists
             sentences_html = []
             for sentence_words, sentence_mutual_info in zip(words, mutual_info):
-                sentence_html = self._generate_sentence_html(sentence_words, sentence_mutual_info, colormap)
+                sentence_html = self._generate_sentence_html(
+                    sentence_words, sentence_mutual_info, colormap
+                )
                 sentences_html.append(sentence_html)
-            html_str = "<div style='margin: 15px 0;'>" + "".join(sentences_html) + "</div>"
+            html_str = (
+                "<div style='margin: 15px 0;'>" + "".join(sentences_html) + "</div>"
+            )
         else:
             # Single sentence
             html_str = self._generate_sentence_html(words, mutual_info, colormap)

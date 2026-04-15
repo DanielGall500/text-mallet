@@ -33,9 +33,7 @@ class HierarchicalScrambleObfuscator(SpaCyObfuscator):
                 "Please provide a valid hierarchical scrambling algorithm."
             )
 
-    def _hierarchical_scramble(
-        self, doc: Doc, algorithm: str
-    ) -> str:
+    def _hierarchical_scramble(self, doc: Doc, algorithm: str) -> str:
         d = {}
         for token in doc:
             path_to_root = self._get_route_to_root(token)

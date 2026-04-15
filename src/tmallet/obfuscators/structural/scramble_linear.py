@@ -4,7 +4,7 @@ from nltk.tokenize import sent_tokenize
 from typing import Dict
 import random
 
-DEFAULT_LINEAR_CONFIG = {"level": "sentence", "seed": 100}
+DEFAULT_LINEAR_CONFIG = {"seed": 100}
 DEFAULT_SEED = 100
 
 
@@ -22,21 +22,20 @@ class LinearScrambleObfuscator(Obfuscator):
             seed = config["seed"]
         random.seed(seed)
 
-        if "level" not in config.keys():
+        if "algorithm" not in config.keys():
             raise ValueError(
                 "Please pass a configuration with the 'level' parameter to determine whether scrambling occurs at document or sentence level."
             )
+        algorithm = config["algorithm"]
 
-        scramble_level = config["level"]
-
-        if scramble_level == "sentence":
+        if algorithm == "scramble-BoW-sentence":
             sentences = sent_tokenize(text)
             scrambled_sentences = [self._linear_scramble(s) for s in sentences]
             return " ".join(scrambled_sentences)
-        elif scramble_level == "document":
+        elif algorithm == "scramble-BoW-document":
             return self._linear_scramble(text)
         else:
-            raise ValueError(f"Invalid scrambling level: {scramble_level}")
+            raise ValueError(f"Invalid scrambling level: {algorithm}")
 
     def _linear_scramble(self, text) -> str:
         words = text.split()

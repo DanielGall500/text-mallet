@@ -1,4 +1,4 @@
-from tmallet.utils.replacement_mechanism import (
+from tmallet.obfuscators.replacement_token import (
     ReplacementMechanism,
     get_replacement_tok,
 )
@@ -7,7 +7,7 @@ from nltk.tokenize.treebank import TreebankWordDetokenizer
 from typing import Literal, Dict
 from spacy.tokens import Doc
 
-DEFAULT_CONFIG = {"algorithm": "noun", "replacement_mechanism": "POS"}
+DEFAULT_CONFIG = {"algorithm": "noun", "replacement_mechanism": "DEFAULT"}
 
 
 class POSFilter(SpaCyObfuscator):
@@ -47,22 +47,22 @@ class POSFilter(SpaCyObfuscator):
     def _nouns_only(
         self, doc: Doc, replacement_mechanism: ReplacementMechanism = False
     ) -> str:
-        return self._keep_only(doc, ["NOUN"], replacement_tok)
+        return self._keep_only(doc, ["NOUN"], replacement_mechanism)
 
     def _nouns_and_prop_only(
         self, doc: Doc, replacement_mechanism: ReplacementMechanism = False
     ) -> str:
-        return self._keep_only(doc, ["NOUN", "PROPN"], replacement_tok)
+        return self._keep_only(doc, ["NOUN", "PROPN"], replacement_mechanism)
 
     def _no_nouns(
         self, doc: Doc, replacement_mechanism: bool = ReplacementMechanism
     ) -> str:
-        return self._keep_all_except(doc, ["NOUN"], replacement_tok)
+        return self._keep_all_except(doc, ["NOUN"], replacement_mechanism)
 
     def _no_nouns_or_propn(
         self, doc: Doc, replacement_mechanism: ReplacementMechanism = False
     ) -> str:
-        return self._keep_all_except(doc, ["NOUN", "PROPN"], replacement_tok)
+        return self._keep_all_except(doc, ["NOUN", "PROPN"], replacement_mechanism)
 
     def _keep_only(
         self,

@@ -1,5 +1,5 @@
-from tmallet.shannon.calc import ShannonBERT
-from tmallet.shannon.visualise import ShannonVisualiser
-from tmallet.shannon.analysis import ShannonAnalyser
+from tmallet.obfuscators.shannon.impl.calc import ShannonBERT
+from tmallet.obfuscators.shannon.impl.visualise import ShannonVisualiser
+from tmallet.obfuscators.shannon.impl.analysis import ShannonAnalyser
 
 __all__ = ["ShannonVisualiser", "ShannonAnalyser", "ShannonBERT"]

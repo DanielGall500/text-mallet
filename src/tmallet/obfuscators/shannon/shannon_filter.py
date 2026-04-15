@@ -1,7 +1,10 @@
 from tmallet.obfuscators.base import Obfuscator
 from tmallet.obfuscators.shannon.impl.calc import ShannonBERT
 from tmallet.obfuscators.shannon.impl.analysis import ShannonAnalyser
-from tmallet.obfuscators.replacement_token import ReplacementMechanism, get_replacement_tok
+from tmallet.obfuscators.replacement_token import (
+    ReplacementMechanism,
+    get_replacement_tok,
+)
 from tmallet.utils.pos_tagger import get_pos_tags
 from typing import Dict, Union, List
 from nltk.tokenize.treebank import TreebankWordDetokenizer
@@ -14,7 +17,9 @@ DEFAULT_THRESHOLD = 10
 DEFAULT_REPLACEMENT_MECHANISM = "DEFAULT"
 DEFAULT_CONFIG = {
     "threshold": DEFAULT_THRESHOLD,
-    "replacement_mechanism": DEFAULT_REPLACEMENT_MECHANISM
+    "as_upper_bound": True,
+    "as_lower_bound": True,
+    "replacement_mechanism": DEFAULT_REPLACEMENT_MECHANISM,
 }
 
 
@@ -44,7 +49,7 @@ class ShannonFilter(Obfuscator):
         self.shannon = ShannonBERT(model_name=DEFAULT_MODEL, device=device)
         self.detok = TreebankWordDetokenizer()
 
-    def obfuscate(self, text: str, config: Dict = DEFAULT_CONFIG) -> str|List[str]:
+    def obfuscate(self, text: str, config: Dict = DEFAULT_CONFIG) -> Dict[float, str]:
         if "threshold" not in config.keys():
             max_mutual_info = DEFAULT_THRESHOLD
         else:
@@ -55,34 +60,65 @@ class ShannonFilter(Obfuscator):
         else:
             replacement_mechanism = config["replacement_mechanism"]
 
+        if "as_upper_bound" not in config.keys():
+            as_upper_bound = True
+        else:
+            as_upper_bound = config["as_upper_bound"]
+
+        if "as_lower_bound" not in config.keys():
+            as_lower_bound = True
+        else:
+            as_lower_bound = config["as_lower_bound"]
+
         shannon_stats_text = self.shannon.get_text_stats(text)
         words = shannon_stats_text.get_words()
 
         if replacement_mechanism == "POS":
-            pos_tags = get_pos_tags(words)
-
-
-        if isinstance(max_mutual_info, list):
-            surviving_words = []
-
-            for i,w in enumerate(words):
-                word_text = w.word
-                if (w.mutual_information < thresh):
-                    surviving_words.append(word_text)
-                else:
-                    replacement_tok = get_replacement_tok(replacement_mechanism, pos_tags[i])
-                    surviving_words.append(replacement_tok)
-
-            surviving_words = [[
-                w.word if (w.mutual_information < thresh) else obfuscatory_token
-                for w in words
-            ] for thresh in max_mutual_info]
-            reconstructed = {thresh: self.detok.detokenize(x) for thresh,x in zip(max_mutual_info,surviving_words)}
-            return reconstructed
+            pos_tags = get_pos_tags([w.word for w in words])
         else:
-            surviving_words = [
-                w.word if (w.mutual_information < max_mutual_info) else obfuscatory_token
-                for w in words
-            ]
-            reconstructed = self.detok.detokenize(surviving_words)
-            return reconstructed
+            replacement_tok = get_replacement_tok(replacement_mechanism, None)
+
+        # check if multiple thresholds were specified
+        is_multiple_thresholds = isinstance(max_mutual_info, list)
+        if not is_multiple_thresholds:
+            max_mutual_info = [max_mutual_info]
+
+        reconstructed = {}
+        for thresh in max_mutual_info:
+            resulting_output_lower_bound = []
+            resulting_output_upper_bound = []
+
+            for i, w in enumerate(words):
+                word_text = w.word
+
+                # check if we need to update the replacement token,
+                # which is only the case if we're using POS tags
+                if replacement_mechanism == "POS":
+                    replacement_tok = pos_tags[i]
+
+                if as_upper_bound:
+                    if w.mutual_information <= thresh:
+                        resulting_output_upper_bound.append(word_text)
+                    else:
+                        resulting_output_upper_bound.append(replacement_tok)
+
+                if as_lower_bound:
+                    if w.mutual_information >= thresh:
+                        resulting_output_lower_bound.append(word_text)
+                    else:
+                        resulting_output_lower_bound.append(replacement_tok)
+
+            reconstructed[thresh] = {
+                "as_upper_bound": (
+                    self.detok.detokenize(resulting_output_upper_bound)
+                    if as_upper_bound
+                    else None
+                ),
+                "as_lower_bound": (
+                    self.detok.detokenize(resulting_output_lower_bound)
+                    if as_lower_bound
+                    else None
+                ),
+            }
+
+        return reconstructed

@@ -1,5 +1,5 @@
-from tmallet.shannon.calc import ShannonBERT
-from tmallet.shannon.visualise import ShannonVisualiser
+from tmallet.obfuscators.shannon.impl.calc import ShannonBERT
+from tmallet.obfuscators.shannon.impl.visualise import ShannonVisualiser
 from typing import Union, List, Optional
 
 
@@ -21,7 +21,9 @@ class ShannonAnalyser:
             processed_texts = self.calculator.get_text_stats(texts)
             mi = [word.mutual_information for word in processed_texts.get_words()]
         else:
-            raise ValueError(f"Please provide a valid either a list or str for texts, not {type(texts)}")
+            raise ValueError(
+                f"Please provide a valid either a list or str for texts, not {type(texts)}"
+            )
 
         if plot_to:
             print(mi)
