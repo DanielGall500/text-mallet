@@ -32,7 +32,14 @@ Languages vary significantly in which they most rely on for certain features, fo
 All of the approaches offered for transforming text in this package target some aspect of this _information_.
 
 #### Why obfuscate text?
-When training models for text generation, we typically need all of the content and style of the original, fluent text. However, there are many tasks such as classification, semantic similarity scoring, topic modelling, and so on, where the original text may not be required in its original form to help model performance. There is typically a trove of public-domain data that can be used for model training, but there are still many questions around the usage of copyright-protected data in training. This package offers a route to preserve some of the value of copyrighted texts while hindering their reconstruction, whether that be in through training-data reconstruction or model outputs.
+When training models for text generation, we typically need all of the content and style of the original, fluent text. However, there are many tasks such as classification, semantic similarity scoring, topic modelling, and so on, where the original text may not be required in its original form to help model performance. There is typically a trove of public-domain data that can be used for model training, but there are still many questions around the usage of copyright-protected data in training. This package offers a route to preserve some of the value of copyrighted texts while hindering their reconstruction, whether that be through training-data reconstruction or model outputs.
+
+The creation of transformed texts that are thus no longer consumable by humans, but still useful for training on specific tasks, is the goal of this package.
+
+#### Won't that reduce model performance?
+In many cases, this approach will likely reduce model performance if we compare it to a model trained on the original data.
+However, the goal is to _add_ these additional obfuscated text formats to our original, public-domain text data. 
+This approach ensures that the original copyright-protected text never enters the model in any consumable format, thus offering strong protection again copyright infringement.
 
 ## Usage
 
