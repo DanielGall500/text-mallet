@@ -19,7 +19,7 @@
 
 A package for the smashing of text into [derived](https://text-plus.org/en/themen-dokumentation/atf) formats, aimed at reducing the possibility of privacy or copyright infringement while maintaining the text utility for certain tasks e.g. classification, retrieval.
 
-When we think about how strings can be altered for obfuscation, we can look at the following aspects:
+When we think about how we might be able to transform text, we can look at the following aspects:
 * Word Forms (the character sequence)
 * Root Forms (lemmas)
 * Syntactic and Morpho-Syntactic Features
@@ -29,25 +29,27 @@ When we think about how strings can be altered for obfuscation, we can look at t
 
 Each of the above contributes a certain amount of *information* to the final text. This tool allows you to directly or indirectly reduce the information present in a text.
 Languages vary significantly in which they most rely on for certain features, for instance English relies heavily on structure for assigning grammatical case while German relies more on morphological adjustments with relatively free word order.
+All of the approaches offered for transforming text in this package target some aspect of this _information_.
 
-![Overview of Text Mallet's Features](assets/text-mallet-overview.png)
+#### Why obfuscate text?
+When training models for text generation, we typically need all of the content and style of the original, fluent text. However, there are many tasks such as classification, semantic similarity scoring, topic modelling, and so on, where the original text may not be required in its original form to help model performance. There is typically a trove of public-domain data that can be used for model training, but there are still many questions around the usage of copyright-protected data in training. This package offers a route to preserve some of the value of copyrighted texts while hindering their reconstruction, whether that be in through training-data reconstruction or model outputs.
 
 ## Usage
 
 ### Basic Obfuscation
 ```python
 from tmallet import TMallet
-
-# Initialise the obfuscator
 mallet = TMallet()
 
-# Transform a text into Nouns, Proper Nouns, and POS tags
 text = """
 A Soyuz rocket launched two Galileo satellites into orbit on Friday,
 marking a crucial step for Europe’s planned navigation system,
 operator Arianespace announced.
 """
-config = {"algorithm": "noun-propn", "replace_with_pos": True}
+config = {
+    "algorithm": "retain-noun-propn", 
+    "replacement_mechanism": "POS"
+}
 obfuscated_text = mallet.obfuscate(text, config)
 ```
 Output
@@ -55,6 +57,36 @@ Output
 "DET Soyuz rocket VERB NUM Galileo satellites ADP orbit ADP Friday PUNCT
 VERB DET ADJ step ADP Europe PART VERB navigation system PUNCT
 operator Arianespace VERB "
+```
+
+**Obfuscate based on an approximation of 'word importance'**
+Mutual information measures how much information context tells you about a word.
+Words which are both _rare_ and _context-dependant_ tend to be _important_ to the meaning of a text.
+We can apply a filter to set upper or lower bounds on such an MI score, filering at the word level.
+```python
+...
+text = """
+Three-dimensional printing is being used to make metal parts 
+for aircraft and space vehicles.
+"""
+   
+config = {
+    "algorithm": "shannon", 
+    "threshold": 8,
+    "as_upper_bound": True,
+    "as_lower_bound": True,
+    "replacement_mechanism": "DEFAULT"
+}
+obfuscated_text = mallet.obfuscate(text, config)
+```
+
+Output
+```
+==Mutual-Information Obfuscation==
+Threshold:  8
+Lower Bounded:  Three _ dimensional printing _ _ used _ _ metal parts _ aircraft _ space vehicles _
+Upper Bounded:  _ - _ _ is being _ to make _ _ for _ and _ _.
+==================================
 ```
 
 ### Obfuscate a Dataset
@@ -103,9 +135,9 @@ Here’s a structured markdown description of the algorithms and their parameter
 
 There are four primary means of obfuscation provided:
 1. Lemmatisation (somewhat obfuscates writing style; very light)
-2. Scrambling (obfuscates language structure and to a lesser extent meaning; light)
-3. Replacement (obfuscates word types; medium-strong)
-4. Mutual Information (obfuscates based on Shannon-based metrics; adjustable).
+2. Scrambling (obfuscates language structure; light-to-medium)
+3. Part-of-Speech Filtering (obfuscates word types; medium-strong)
+4. Mutual-Information Filtering (obfuscates based on an approximation of 'word importance' in a text; adjustable).
 
 #### 1. Lemmatisation
 **Description**: Reduces words to their base or dictionary form. A very light form of obfuscation, particularly to remove shallow elements of writing style.
@@ -113,26 +145,23 @@ To use it pass a `config` with `algorithm` set to `lemmatize`.
 
 #### 2. Scrambling
 **Description**: Scrambling involves jumbling the words in a sentence or text. You can choose from the following scrambling algorithms:
-- `scramble-BoW`: Without concern for language structure.
-- `scramble-shuffle-siblings`: Parse text into a dependency tree and randomly shuffling words that are sibling nodes.
-- `scramble-reverse-head`: Parse text into a dependency structure and randomly reverse the order of head nodes in relation to their siblings.
-
-| Parameter                  | Type    | Description                                      | Default Value |
-|----------------------------|---------|--------------------------------------------------|---------------|
-| `scramble_within_sentence` | bool    | If `True`, scrambles words within sentences. If `False`, scrambles across the entire text. | `False`       |
+- `scramble-hier-weak`: Use dependency parsing to scramble words (child nodes i.e. words follow their head) that of the same head and the same side of said head.
+- `scramble-hier-strong`: Use dependency parsing to scramble words (child nodes i.e. words follow their head) of the same head. 
+- `scramble-BoW-sentence`: Randomly scramble words (within sentences) without concern for language structure.
+- `scramble-BoW-document`: Randomly scramble words (across the entire text) without concern for language structure.
 
 #### 3. Replacement of Nouns / Proper Nouns
 **Description**: Adjusts different word types by either deleting them or replacing them with POS tags.
 Algorithms
-- `noun`: Keep only nouns.
-- `noun-propn`: Keep only nouns and proper nouns.
-- `no-noun`: Keep everything but nouns.
-- `no-noun-propn`: Keep everything but nouns and proper nouns.
+- `retain-noun`: Keep only nouns.
+- `retain-noun-propn`: Keep only nouns and proper nouns.
+- `remove-noun`: Keep everything but nouns.
+- `remove-noun-propn`: Keep everything but nouns and proper nouns.
 
 Additional Configuration Options:
 | Parameter            | Type    | Description                                      | Default Value |
 |----------------------|---------|--------------------------------------------------|---------------|
-| `replace_with_pos`   | bool    | If `True`, replaces with the specified POS.      | `True`        |
+| `replacement_mechanism`   | str    | Determines how filtered words are replaced in the text. Can be one of "DEFAULT" (replaced with a default character, typically an underscore), "DELETE", or "POS" (replaced with the corresponding part-of-speech tag).     | `DEFAULT`        |
 
 #### 4. Mutual Information Obfuscation
 **Description**: Applies Shannon entropy-based text transformation, replacing words based on a threshold of Mutual Information. To use this pass `shannon` to the `algorithm` parameter in the configuration.
@@ -141,7 +170,9 @@ Additional Configuration Options:
 | Parameter      | Type    | Description                                      | Default Value |
 |----------------|---------|--------------------------------------------------|---------------|
 | `threshold`    | int     | Threshold for character replacement.             | `10`          |
-| `replace_with` | str     | Character used for replacement.                  | `"_"`         |
+| `replacement_mechanism`   | str    | Determines how filtered words are replaced in the text. Can be one of "DEFAULT" (replaced with a default character, typically an underscore), "DELETE", or "POS" (replaced with the corresponding part-of-speech tag).     | `DEFAULT`        |
+| `as_upper_bound`    | bool     | Whether all words with a MI value above the threshold should be filtered.             | `True`          |
+| `as_lower_bound`    | bool     | Whether all words with a MI value below the threshold should be filtered.             | `True`          |
 
 #### Acknowledgements
 Part of this work was conducted within the [CORAL project](https://coral-nlp.github.io) funded by the German Federal Ministry of Research, Technology, and Space (BMFTR) under the grant number 16IS24077A. Responsibility for the content of this publication lies with the authors. 
