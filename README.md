@@ -29,7 +29,6 @@ When we think about how we might be able to transform text, we can look at the f
 
 Each of the above contributes a certain amount of *information* to the final text. This tool allows you to directly or indirectly erode such information.
 Languages vary significantly in which they most rely on for certain features, for instance English relies heavily on structure for assigning grammatical case while German relies more on morphological adjustments with relatively free word order.
-All of the approaches offered for transforming text in this package target some aspect of this _information_.
 
 #### Why obfuscate text?
 When training models for text generation, we typically need all of the content and style of the original, fluent text. However, there are many tasks such as classification, semantic similarity scoring, topic modelling, and so on, where the original text may not be required in its original form to help model performance. There is typically a trove of public-domain data that can be used for model training, but there are still many questions around the usage of copyright-protected data in training. This package offers a route to preserve some of the value of copyrighted texts while hindering their reconstruction, whether that be through training-data reconstruction or model outputs.
