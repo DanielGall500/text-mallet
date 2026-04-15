@@ -27,7 +27,7 @@ When we think about how we might be able to transform text, we can look at the f
 * Grammatical Relations (hierarchical structure)
 * Sequence Information (linear structure)
 
-Each of the above contributes a certain amount of *information* to the final text. This tool allows you to directly or indirectly reduce the information present in a text.
+Each of the above contributes a certain amount of *information* to the final text. This tool allows you to directly or indirectly erode such information.
 Languages vary significantly in which they most rely on for certain features, for instance English relies heavily on structure for assigning grammatical case while German relies more on morphological adjustments with relatively free word order.
 All of the approaches offered for transforming text in this package target some aspect of this _information_.
 
