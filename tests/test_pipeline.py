@@ -76,6 +76,7 @@ obfuscation_techniques = {
         "replacement_mechanism": "DELETE",
         "as_upper_bound": True,
         "as_lower_bound": True,
+        "output_mi_values": True,
     },
     "Shannon (10, DEFAULT)": {
         "algorithm": "shannon",
@@ -83,6 +84,7 @@ obfuscation_techniques = {
         "replacement_mechanism": "DEFAULT",
         "as_upper_bound": True,
         "as_lower_bound": True,
+        "output_mi_values": True,
     },
     "Shannon (10, POS)": {
         "algorithm": "shannon",
@@ -90,6 +92,7 @@ obfuscation_techniques = {
         "replacement_mechanism": "POS",
         "as_upper_bound": True,
         "as_lower_bound": True,
+        "output_mi_values": True,
     },
 }
 
@@ -107,30 +110,11 @@ for technique, config in obfuscation_techniques.items():
                 if "as_upper_bound" in results.keys():
                     print("Upper Bounded: ", results["as_upper_bound"])
                     print("===========")
+                if "mi_values" in results.keys():
+                    print("MI Values: ", results["mi_values"])
+                    print("===========")
         else:
             print(f"===={technique}====")
             print(obfuscated_text)
             print("================")
             print("\n\n")
-
-
-"""
-analyser = ShannonAnalyser()
-visualiser = ShannonVisualiser()
-
-processed_texts = analyser.get_distribution_by_word(sample_texts, "test_dist.png")
-print(processed_texts)
-
-for text in processed_texts:
-    print("====")
-    print(text)
-    print("====")
-
-words = [[w.word for w in text.word_stats] for text in processed_texts]
-mi = [[w.mutual_information for w in text.word_stats] for text in processed_texts]
-heatmap = visualiser.display_sentence_heatmap(words, mi)
-print(heatmap)
-
-with open("example.html", "w") as f:
-    f.write(f"<html><body>{heatmap}</body></html>")
-"""
