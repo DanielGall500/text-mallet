@@ -145,8 +145,7 @@ statsmodels==0.14.6
 sympy==1.14.0
 thinc==8.3.10
 tokenizers==0.22.2
-torch==2.11.0.dev20260205+cu130
-torchvision==0.25.0.dev20260205+cu130
+torch==2.11.0
 tqdm==4.67.1
 traitlets==5.14.3
 transformers==4.57.6
