@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="violet" data-content_root="./">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>text-mallet 0.0.1 documentation</title><link rel="author" title="About these documents" href="about.html" /><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Installation" href="installation.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="_static/pygments.css?v=e1a1ceaf" />
+    <link rel="stylesheet" type="text/css" href="_static/shibuya.css?v=44020203" />
+    <link media="print" rel="stylesheet" type="text/css" href="_static/print.css?v=20ff2c19" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    <meta property="og:type" content="website"/><meta property="og:title" content="Text Mallet Documentation"/>
+    <meta name="twitter:card" content="summary"/>
+  </head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="#">
+      
+      
+      <strong>text-mallet</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials"></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="usage/basics.html">Basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/datasets.html">Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/large_datasets.html">Large Datasets</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Obfuscation Methods</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="methods/lemmatization.html">Lemmatization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="methods/structural.html">Structural</a></li>
+<li class="toctree-l1"><a class="reference internal" href="methods/pos_filtering.html">POS Filtering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="methods/mutual_information.html">Mutual Information</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Project Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
+</ul>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#contents">Contents</a><ul>
+</ul>
+</li>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#why-obfuscate-text">Why Obfuscate Text?</a></li>
+<li><a class="reference internal" href="#quick-example">Quick Example</a></li>
+<li><a class="reference internal" href="#output">Output</a></li>
+<li><a class="reference internal" href="#core-obfuscation-strategies">Core Obfuscation Strategies</a></li>
+<li><a class="reference internal" href="#design-goals">Design Goals</a></li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="#"><span itemprop="name">text-mallet</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">Text Mallet Documentation</strong>
+        <meta itemprop="position" content="2" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <article class="yue" role="main">
+          <section id="text-mallet-documentation">
+<h1>Text Mallet Documentation<a class="headerlink" href="#text-mallet-documentation" title="Link to this heading">¶</a></h1>
+<p><strong>text-mallet</strong> is a toolkit for transforming text into obfuscated or
+derived formats while preserving utility for downstream NLP tasks such
+as classification, retrieval, and topic modeling.</p>
+<p>The package focuses on reducing the risk of privacy or copyright
+infringement by degrading reconstructable linguistic information,
+while retaining task-relevant signals.</p>
+<section id="contents">
+<h2>Contents<a class="headerlink" href="#contents" title="Link to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="usage/basics.html">Basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/datasets.html">Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/large_datasets.html">Large Datasets</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Obfuscation Methods</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="methods/lemmatization.html">Lemmatization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="methods/structural.html">Structural</a></li>
+<li class="toctree-l1"><a class="reference internal" href="methods/pos_filtering.html">POS Filtering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="methods/mutual_information.html">Mutual Information</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Project Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
+</ul>
+</div>
+</section>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">¶</a></h2>
+<p>Text can be transformed along multiple linguistic dimensions:</p>
+<ul class="simple">
+<li><p><strong>Word Forms</strong> (surface character sequences)</p></li>
+<li><p><strong>Root Forms</strong> (lemmas)</p></li>
+<li><p><strong>Syntactic and Morphological Features</strong></p></li>
+<li><p><strong>Semantic Content</strong></p></li>
+<li><p><strong>Grammatical Relations</strong></p></li>
+<li><p><strong>Sequence Structure</strong></p></li>
+</ul>
+<p>Each of these contributes information to the final text. <code class="docutils literal notranslate"><span class="pre">text-mallet</span></code>
+provides mechanisms to selectively erode this information, producing
+representations that are less human-readable but still useful for
+machine learning tasks.</p>
+<p>Different languages rely on these dimensions differently. For example,
+English depends heavily on word order, while German relies more on
+morphological variation.</p>
+</section>
+<section id="why-obfuscate-text">
+<h2>Why Obfuscate Text?<a class="headerlink" href="#why-obfuscate-text" title="Link to this heading">¶</a></h2>
+<p>Many NLP tasks do not require fully reconstructable text. Tasks such as:</p>
+<ul class="simple">
+<li><p>Text classification</p></li>
+<li><p>Semantic similarity</p></li>
+<li><p>Topic modeling</p></li>
+<li><p>Information retrieval</p></li>
+</ul>
+<p>can often operate effectively on degraded or transformed inputs.</p>
+<p>This package enables:</p>
+<ul class="simple">
+<li><p>Possible use of sensitive or copyrighted data without exposing raw text</p></li>
+<li><p>Reduced risk of reconstruction from adversarial attacks (e.g. embedding inversion) or thorugh model outputs</p></li>
+</ul>
+<p>Rather than replacing clean data, obfuscated text is intended to
+<em>complement</em> existing datasets.</p>
+</section>
+<section id="quick-example">
+<h2>Quick Example<a class="headerlink" href="#quick-example" title="Link to this heading">¶</a></h2>
+<p>The following example demonstrates how to use <code class="docutils literal notranslate"><span class="pre">TMallet</span></code> to obfuscate text
+based on part-of-speech replacement.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">tmallet</span><span class="w"> </span><span class="kn">import</span> <span class="n">TMallet</span>
+</span><span data-line="2">
+</span><span data-line="3"><span class="n">mallet</span> <span class="o">=</span> <span class="n">TMallet</span><span class="p">()</span>
+</span><span data-line="4">
+</span><span data-line="5"><span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+</span><span data-line="6"><span class="s2">A Soyuz rocket launched two Galileo satellites into orbit on Friday,</span>
+</span><span data-line="7"><span class="s2">marking a crucial step for Europe’s planned navigation system,</span>
+</span><span data-line="8"><span class="s2">operator Arianespace announced.</span>
+</span><span data-line="9"><span class="s2">&quot;&quot;&quot;</span>
+</span><span data-line="10">
+</span><span data-line="11"><span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
+</span><span data-line="12">    <span class="s2">&quot;algorithm&quot;</span><span class="p">:</span> <span class="s2">&quot;retain-noun-propn&quot;</span><span class="p">,</span>
+</span><span data-line="13">    <span class="s2">&quot;replacement_mechanism&quot;</span><span class="p">:</span> <span class="s2">&quot;POS&quot;</span>
+</span><span data-line="14"><span class="p">}</span>
+</span><span data-line="15">
+</span><span data-line="16"><span class="n">obfuscated_text</span> <span class="o">=</span> <span class="n">mallet</span><span class="o">.</span><span class="n">obfuscate</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+</span></pre></div>
+</div>
+</section>
+<section id="output">
+<h2>Output<a class="headerlink" href="#output" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span><span data-line="1">DET Soyuz rocket VERB NUM Galileo satellites ADP orbit ADP Friday PUNCT
+</span><span data-line="2">VERB DET ADJ step ADP Europe PART VERB navigation system PUNCT
+</span><span data-line="3">operator Arianespace VERB
+</span></pre></div>
+</div>
+</section>
+<section id="core-obfuscation-strategies">
+<h2>Core Obfuscation Strategies<a class="headerlink" href="#core-obfuscation-strategies" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">text-mallet</span></code> provides four primary approaches:</p>
+<ol class="arabic simple">
+<li><p><strong>Lemmatization</strong>
+- Light obfuscation
+- Removes stylistic variation</p></li>
+<li><p><strong>Scrambling</strong>
+- Alters word order
+- Ranges from structure-aware to bag-of-words randomization</p></li>
+<li><p><strong>Part-of-Speech Filtering</strong>
+- Removes or isolates word classes
+- Medium to strong obfuscation</p></li>
+<li><p><strong>Mutual Information Filtering</strong>
+- Uses Shannon entropy approximation
+- Filters words based on contextual importance
+- Highly configurable strength</p></li>
+</ol>
+</section>
+<section id="design-goals">
+<h2>Design Goals<a class="headerlink" href="#design-goals" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Preserve task-relevant signal</p></li>
+<li><p>Minimize reconstructability of original text</p></li>
+<li><p>Provide configurable and composable text transformations</p></li>
+</ul>
+</section>
+<section id="indices-and-tables">
+<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"><div class="navigation-next">
+    <a href="installation.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">Installation</div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>2026, InfAI e.V.</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials"></div>
+    </div>
+  </div>
+</footer>
+      <script src="_static/documentation_options.js?v=d45e8c67"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="_static/shibuya.js?v=cac61aee"></script></body>
+</html>
