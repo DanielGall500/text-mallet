@@ -179,6 +179,7 @@ Additional Configuration Options:
 | `replacement_mechanism`   | str    | Determines how filtered words are replaced in the text. Can be one of "DEFAULT" (replaced with a default character, typically an underscore), "DELETE", or "POS" (replaced with the corresponding part-of-speech tag).     | `DEFAULT`        |
 | `as_upper_bound`    | bool     | Whether all words with a MI value above the threshold should be filtered.             | `True`          |
 | `as_lower_bound`    | bool     | Whether all words with a MI value below the threshold should be filtered.             | `True`          |
+| `output_mi_values`    | bool     | Whether the MI values themselves should be provided.             | `False`          |
 
 #### Acknowledgements
 Part of this work was conducted within the [CORAL project](https://coral-nlp.github.io) funded by the German Federal Ministry of Research, Technology, and Space (BMFTR) under the grant number 16IS24077A. Responsibility for the content of this publication lies with the authors. 
