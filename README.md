@@ -9,7 +9,7 @@
     <br />
     <br />
     <br />
-    <a href="">View Demo</a>
+    <a href="https://text-mallet.readthedocs.io/en/latest/">Read The Docs</a>
     &middot;
     <a href="https://github.com/DanielGall500/text-hammer/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
     &middot;
