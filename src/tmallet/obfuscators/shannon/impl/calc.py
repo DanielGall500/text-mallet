@@ -46,14 +46,25 @@ class WordStat:
             return 0
 
         # get P(word) in lookup
-        # if not found, then it's likely names, dialectal spellings, etc,
+        # if not found, then try the same wordd but lowercase,
+        # if not again, then it's likely names, dialectal spellings, etc,
         # give default 25th percentile freq (low)
-        prior_prob = freq_dict.get(self.word, FREQ_P25)
+        prior_prob = freq_dict.get(self.word)
+        if prior_prob == 0:
+            prior_prob = freq_dict.get(
+                    lower(self.word), FREQ_P25
+            )
+
         prior_surprisal = -math.log2(prior_prob)
 
-        # pointwise I(X;Y) = S(X) - S(X|Y)
-        MI = prior_surprisal - self.contextual_surprisal
-        return MI
+        # Pointwise MI(X;Y) = S(X) - S(X|Y)
+        PMI = prior_surprisal - self.contextual_surprisal
+
+        # Positive PMI
+        # it is common to clip all negative values where PMI 
+        # is an approximation
+        PPMI = max(MI, 0)
+        return PPMI
 
 
 @dataclass

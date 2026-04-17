@@ -20,6 +20,7 @@ DEFAULT_CONFIG = {
     "as_upper_bound": True,
     "as_lower_bound": True,
     "replacement_mechanism": DEFAULT_REPLACEMENT_MECHANISM,
+    "output_mi_values": True
 }
 
 
@@ -70,8 +71,15 @@ class ShannonFilter(Obfuscator):
         else:
             as_lower_bound = config["as_lower_bound"]
 
+        if "output_mi_values" not in config.keys():
+            output_mi_values = False
+        else:
+            output_mi_values = config["output_mi_values"]
+
         shannon_stats_text = self.shannon.get_text_stats(text)
         words = shannon_stats_text.get_words()
+        word_labels = shannon_stats_text.get_word_labels()
+        mi_values = shannon_stats_text.get_mutual_infos()
 
         if replacement_mechanism == "POS":
             pos_tags = get_pos_tags([w.word for w in words])
@@ -88,22 +96,20 @@ class ShannonFilter(Obfuscator):
             resulting_output_lower_bound = []
             resulting_output_upper_bound = []
 
-            for i, w in enumerate(words):
-                word_text = w.word
-
+            for i, word_text in enumerate(word_labels):
                 # check if we need to update the replacement token,
                 # which is only the case if we're using POS tags
                 if replacement_mechanism == "POS":
                     replacement_tok = pos_tags[i]
 
                 if as_upper_bound:
-                    if w.mutual_information <= thresh:
+                    if mi_values[i] <= thresh:
                         resulting_output_upper_bound.append(word_text)
                     else:
                         resulting_output_upper_bound.append(replacement_tok)
 
                 if as_lower_bound:
-                    if w.mutual_information >= thresh:
+                    if mi_values[i] >= thresh:
                         resulting_output_lower_bound.append(word_text)
                     else:
                         resulting_output_lower_bound.append(replacement_tok)
@@ -120,5 +126,8 @@ class ShannonFilter(Obfuscator):
                     else None
                 ),
             }
+
+            if output_mi_values:
+                reconstructed[thresh]["mi_values"] = mi_values
 
         return reconstructed
