@@ -43,7 +43,10 @@ class WordStat:
     @property
     def mutual_information(self):
         # if punctuation, default to no information contributed
-        if len(self.word) == 1 and unicodedata.category(self.word).startswith("P"):
+        if len(self.word) == 1 and (
+            unicodedata.category(self.word).startswith("P")
+            or unicodedata.category(self.word).startswith("S")
+        ):
             return 0
 
         # find P(word) in lookup table

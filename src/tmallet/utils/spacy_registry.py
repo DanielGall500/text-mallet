@@ -41,11 +41,17 @@ class SpaCyInterface:
         match pipeline:
             case "pos":
                 for name in nlp.component_names:
-                    if name not in ["transformer", "tagger", "morphologizer", "attribute_ruler", "lemmatizer"]:
+                    if name not in [
+                        "transformer",
+                        "tagger",
+                        "morphologizer",
+                        "attribute_ruler",
+                        "lemmatizer",
+                    ]:
                         nlp.disable_pipe(name)
             case "ner":
                 for name in nlp.component_names:
-                    if name != "ner":
+                    if name not in ["transformer", "ner"]:
                         nlp.disable_pipe(name)
             case "lemma":
                 for name in ["parser", "ner", "textcat"]:

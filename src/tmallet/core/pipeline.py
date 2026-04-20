@@ -31,7 +31,7 @@ ObfuscationTechnique = Literal[
 
 
 class TMallet:
-    # apply_spacy_preprocessing: determines whether spacy is used or not 
+    # apply_spacy_preprocessing: determines whether spacy is used or not
     # for the initial text processing
     # -> determined automatically based on the configuration selected
     apply_spacy_preprocessing: bool = False
@@ -44,19 +44,14 @@ class TMallet:
         self.lang: LangConfig = lang
         self.device = "cuda" if prefer_gpu else "cpu"
 
-    def obfuscate(
-        self, text: Union[List[str], str]
-    ) -> Union[List[str], str]:
+    def obfuscate(self, text: Union[List[str], str]) -> Union[List[str], str]:
         if not self.active_obfuscator or not self.active_config:
-            raise RuntimeError("Please use `set_obfuscator` to setup the obfuscation details first.")
+            raise RuntimeError(
+                "Please use `set_obfuscator` to setup the obfuscation details first."
+            )
 
         if self.apply_spacy_preprocessing:
             text = self.spacy_interface.process(text)
-            print("====")
-            print("Spacy Applied ", self.active_config["algorithm"])
-            print(self.spacy_interface._active_model.pipe_names)
-            print([(x.text,x.pos_) for x in text])
-            print("====")
 
         return self.active_obfuscator.obfuscate(text, config=self.active_config)
 
@@ -64,6 +59,7 @@ class TMallet:
         self.active_config = config
         algorithm = self.active_config["algorithm"]
         self.active_obfuscator = self._get_obfuscator(algorithm)
+        return self
 
     def _get_obfuscator(
         self, algorithm: ObfuscationTechnique
@@ -91,8 +87,12 @@ class TMallet:
                 return LinearScrambleObfuscator()
             case "shannon":
                 self.apply_spacy_preprocessing = False
-                self.spacy_interface.set_pipeline("ner")
-                return ShannonFilter(lang=self.lang, spacy_interface=self.spacy_interface, device=self.device)
+                self.spacy_interface.set_pipeline("pos")
+                return ShannonFilter(
+                    lang=self.lang,
+                    spacy_interface=self.spacy_interface,
+                    device=self.device,
+                )
             case _:
                 raise ValueError(
                     f"Input {algorithm} invalid. Please provide a valid obfuscation algorithm."

@@ -4,6 +4,7 @@ from tmallet.obfuscators.shannon.impl.analysis import ShannonAnalyser
 from tmallet.obfuscators.replacement_token import (
     ReplacementMechanism,
     get_replacement_tok,
+    DEFAULT_TOKEN,
 )
 from typing import Dict, Union, List
 from nltk.tokenize.treebank import TreebankWordDetokenizer
@@ -28,6 +29,7 @@ DEFAULT_CONFIG = {
     "output_mi_values": True,
 }
 
+
 class ShannonFilter(Obfuscator):
     """
     Removes tokens depending on their Mutual Information, as assigned
@@ -36,7 +38,9 @@ class ShannonFilter(Obfuscator):
     Recommended to run this using at least a GPU.
     """
 
-    def __init__(self, lang: LangConfig, spacy_interface: SpaCyInterface, device: str = "cpu"):
+    def __init__(
+        self, lang: LangConfig, spacy_interface: SpaCyInterface, device: str = "cpu"
+    ):
         match lang:
             case "en":
                 model_name = DEFAULT_MODEL_EN
@@ -67,8 +71,6 @@ class ShannonFilter(Obfuscator):
             # is used by the obfuscation class itself and
             # not handled by the pipeline
             pos_tags = self.spacy_interface.get_pos_tags_for_tokens(word_labels)
-        else:
-            replacement_tok = get_replacement_tok(replacement_mechanism, None)
 
         # check if multiple thresholds were specified
         is_multiple_thresholds = isinstance(max_mutual_info, list)
@@ -83,8 +85,17 @@ class ShannonFilter(Obfuscator):
             for i, word_text in enumerate(word_labels):
                 # check if we need to update the replacement token,
                 # which is only the case if we're using POS tags
-                if replacement_mechanism == "POS":
-                    replacement_tok = pos_tags[i]
+                match replacement_mechanism:
+                    case "POS":
+                        replacement_tok = pos_tags[i]
+                    case "DEFAULT":
+                        replacement_tok = DEFAULT_TOKEN
+                    case "DELETE":
+                        continue
+                    case _:
+                        raise ValueError(
+                            f"Please provide a valid replacement mechanism (provided {replacement_mechanism})."
+                        )
 
                 if as_upper_bound:
                     if mi_values[i] <= thresh:

@@ -1,6 +1,7 @@
 from tmallet.obfuscators.replacement_token import (
     ReplacementMechanism,
     get_replacement_tok,
+    DEFAULT_TOKEN,
 )
 from tmallet.obfuscators.base import SpaCyObfuscator
 from nltk.tokenize.treebank import TreebankWordDetokenizer
@@ -74,19 +75,25 @@ class POSFilter(SpaCyObfuscator):
         for token in doc:
             is_kept = token.pos_ in pos_tags
             # if the word is allowed to be kept, then append it,
-            print("==")
-            print(token.text)
-            print(token.pos_)
-            print(f"{token.text} is kept: {is_kept}")
-            print(token.pos_)
-            print("==")
             if is_kept:
                 remaining_tokens.append(token.text)
             else:
                 # otherwise, find out whether it should be replaced with nothing,
                 # a default character, or the POS tag
-                replacement_tok = get_replacement_tok(replacement_mechanism, token.pos_)
+                match replacement_mechanism:
+                    case "POS":
+                        replacement_tok = token.pos_
+                    case "DEFAULT":
+                        replacement_tok = DEFAULT_TOKEN
+                    case "DELETE":
+                        continue
+                    case _:
+                        raise ValueError(
+                            f"Please provide a valid replacement mechanism (provided {replacement_mechanism})."
+                        )
+
                 remaining_tokens.append(replacement_tok)
+
         return self.detok.detokenize(remaining_tokens)
 
     def _keep_all_except(
@@ -103,6 +110,19 @@ class POSFilter(SpaCyObfuscator):
             else:
                 # otherwise, find out whether it should be replaced with nothing,
                 # a default character, or the POS tag
-                replacement_tok = get_replacement_tok(replacement_mechanism, token.pos_)
+                match replacement_mechanism:
+                    case "POS":
+                        replacement_tok = token.pos_
+                    case "DEFAULT":
+                        replacement_tok = DEFAULT_TOKEN
+                    case "DELETE":
+                        continue
+                    case _:
+                        raise ValueError(
+                            f"Please provide a valid replacement mechanism (provided {replacement_mechanism})."
+                        )
+
                 remaining_tokens.append(replacement_tok)
+                # otherwise, find out whether it should be replaced with nothing,
+                # a default character, or the POS tag
         return self.detok.detokenize(remaining_tokens)

@@ -7,7 +7,7 @@ DEFAULT_TOKEN = "_"
 def get_replacement_tok(preference: ReplacementMechanism, pos_tag: str):
     match preference:
         case "DELETE":
-            return ""
+            return None
         case "DEFAULT":
             return DEFAULT_TOKEN
         case "POS":
