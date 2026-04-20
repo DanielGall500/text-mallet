@@ -52,6 +52,11 @@ class TMallet:
 
         if self.apply_spacy_preprocessing:
             text = self.spacy_interface.process(text)
+            print("====")
+            print("Spacy Applied ", self.active_config["algorithm"])
+            print(self.spacy_interface._active_model.pipe_names)
+            print([(x.text,x.pos_) for x in text])
+            print("====")
 
         return self.active_obfuscator.obfuscate(text, config=self.active_config)
 
@@ -75,7 +80,7 @@ class TMallet:
                 | "noun-propn-remove"
             ):
                 self.apply_spacy_preprocessing = True
-                self.spacy_interface.set_pipeline("ner")
+                self.spacy_interface.set_pipeline("pos")
                 return POSFilter()
             case "scramble-hier-weak" | "scramble-hier-strong":
                 self.apply_spacy_preprocessing = True

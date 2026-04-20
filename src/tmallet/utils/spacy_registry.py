@@ -24,20 +24,25 @@ class SpaCyInterface:
         if prefer_gpu:
             spacy.prefer_gpu()
 
-        self._active_model = spacy.load(self.model_name)
+        self._full_model = spacy.load(self.model_name)
+        self._active_model = self._full_model
 
     def set_pipeline(self, pipeline: str) -> None:
-        nlp = self._active_model
+        nlp = self._full_model
 
         # reset all pipes to enabled before reconfiguring
         for name in nlp.component_names:
-            if nlp.has_pipe(name) and not nlp.get_pipe_meta(name).default_score_weights:
+            if nlp.has_pipe(name):
                 try:
                     nlp.enable_pipe(name)
                 except ValueError:
                     pass
 
         match pipeline:
+            case "pos":
+                for name in nlp.component_names:
+                    if name not in ["transformer", "tagger", "morphologizer", "attribute_ruler", "lemmatizer"]:
+                        nlp.disable_pipe(name)
             case "ner":
                 for name in nlp.component_names:
                     if name != "ner":
@@ -55,7 +60,7 @@ class SpaCyInterface:
 
         self._active_model = nlp
 
-    def process(self, text: str) -> spacy:
+    def process(self, text: str) -> Doc:
         return self._active_model(text)
 
     def get_pos_tags_for_tokens(self, word_list: list[str]):
