@@ -23,8 +23,12 @@ class HierarchicalScrambleObfuscator(SpaCyObfuscator):
             )
         algorithm = config["algorithm"]
 
+        doc_as_sents = [sent.as_doc() for sent in doc.sents]
+
         if (algorithm == "scramble-hier-weak") or (algorithm == "scramble-hier-strong"):
-            return self._hierarchical_scramble(doc, algorithm=algorithm)
+            # operate at the sentence level
+            scrambled_sentences = [self._hierarchical_scramble(d, algorithm=algorithm) for d in doc_as_sents]
+            return " ".join(scrambled_sentences)
         else:
             raise ValueError(
                 "Please provide a valid hierarchical scrambling algorithm."

@@ -25,18 +25,12 @@ class SpaCyInterface:
             spacy.prefer_gpu()
 
         self._full_model = spacy.load(self.model_name)
+        self._full_model.add_pipe("sentencizer")
+
         self._active_model = self._full_model
 
     def set_pipeline(self, pipeline: str) -> None:
         nlp = self._full_model
-
-        # reset all pipes to enabled before reconfiguring
-        for name in nlp.component_names:
-            if nlp.has_pipe(name):
-                try:
-                    nlp.enable_pipe(name)
-                except ValueError:
-                    pass
 
         match pipeline:
             case "pos":
@@ -47,6 +41,7 @@ class SpaCyInterface:
                         "morphologizer",
                         "attribute_ruler",
                         "lemmatizer",
+                        "sentencizer"
                     ]:
                         nlp.disable_pipe(name)
             case "ner":
