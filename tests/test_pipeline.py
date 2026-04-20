@@ -1,11 +1,6 @@
 from tmallet import TMallet
 from tmallet.obfuscators.shannon.impl import ShannonAnalyser, ShannonVisualiser
 
-sample_texts = [
-    "Three-dimensional printing is being used to make metal parts for aircraft and space vehicles."
-]
-
-mallet = TMallet()
 obfuscation_techniques = {
     "lemmatize": {
         "algorithm": "lemmatize",
@@ -96,25 +91,39 @@ obfuscation_techniques = {
     },
 }
 
-for technique, config in obfuscation_techniques.items():
-    for text in sample_texts:
-        obfuscated_text = mallet.obfuscate(text, config=config, device="cpu")
 
-        if "Shannon" in technique:
-            for threshold, results in obfuscated_text.items():
-                print("==Shannon==")
-                print(threshold)
-                print("Threshold: ", threshold)
-                if "as_lower_bound" in results.keys():
-                    print("Lower Bounded: ", results["as_lower_bound"])
-                if "as_upper_bound" in results.keys():
-                    print("Upper Bounded: ", results["as_upper_bound"])
-                    print("===========")
-                if "mi_values" in results.keys():
-                    print("MI Values: ", results["mi_values"])
-                    print("===========")
-        else:
-            print(f"===={technique}====")
-            print(obfuscated_text)
-            print("================")
-            print("\n\n")
+def main():
+    sample_texts = [
+        "Three-dimensional printing is being used to make metal parts for aircraft and space vehicles."
+    ]
+    language = "en"
+    prefer_gpu = True
+
+    tmallet = TMallet(language, prefer_gpu)
+
+    for technique, config in obfuscation_techniques.items():
+        for text in sample_texts:
+            obfuscated_text = tmallet.obfuscate(text, config=config, device="cpu")
+
+            if "Shannon" in technique:
+                for threshold, results in obfuscated_text.items():
+                    print("==Shannon==")
+                    print(threshold)
+                    print("Threshold: ", threshold)
+                    if "as_lower_bound" in results.keys():
+                        print("Lower Bounded: ", results["as_lower_bound"])
+                    if "as_upper_bound" in results.keys():
+                        print("Upper Bounded: ", results["as_upper_bound"])
+                        print("===========")
+                    if "mi_values" in results.keys():
+                        print("MI Values: ", results["mi_values"])
+                        print("===========")
+            else:
+                print(f"===={technique}====")
+                print(obfuscated_text)
+                print("================")
+                print("\n\n")
+
+
+if __name__ == "__main__":
+    main()
