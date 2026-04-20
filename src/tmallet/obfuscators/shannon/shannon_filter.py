@@ -9,11 +9,15 @@ from typing import Dict, Union, List
 from nltk.tokenize.treebank import TreebankWordDetokenizer
 import logging
 
-from tmallet.utils.spacy_registry import SpaCyInterface
+from tmallet.utils.spacy_registry import LangConfig, SpaCyInterface
 
 logging.getLogger("transformers").setLevel(logging.ERROR)
 
-DEFAULT_MODEL = "bert-base-cased"
+# == default model used for approximating Surprisal(word|context)
+DEFAULT_MODEL_EN = "bert-base-cased"
+DEFAULT_MODEL_DE = "google-bert/bert-base-german-cased"
+
+# == config parameters ==
 DEFAULT_THRESHOLD = 10
 DEFAULT_REPLACEMENT_MECHANISM = "DEFAULT"
 DEFAULT_CONFIG = {
@@ -24,21 +28,6 @@ DEFAULT_CONFIG = {
     "output_mi_values": True,
 }
 
-
-def analyse(texts: Union[List[str], str], save_plot_to: str = "dist.png"):
-    analyser = ShannonAnalyser()
-    analyser.get_distribution(texts, save_to=save_plot_to)
-    mean_surp = analyser.get_mean(texts)
-    median_surp = analyser.get_median(texts)
-
-    print("====")
-    print("Shannon Analysis")
-    print(f"Mean: {mean_surp}")
-    print(f"Median: {median_surp}")
-    print(f"Distribution saved to: {save_plot_to}")
-    print("====")
-
-
 class ShannonFilter(Obfuscator):
     """
     Removes tokens depending on their Mutual Information, as assigned
@@ -47,8 +36,16 @@ class ShannonFilter(Obfuscator):
     Recommended to run this using at least a GPU.
     """
 
-    def __init__(self, spacy_interface: SpaCyInterface, device: str = "cpu"):
-        self.shannon = ShannonBERT(model_name=DEFAULT_MODEL, device=device)
+    def __init__(self, lang: LangConfig, spacy_interface: SpaCyInterface, device: str = "cpu"):
+        match lang:
+            case "en":
+                model_name = DEFAULT_MODEL_EN
+            case "de":
+                model_name = DEFAULT_MODEL_DE
+            case _:
+                raise ValueError("Please provide a valid language (`en` or `de`.")
+
+        self.shannon = ShannonBERT(model_name=model_name, device=device)
         self.detok = TreebankWordDetokenizer()
         self.spacy_interface = spacy_interface
 

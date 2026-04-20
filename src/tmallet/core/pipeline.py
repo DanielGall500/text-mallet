@@ -31,30 +31,38 @@ ObfuscationTechnique = Literal[
 
 
 class TMallet:
-    # whether spacy is used or not for the initial text processing
+    # apply_spacy_preprocessing: determines whether spacy is used or not 
+    # for the initial text processing
     # -> determined automatically based on the configuration selected
     apply_spacy_preprocessing: bool = False
+    is_obfuscation_set_up: bool = False
+    active_obfuscator = None
+    active_config = None
 
     def __init__(self, lang: LangConfig = "en", prefer_gpu: bool = False):
         self.spacy_interface = SpaCyInterface(lang=lang, prefer_gpu=prefer_gpu)
         self.lang: LangConfig = lang
+        self.device = "cuda" if prefer_gpu else "cpu"
 
     def obfuscate(
-        self, text: Union[List[str], str], config: Dict, device: str = "cpu"
+        self, text: Union[List[str], str]
     ) -> Union[List[str], str]:
-        algorithm = config["algorithm"]
-        obfuscator = self._get_obfuscator(algorithm, device)
+        if not self.active_obfuscator or not self.active_config:
+            raise RuntimeError("Please use `set_obfuscator` to setup the obfuscation details first.")
 
         if self.apply_spacy_preprocessing:
             text = self.spacy_interface.process(text)
 
-        return obfuscator.obfuscate(text, config=config)
+        return self.active_obfuscator.obfuscate(text, config=self.active_config)
+
+    def load_obfuscator(self, config: Dict):
+        self.active_config = config
+        algorithm = self.active_config["algorithm"]
+        self.active_obfuscator = self._get_obfuscator(algorithm)
 
     def _get_obfuscator(
-        self, algorithm: ObfuscationTechnique, device
+        self, algorithm: ObfuscationTechnique
     ) -> Union[Obfuscator, SpaCyObfuscator]:
-        prefer_gpu = device == "cuda"
-
         match algorithm:
             case "lemmatize":
                 self.apply_spacy_preprocessing = True
@@ -79,7 +87,7 @@ class TMallet:
             case "shannon":
                 self.apply_spacy_preprocessing = False
                 self.spacy_interface.set_pipeline("ner")
-                return ShannonFilter(self.spacy_interface, device=device)
+                return ShannonFilter(lang=self.lang, spacy_interface=self.spacy_interface, device=self.device)
             case _:
                 raise ValueError(
                     f"Input {algorithm} invalid. Please provide a valid obfuscation algorithm."

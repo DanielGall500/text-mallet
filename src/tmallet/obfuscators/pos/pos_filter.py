@@ -7,7 +7,7 @@ from nltk.tokenize.treebank import TreebankWordDetokenizer
 from typing import Literal, Dict
 from spacy.tokens import Doc
 
-DEFAULT_CONFIG = {"algorithm": "noun", "replacement_mechanism": "DEFAULT"}
+DEFAULT_CONFIG = {"algorithm": "noun-retain", "replacement_mechanism": "DEFAULT"}
 
 
 class POSFilter(SpaCyObfuscator):
@@ -74,6 +74,12 @@ class POSFilter(SpaCyObfuscator):
         for token in doc:
             is_kept = token.pos_ in pos_tags
             # if the word is allowed to be kept, then append it,
+            print("==")
+            print(token.text)
+            print(token.pos_)
+            print(f"{token.text} is kept: {is_kept}")
+            print(token.pos_)
+            print("==")
             if is_kept:
                 remaining_tokens.append(token.text)
             else:
