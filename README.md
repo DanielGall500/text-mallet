@@ -1,6 +1,6 @@
 [![Powered by spaCy](https://img.shields.io/badge/Powered%20by-spaCy-09a3d5?logo=spacy&logoColor=white)](https://spacy.io)
-![English](https://img.shields.io/badge/lang-en-blue)
-![German](https://img.shields.io/badge/lang-de-blue)
+[![English]](https://img.shields.io/badge/lang-en-blue)
+[![German]](https://img.shields.io/badge/lang-de-blue)
 
 <br />
 <div align="center">
