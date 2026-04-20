@@ -25,6 +25,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+de = ["de_dep_news_trf @ https://github.com/explosion/spacy-models/releases/download/de_dep_news_trf-3.x.x/de_dep_news_trf-3.x.x-py3-none-any.whl"]
+en = ["en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.x.x/en_core_web_sm-3.x.x-py3-none-any.whl"]
+
 dev = [
     "pytest>=7.0.0",
     "black>=23.0.0",
