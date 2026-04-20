@@ -1,4 +1,6 @@
 [![Powered by spaCy](https://img.shields.io/badge/Powered%20by-spaCy-09a3d5?logo=spacy&logoColor=white)](https://spacy.io)
+![English](https://img.shields.io/badge/lang-en-blue)
+![German](https://img.shields.io/badge/lang-de-blue)
 
 <br />
 <div align="center">
@@ -18,6 +20,7 @@
 </div>
 
 A package for the smashing of text into [derived](https://text-plus.org/en/themen-dokumentation/atf) formats, aimed at reducing the possibility of privacy or copyright infringement while maintaining the text utility for certain tasks e.g. classification, retrieval.
+Supports obfuscation of text in English or German.
 
 When we think about how we might be able to transform text, we can look at the following aspects:
 * Word Forms (the character sequence)
@@ -45,17 +48,20 @@ This approach ensures that the original copyright-protected text never enters th
 ### Basic Obfuscation
 ```python
 from tmallet import TMallet
-mallet = TMallet()
+
+config = {
+    "algorithm": "retain-noun-propn", 
+    "replacement_mechanism": "POS"
+}
+
+tmallet = TMallet(lang="en")
+tmallet.load_obfuscator(config)
 
 text = """
 A Soyuz rocket launched two Galileo satellites into orbit on Friday,
 marking a crucial step for Europe’s planned navigation system,
 operator Arianespace announced.
 """
-config = {
-    "algorithm": "retain-noun-propn", 
-    "replacement_mechanism": "POS"
-}
 obfuscated_text = mallet.obfuscate(text, config)
 ```
 Output
@@ -70,12 +76,8 @@ Mutual information measures how much information context tells you about a word.
 Words which are both _rare_ and _context-dependant_ tend to be _important_ to the meaning of a text.
 We can apply a filter to set upper or lower bounds on such an MI score, filering at the word level.
 ```python
-...
-text = """
-Three-dimensional printing is being used to make metal parts 
-for aircraft and space vehicles.
-"""
-   
+from tmallet import TMallet
+
 config = {
     "algorithm": "shannon", 
     "threshold": 8,
@@ -83,7 +85,16 @@ config = {
     "as_lower_bound": True,
     "replacement_mechanism": "DEFAULT"
 }
-obfuscated_text = mallet.obfuscate(text, config)
+
+tmallet = TMallet(lang="en")
+tmallet.load_obfuscator(config)
+
+...
+text = """
+Three-dimensional printing is being used to make metal parts 
+for aircraft and space vehicles.
+"""
+obfuscated_text = mallet.obfuscate(text)
 ```
 
 Output
@@ -103,10 +114,12 @@ from datasets import load_dataset
 dataset = load_dataset("your_huggingface_dataset")
 
 # Obfuscate a column
-mallet = TMallet()
 config = {"algorithm": "lemmatize"}
 
-obfuscated_dataset = mallet.obfuscate_dataset(
+tmallet = TMallet()
+tmallet.load_obfuscator(config)
+
+obfuscated_dataset = tmallet.obfuscate_dataset(
     dataset=dataset,
     column="text",
     column_obfuscated="text_obfuscated",
@@ -119,10 +132,7 @@ obfuscated_dataset = mallet.obfuscate_dataset(
 
 For large datasets, use chunked processing to save progress:
 ```python
-from pathlib import Path
-
-mallet = TMallet()
-config = {"algorithm": "scramble-BoW"}
+...
 
 obfuscated_dataset = mallet.obfuscate_dataset_by_chunk(
     dataset=dataset,
