@@ -16,7 +16,7 @@ logging.getLogger("transformers").setLevel(logging.ERROR)
 
 # == default model used for approximating Surprisal(word|context)
 DEFAULT_MODEL_EN = "bert-base-cased"
-DEFAULT_MODEL_DE = "google-bert/bert-base-german-cased"
+DEFAULT_MODEL_DE = "google-bert/bert-base-multilingual-cased"
 
 # == config parameters ==
 DEFAULT_THRESHOLD = 10
@@ -91,7 +91,7 @@ class ShannonFilter(Obfuscator):
                     case "DEFAULT":
                         replacement_tok = DEFAULT_TOKEN
                     case "DELETE":
-                        continue
+                        replacement_tok = None
                     case _:
                         raise ValueError(
                             f"Please provide a valid replacement mechanism (provided {replacement_mechanism})."
@@ -101,13 +101,15 @@ class ShannonFilter(Obfuscator):
                     if mi_values[i] <= thresh:
                         resulting_output_upper_bound.append(word_text)
                     else:
-                        resulting_output_upper_bound.append(replacement_tok)
+                        if replacement_tok is not None:
+                            resulting_output_upper_bound.append(replacement_tok)
 
                 if as_lower_bound:
                     if mi_values[i] >= thresh:
                         resulting_output_lower_bound.append(word_text)
                     else:
-                        resulting_output_lower_bound.append(replacement_tok)
+                        if replacement_tok is not None:
+                            resulting_output_lower_bound.append(replacement_tok)
 
             reconstructed[thresh] = {
                 "as_upper_bound": (
