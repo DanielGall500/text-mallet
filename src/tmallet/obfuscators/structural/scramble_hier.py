@@ -4,8 +4,8 @@ from spacy.tokens import Token, Doc
 from typing import Dict
 import random
 
-DEFAULT_HIERARCHICAL_CONFIG = {"algorithm": "scramble-hier-weak", "seed": 100}
 DEFAULT_SEED = 100
+DEFAULT_HIERARCHICAL_CONFIG = {"algorithm": "scramble-hier-weak", "seed": DEFAULT_SEED}
 
 
 class HierarchicalScrambleObfuscator(SpaCyObfuscator):
@@ -14,10 +14,7 @@ class HierarchicalScrambleObfuscator(SpaCyObfuscator):
         doc: Doc,
         config: Dict = DEFAULT_HIERARCHICAL_CONFIG,
     ) -> str:
-        if "seed" not in config.keys():
-            seed = DEFAULT_SEED
-        else:
-            seed = config["seed"]
+        seed = config.get("seed", DEFAULT_SEED)
         random.seed(seed)
 
         if "algorithm" not in config.keys():
@@ -44,7 +41,7 @@ class HierarchicalScrambleObfuscator(SpaCyObfuscator):
             shuffled = scramble_hier_weak(d)
             linearised = linearise_sentence(shuffled)
         elif algorithm == "scramble-hier-strong":
-            swapped = scramble_hier_strong(d, swap_probability=0.7)
+            swapped = scramble_hier_strong(d, flip_prob=0.5)
             linearised = linearise_sentence(swapped, reverse=True)
         else:
             raise ValueError(f"Invalid hierarchical scramble algorithm: {algorithm}.")
@@ -111,6 +108,29 @@ def scramble_hier_weak(tree):
     return dict(l_siblings + r_siblings)
 
 
+def scramble_hier_strong(tree, flip_prob=0.5):
+    shuffled_tree = {}
+    for (word, direction), children in tree.items():
+        shuffled_children = scramble_hier_strong(children, flip_prob)
+
+        # randomly flip direction with flip_prob probability
+        new_direction = (
+            ("R" if direction == "L" else "L")
+            if random.random() < flip_prob
+            else direction
+        )
+        shuffled_tree[(word, new_direction)] = shuffled_children
+
+    l_siblings = [(k, v) for k, v in shuffled_tree.items() if k[1] == "L"]
+    r_siblings = [(k, v) for k, v in shuffled_tree.items() if k[1] == "R"]
+
+    random.shuffle(l_siblings)
+    random.shuffle(r_siblings)
+
+    return dict(l_siblings + r_siblings)
+
+
+"""
 def scramble_hier_strong(tree, swap_probability: float = 1.0):
     swapped_tree = {}
     for (word, direction), children in tree.items():
@@ -123,6 +143,7 @@ def scramble_hier_strong(tree, swap_probability: float = 1.0):
         swapped_children = scramble_hier_strong(children, swap_probability)
         swapped_tree[(word, new_direction)] = swapped_children
     return swapped_tree
+"""
 
 
 def get_nested_dict_from_list(l: list[tuple]) -> dict:

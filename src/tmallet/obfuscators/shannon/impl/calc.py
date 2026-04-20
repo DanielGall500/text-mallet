@@ -13,6 +13,7 @@ import torch
 import torch.nn.functional as F
 import nltk
 import string
+import unicodedata
 
 nltk.download("punkt_tab", quiet=True)
 DEFAULT_LANG = "en"
@@ -42,18 +43,16 @@ class WordStat:
     @property
     def mutual_information(self):
         # if punctuation, default to no information contributed
-        if self.word in string.punctuation:
+        if len(self.word) == 1 and unicodedata.category(self.word).startswith("P"):
             return 0
 
-        # get P(word) in lookup
-        # if not found, then try the same wordd but lowercase,
+        # find P(word) in lookup table
+        # if not found, then try the same word but lowercase,
         # if not again, then it's likely names, dialectal spellings, etc,
-        # give default 25th percentile freq (low)
+        # give default 25th percentile freq (rare)
         prior_prob = freq_dict.get(self.word)
-        if prior_prob == 0:
-            prior_prob = freq_dict.get(
-                    lower(self.word), FREQ_P25
-            )
+        if not prior_prob:
+            prior_prob = freq_dict.get(self.word.lower(), FREQ_P25)
 
         prior_surprisal = -math.log2(prior_prob)
 
@@ -61,9 +60,9 @@ class WordStat:
         PMI = prior_surprisal - self.contextual_surprisal
 
         # Positive PMI
-        # it is common to clip all negative values where PMI 
+        # it is common to clip all negative values where PMI
         # is an approximation
-        PPMI = max(MI, 0)
+        PPMI = max(PMI, 0)
         return PPMI
 
 

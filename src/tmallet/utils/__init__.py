@@ -1,3 +1,3 @@
-from tmallet.utils.spacy_registry import get_spacy_nlp
+from tmallet.utils.spacy_registry import SpaCyInterface, LangConfig
 
-__all__ = ["get_spacy_nlp"]
+__all__ = ["SpaCyInterface", "LangConfig"]

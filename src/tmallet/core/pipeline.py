@@ -5,7 +5,7 @@ from tmallet.obfuscators import (
     HierarchicalScrambleObfuscator,
     ShannonFilter,
 )
-from tmallet.utils import get_spacy_nlp
+from tmallet.utils import SpaCyInterface, LangConfig
 from datasets import load_from_disk, concatenate_datasets
 from tmallet.obfuscators.base import Obfuscator, SpaCyObfuscator
 from typing import Literal, Dict, Union, List, Optional
@@ -31,8 +31,13 @@ ObfuscationTechnique = Literal[
 
 
 class TMallet:
-    def __init__(self):
-        self.nlp = None
+    # whether spacy is used or not for the initial text processing
+    # -> determined automatically based on the configuration selected
+    apply_spacy_preprocessing: bool = False
+
+    def __init__(self, lang: LangConfig = "en", prefer_gpu: bool = False):
+        self.spacy_interface = SpaCyInterface(lang=lang, prefer_gpu=prefer_gpu)
+        self.lang: LangConfig = lang
 
     def obfuscate(
         self, text: Union[List[str], str], config: Dict, device: str = "cpu"
@@ -40,8 +45,8 @@ class TMallet:
         algorithm = config["algorithm"]
         obfuscator = self._get_obfuscator(algorithm, device)
 
-        if self.nlp:
-            text = self.nlp(text)
+        if self.apply_spacy_preprocessing:
+            text = self.spacy_interface.process(text)
 
         return obfuscator.obfuscate(text, config=config)
 
@@ -52,7 +57,8 @@ class TMallet:
 
         match algorithm:
             case "lemmatize":
-                self.nlp = get_spacy_nlp("lemma", prefer_gpu=prefer_gpu)
+                self.apply_spacy_preprocessing = True
+                self.spacy_interface.set_pipeline("lemma")
                 return LemmaObfuscator()
             case (
                 "noun-retain"
@@ -60,17 +66,20 @@ class TMallet:
                 | "noun-remove"
                 | "noun-propn-remove"
             ):
-                self.nlp = get_spacy_nlp("ner", prefer_gpu=prefer_gpu)
+                self.apply_spacy_preprocessing = True
+                self.spacy_interface.set_pipeline("ner")
                 return POSFilter()
             case "scramble-hier-weak" | "scramble-hier-strong":
-                self.nlp = get_spacy_nlp("full", prefer_gpu=prefer_gpu)
+                self.apply_spacy_preprocessing = True
+                self.spacy_interface.set_pipeline("full")
                 return HierarchicalScrambleObfuscator()
             case "scramble-BoW-sentence" | "scramble-BoW-document":
-                self.nlp = None
+                self.apply_spacy_preprocessing = False
                 return LinearScrambleObfuscator()
             case "shannon":
-                # todo: spacy
-                return ShannonFilter(device=device)
+                self.apply_spacy_preprocessing = False
+                self.spacy_interface.set_pipeline("ner")
+                return ShannonFilter(self.spacy_interface, device=device)
             case _:
                 raise ValueError(
                     f"Input {algorithm} invalid. Please provide a valid obfuscation algorithm."

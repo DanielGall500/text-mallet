@@ -5,10 +5,11 @@ from tmallet.obfuscators.replacement_token import (
     ReplacementMechanism,
     get_replacement_tok,
 )
-from tmallet.utils.pos_tagger import get_pos_tags
 from typing import Dict, Union, List
 from nltk.tokenize.treebank import TreebankWordDetokenizer
 import logging
+
+from tmallet.utils.spacy_registry import SpaCyInterface
 
 logging.getLogger("transformers").setLevel(logging.ERROR)
 
@@ -20,7 +21,7 @@ DEFAULT_CONFIG = {
     "as_upper_bound": True,
     "as_lower_bound": True,
     "replacement_mechanism": DEFAULT_REPLACEMENT_MECHANISM,
-    "output_mi_values": True
+    "output_mi_values": True,
 }
 
 
@@ -46,35 +47,18 @@ class ShannonFilter(Obfuscator):
     Recommended to run this using at least a GPU.
     """
 
-    def __init__(self, device: str = "cpu"):
+    def __init__(self, spacy_interface: SpaCyInterface, device: str = "cpu"):
         self.shannon = ShannonBERT(model_name=DEFAULT_MODEL, device=device)
         self.detok = TreebankWordDetokenizer()
+        self.spacy_interface = spacy_interface
 
     def obfuscate(self, text: str, config: Dict = DEFAULT_CONFIG) -> Dict[float, str]:
-        if "threshold" not in config.keys():
-            max_mutual_info = DEFAULT_THRESHOLD
-        else:
-            max_mutual_info = config["threshold"]
-
-        if "replacement_mechanism" not in config.keys():
-            replacement_mechanism = "DEFAULT"
-        else:
-            replacement_mechanism = config["replacement_mechanism"]
-
-        if "as_upper_bound" not in config.keys():
-            as_upper_bound = True
-        else:
-            as_upper_bound = config["as_upper_bound"]
-
-        if "as_lower_bound" not in config.keys():
-            as_lower_bound = True
-        else:
-            as_lower_bound = config["as_lower_bound"]
-
-        if "output_mi_values" not in config.keys():
-            output_mi_values = False
-        else:
-            output_mi_values = config["output_mi_values"]
+        # set the relevant parameters
+        max_mutual_info = config.get("threshold", DEFAULT_THRESHOLD)
+        replacement_mechanism = config.get("replacement_mechanism", "DEFAULT")
+        as_upper_bound = config.get("as_upper_bound", True)
+        as_lower_bound = config.get("as_lower_bound", True)
+        output_mi_values = config.get("output_mi_values", False)
 
         shannon_stats_text = self.shannon.get_text_stats(text)
         words = shannon_stats_text.get_words()
@@ -82,7 +66,10 @@ class ShannonFilter(Obfuscator):
         mi_values = shannon_stats_text.get_mutual_infos()
 
         if replacement_mechanism == "POS":
-            pos_tags = get_pos_tags([w.word for w in words])
+            # note: this is the only case where the spacy interface
+            # is used by the obfuscation class itself and
+            # not handled by the pipeline
+            pos_tags = self.spacy_interface.get_pos_tags_for_tokens(word_labels)
         else:
             replacement_tok = get_replacement_tok(replacement_mechanism, None)
 

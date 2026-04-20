@@ -26,11 +26,10 @@ class ShannonAnalyser:
             )
 
         if plot_to:
-            print(mi)
             self.visualiser.prepare_data(
                 mutual_info=mi,
                 flatten=True,
             )
             density = self.visualiser.plot_density(show_median=True)
-            density.save(plot_to)
+            density.save(plot_to, width=10, height=5, dpi=400)
         return processed_texts
