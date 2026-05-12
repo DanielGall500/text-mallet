@@ -5,7 +5,7 @@ from tmallet.obfuscators import (
     HierarchicalScrambleObfuscator,
     ShannonFilter,
 )
-from tmallet.utils import SpaCyInterface, LangConfig
+from tmallet.utils import SpaCyInterface, LangConfig, flatten_dict
 from datasets import load_from_disk, concatenate_datasets
 from tmallet.obfuscators.base import Obfuscator, SpaCyObfuscator
 from typing import Literal, Dict, Union, List, Optional
@@ -129,14 +129,9 @@ class TMallet:
 
             # for each dictionary (one per sample)
             for output in obfuscation_output:
-                # get the individual column suffix and obfuscated string
-                for col, obfuscated_form in output.items():
-                    key = f"{column_obfuscated}_{col}"
+                flatten = flatten_dict(output)
+                batch.update(flatten)
 
-                    if key not in batch.keys():
-                        batch[f"{column_obfuscated}_{col}"] = [obfuscated_form]
-                    else:
-                        batch[f"{column_obfuscated}_{col}"].append(obfuscated_form)
         return batch
 
     def obfuscate_dataset(
@@ -150,7 +145,7 @@ class TMallet:
         device: str = "cuda",
     ):
         algorithm = config["algorithm"]
-        obfuscator = self._get_obfuscator(algorithm, device)
+        obfuscator = self._get_obfuscator(algorithm)
 
         obfuscated_dataset = dataset.map(
             partial(
