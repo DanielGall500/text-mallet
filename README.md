@@ -62,7 +62,7 @@ A Soyuz rocket launched two Galileo satellites into orbit on Friday,
 marking a crucial step for Europe’s planned navigation system,
 operator Arianespace announced.
 """
-obfuscated_text = mallet.obfuscate(text, config)
+obfuscated_text = tmallet.obfuscate(text, config)
 ```
 Output
 ```bash
@@ -105,6 +105,14 @@ Lower Bounded:  Three _ dimensional printing _ _ used _ _ metal parts _ aircraft
 Upper Bounded:  _ - _ _ is being _ to make _ _ for _ and _ _.
 ==================================
 ```
+
+If set obfuscate too strongly using mutual information, we'll end up with obfuscated sentences like:
+```
+, . . - ., or . the / . the . - –, . -
+```
+That's, well, probably not very useful. Ideally, we can find a balance between the obfuscation of some words and inclusion of others.
+Here's an overview of word-level mutual information over 12,000 tokens taken from 10 random texts in the FineWeb-Edu dataset, for instance.
+![Distribution of Word-Level Mutual Information](assets/mutual-info-distribution.png)
 
 ### Obfuscate a Dataset
 ```python
