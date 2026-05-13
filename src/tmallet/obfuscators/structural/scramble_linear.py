@@ -4,8 +4,8 @@ from nltk.tokenize import sent_tokenize
 from typing import Dict
 import random
 
-DEFAULT_LINEAR_CONFIG = {"seed": 100}
 DEFAULT_SEED = 100
+DEFAULT_LINEAR_CONFIG = {"level": "document", "seed": DEFAULT_SEED}
 
 
 # the linear scrambler does not use SpaCy
@@ -14,7 +14,7 @@ class LinearScrambleObfuscator(Obfuscator):
         self,
         text: str,
         config: Dict = DEFAULT_LINEAR_CONFIG,
-    ) -> str:
+    ) -> dict:
 
         if "seed" not in config.keys():
             seed = DEFAULT_SEED
@@ -22,20 +22,30 @@ class LinearScrambleObfuscator(Obfuscator):
             seed = config["seed"]
         random.seed(seed)
 
-        if "algorithm" not in config.keys():
+        if "level" not in config.keys():
             raise ValueError(
                 "Please pass a configuration with the 'level' parameter to determine whether scrambling occurs at document or sentence level."
             )
-        algorithm = config["algorithm"]
+        level = config["level"]
 
-        if algorithm == "scramble-BoW-sentence":
-            sentences = sent_tokenize(text)
-            scrambled_sentences = [self._linear_scramble(s) for s in sentences]
-            return " ".join(scrambled_sentences)
-        elif algorithm == "scramble-BoW-document":
-            return self._linear_scramble(text)
-        else:
-            raise ValueError(f"Invalid scrambling level: {algorithm}")
+        # check if multiple replacement mechanisms were specified
+        is_multiple_levels = isinstance(level, list)
+        if not is_multiple_levels:
+            level = [level]
+
+        result = {}
+        for l in level:
+            match l:
+                case "sentence":
+                    sentences = sent_tokenize(text)
+                    scrambled_sentences = [self._linear_scramble(s) for s in sentences]
+                    join_scrambled_sentences = " ".join(scrambled_sentences)
+                    result[l] = join_scrambled_sentences
+                case "document":
+                    result[l] = self._linear_scramble(text)
+                case _:
+                    raise ValueError(f"Invalid scrambling level: {level}")
+        return { "scramble-linear": result }
 
     def _linear_scramble(self, text) -> str:
         words = text.split()

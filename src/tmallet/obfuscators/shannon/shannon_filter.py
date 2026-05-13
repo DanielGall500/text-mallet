@@ -67,7 +67,7 @@ class ShannonFilter(Obfuscator):
         self.spacy_interface = spacy_interface
 
     # todo: improve function SOC
-    def obfuscate(self, text: str, config: Dict = DEFAULT_CONFIG) -> Dict[float, str]:
+    def obfuscate(self, text: str, config: Dict = DEFAULT_CONFIG) -> dict:
         # set the relevant parameters
         max_mutual_info = config.get("threshold", DEFAULT_THRESHOLD)
         replacement_mechanism = config.get("replacement_mechanism", "DEFAULT")

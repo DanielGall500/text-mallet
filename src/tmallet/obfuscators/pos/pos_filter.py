@@ -1,3 +1,4 @@
+from os import replace
 from tmallet.obfuscators.replacement_token import (
     ReplacementMechanism,
     get_replacement_tok,
@@ -5,15 +6,15 @@ from tmallet.obfuscators.replacement_token import (
 )
 from tmallet.obfuscators.base import SpaCyObfuscator
 from nltk.tokenize.treebank import TreebankWordDetokenizer
-from typing import Literal, Dict
+from typing import Literal, Dict, List
 from spacy.tokens import Doc
 
-DEFAULT_CONFIG = {"algorithm": "noun-retain", "replacement_mechanism": "DEFAULT"}
+DEFAULT_CONFIG = {"algorithm": "pos-filter", "filter_type": "noun-retain", "replacement_mechanism": "DEFAULT"}
 
 
 class POSFilter(SpaCyObfuscator):
     POS = Literal["NOUN", "PROPN", "VERB"]
-    Algorithm = Literal[
+    FilterType = Literal[
         "noun-retain", "nouns-and-prop-retain", "noun-remove", "noun-propn-remove"
     ]
 
@@ -25,25 +26,42 @@ class POSFilter(SpaCyObfuscator):
         doc: Doc,
         config: Dict = DEFAULT_CONFIG,
     ) -> str:
-        if "algorithm" not in config.keys():
+        if "filter_type" not in config.keys():
             raise ValueError(
-                "Please pass a configuration with the 'algorithm' parameter."
+                "Please pass a configuration with the 'type' parameter for this algorithm."
             )
+        filter_type = config["filter_type"]
 
-        replacement_mechanism: ReplacementMechanism = config["replacement_mechanism"]
-        algorithm: str = config["algorithm"]
+        if "replacement_mechanism" not in config.keys():
+            raise ValueError(
+                "Please pass a configuration with the 'replacement_mechanism' parameter for this algorithm."
+            )
+        replacement_mechanism: ReplacementMechanism | List[ReplacementMechanism]= config["replacement_mechanism"]
 
-        match algorithm:
-            case "noun-retain":
-                return self._nouns_only(doc, replacement_mechanism)
-            case "noun-propn-retain":
-                return self._nouns_and_prop_only(doc, replacement_mechanism)
-            case "noun-remove":
-                return self._no_nouns(doc, replacement_mechanism)
-            case "noun-propn-remove":
-                return self._no_nouns_or_propn(doc, replacement_mechanism)
-            case _:
-                raise ValueError("Please provide a valid algorithm.")
+        is_multiple_filters = isinstance(filter_type, list)
+        if not is_multiple_filters:
+            filter_type = [filter_type]
+
+        is_multiple_replacement_mechanisms = isinstance(replacement_mechanism, list)
+        if not is_multiple_replacement_mechanisms:
+            replacement_mechanism = [replacement_mechanism]
+
+        results = {}
+        for ft in filter_type:
+            results[ft] = {}
+            for mech in replacement_mechanism:
+                match ft:
+                    case "noun-retain":
+                        results[ft][mech] = self._nouns_only(doc, mech)
+                    case "noun-propn-retain":
+                        results[ft][mech] = self._nouns_and_prop_only(doc, mech)
+                    case "noun-remove":
+                        results[ft][mech] = self._no_nouns(doc, mech)
+                    case "noun-propn-remove":
+                        results[ft][mech] = self._no_nouns_or_propn(doc, mech)
+                    case _:
+                        raise ValueError(f"Please provide a valid filter type: {ft}.")
+        return { "pos-filter": results }
 
     def _nouns_only(
         self, doc: Doc, replacement_mechanism: ReplacementMechanism = False

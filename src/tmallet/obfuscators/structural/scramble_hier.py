@@ -5,7 +5,7 @@ from typing import Dict
 import random
 
 DEFAULT_SEED = 100
-DEFAULT_HIERARCHICAL_CONFIG = {"algorithm": "scramble-hier-weak", "seed": DEFAULT_SEED}
+DEFAULT_HIERARCHICAL_CONFIG = {"algorithm": "scramble-hier", "strength": "weak", "seed": DEFAULT_SEED}
 
 
 class HierarchicalScrambleObfuscator(SpaCyObfuscator):
@@ -13,42 +13,47 @@ class HierarchicalScrambleObfuscator(SpaCyObfuscator):
         self,
         doc: Doc,
         config: Dict = DEFAULT_HIERARCHICAL_CONFIG,
-    ) -> str:
+    ) -> dict:
         seed = config.get("seed", DEFAULT_SEED)
         random.seed(seed)
 
-        if "algorithm" not in config.keys():
+        if "strength" not in config.keys():
             raise ValueError(
-                "Please pass a configuration with the 'algorithm' parameter."
+                "Please pass a configuration with the 'strength' parameter for this algorithm."
             )
-        algorithm = config["algorithm"]
+        strength = config["strength"]
+
+        # todo: turn this into a helper function
+        # check if multiple replacement mechanisms were specified
+        is_multiple_strengths = isinstance(strength, list)
+        if not is_multiple_strengths:
+            strength = [strength]
 
         doc_as_sents = [sent.as_doc() for sent in doc.sents]
 
-        if (algorithm == "scramble-hier-weak") or (algorithm == "scramble-hier-strong"):
-            # operate at the sentence level
-            scrambled_sentences = [self._hierarchical_scramble(d, algorithm=algorithm) for d in doc_as_sents]
-            return " ".join(scrambled_sentences)
-        else:
-            raise ValueError(
-                "Please provide a valid hierarchical scrambling algorithm."
-            )
+        # operate at the sentence level
+        result = {}
+        for s in strength:
+            scrambled_sentences = [self._hierarchical_scramble(d, strength=s) for d in doc_as_sents]
+            scrambled = " ".join(scrambled_sentences).strip()
+            result[s] = scrambled
+        return { "scramble-hier" : result }
 
-    def _hierarchical_scramble(self, doc: Doc, algorithm: str) -> str:
+    def _hierarchical_scramble(self, doc: Doc, strength: str) -> str:
         d = {}
         for token in doc:
             path_to_root = self._get_route_to_root(token)
             d_from_l = get_nested_dict_from_list(path_to_root)
             deep_update(d, d_from_l)
 
-        if algorithm == "scramble-hier-weak":
+        if strength == "weak":
             shuffled = scramble_hier_weak(d)
             linearised = linearise_sentence(shuffled)
-        elif algorithm == "scramble-hier-strong":
+        elif strength == "strong":
             swapped = scramble_hier_strong(d, flip_prob=0.5)
             linearised = linearise_sentence(swapped, reverse=True)
         else:
-            raise ValueError(f"Invalid hierarchical scramble algorithm: {algorithm}.")
+            raise ValueError(f"Invalid hierarchical scramble strength: {strength}.")
 
         linearised = TreebankWordDetokenizer().detokenize(linearised)
         return linearised

@@ -18,14 +18,9 @@ torch.set_num_threads(1)
 
 ObfuscationTechnique = Literal[
     "lemmatize",  # convert words to their roots
-    "noun-retain",  # part-of-speech filtering
-    "noun-propn-retain",  # part-of-speech filtering
-    "noun-remove",  # part-of-speech filtering
-    "noun-propn-remove",  # part-of-speech filtering
-    "scramble-hier-weak",  # dependency-parsing structural obfuscation
-    "scramble-hier-strong",  # dependency-parsing structural obfuscation
-    "scramble-BoW-sentence",  # randomly shuffle words at the sentence level
-    "scramble-BoW-document",  # randomly shuffle words at the document level
+    "pos-filter"
+    "scramble-hier",  # dependency-parsing structural obfuscation
+    "scramble-BoW",  # randomly shuffle words at the sentence or document level
     "shannon",  # filter based on an approximation of word importance
 ]
 
@@ -44,6 +39,12 @@ class TMallet:
         self.lang: LangConfig = lang
         self.device = "cuda" if prefer_gpu else "cpu"
 
+    def load_obfuscator(self, config: Dict):
+        self.active_config = config
+        algorithm = self.active_config["algorithm"]
+        self.active_obfuscator = self._get_obfuscator(algorithm)
+        return self
+
     def obfuscate(self, text: Union[List[str], str]) -> Union[List[str], str]:
         if not self.active_obfuscator or not self.active_config:
             raise RuntimeError(
@@ -54,49 +55,6 @@ class TMallet:
             text = self.spacy_interface.process(text)
 
         return self.active_obfuscator.obfuscate(text, config=self.active_config)
-
-    def load_obfuscator(self, config: Dict):
-        self.active_config = config
-        algorithm = self.active_config["algorithm"]
-        self.active_obfuscator = self._get_obfuscator(algorithm)
-        return self
-
-    def _get_obfuscator(
-        self, algorithm: ObfuscationTechnique
-    ) -> Union[Obfuscator, SpaCyObfuscator]:
-        match algorithm:
-            case "lemmatize":
-                self.apply_spacy_preprocessing = True
-                self.spacy_interface.set_pipeline("lemma")
-                return LemmaObfuscator()
-            case (
-                "noun-retain"
-                | "noun-propn-retain"
-                | "noun-remove"
-                | "noun-propn-remove"
-            ):
-                self.apply_spacy_preprocessing = True
-                self.spacy_interface.set_pipeline("pos")
-                return POSFilter()
-            case "scramble-hier-weak" | "scramble-hier-strong":
-                self.apply_spacy_preprocessing = True
-                self.spacy_interface.set_pipeline("full")
-                return HierarchicalScrambleObfuscator()
-            case "scramble-BoW-sentence" | "scramble-BoW-document":
-                self.apply_spacy_preprocessing = False
-                return LinearScrambleObfuscator()
-            case "shannon":
-                self.apply_spacy_preprocessing = False
-                self.spacy_interface.set_pipeline("pos")
-                return ShannonFilter(
-                    lang=self.lang,
-                    spacy_interface=self.spacy_interface,
-                    device=self.device,
-                )
-            case _:
-                raise ValueError(
-                    f"Input {algorithm} invalid. Please provide a valid obfuscation algorithm."
-                )
 
     def _obfuscate_batch(
         self,
@@ -133,6 +91,38 @@ class TMallet:
                 batch.update(flatten)
 
         return batch
+
+    def _get_obfuscator(
+        self, algorithm: ObfuscationTechnique
+    ) -> Union[Obfuscator, SpaCyObfuscator]:
+        match algorithm:
+            case "lemmatize":
+                self.apply_spacy_preprocessing = True
+                self.spacy_interface.set_pipeline("lemma")
+                return LemmaObfuscator()
+            case "pos-filter":
+                self.apply_spacy_preprocessing = True
+                self.spacy_interface.set_pipeline("pos")
+                return POSFilter()
+            case "scramble-hier":
+                self.apply_spacy_preprocessing = True
+                self.spacy_interface.set_pipeline("full")
+                return HierarchicalScrambleObfuscator()
+            case "scramble-BoW":
+                self.apply_spacy_preprocessing = False
+                return LinearScrambleObfuscator()
+            case "shannon":
+                self.apply_spacy_preprocessing = False
+                self.spacy_interface.set_pipeline("pos")
+                return ShannonFilter(
+                    lang=self.lang,
+                    spacy_interface=self.spacy_interface,
+                    device=self.device,
+                )
+            case _:
+                raise ValueError(
+                    f"Input {algorithm} invalid. Please provide a valid obfuscation algorithm."
+                )
 
     def obfuscate_dataset(
         self,
