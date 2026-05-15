@@ -7,7 +7,7 @@ from tmallet.obfuscators.shannon.impl import ShannonAnalyser, ShannonVisualiser
 HF_DATASET  = "codelion/fineweb-edu-1B"
 HF_CONFIG   = None
 HF_SPLIT    = "train"
-NUM_SAMPLES = 100        # number of sentences to analyse
+NUM_SAMPLES = 1        # number of sentences to analyse
 MIN_WORDS   = 6         # skip very short / empty lines
 RANDOM_SEED = 42
 
@@ -55,29 +55,26 @@ def sample_texts_from_hf(
     return reservoir
 
 if __name__ == "__main__":
-    print(f"Sampling {NUM_SAMPLES} sentences from '{HF_DATASET}/{HF_CONFIG}' …")
+    print(f"Gathering {NUM_SAMPLES} sample(s) from '{HF_DATASET}/{HF_CONFIG}' …")
     sample_texts = sample_texts_from_hf(
         HF_DATASET, HF_CONFIG, HF_SPLIT, NUM_SAMPLES, MIN_WORDS, RANDOM_SEED
     )
     print(f"{len(sample_texts)} sentences collected.\n")
+    print("Samples: ", len(sample_texts))
+    print(sample_texts)
 
     analyser   = ShannonAnalyser()
     visualiser = ShannonVisualiser()
 
     # compute MI distribution over all sampled sentences
+    # also plots distribution to DIST_PNG_PATH
     processed_texts = analyser.get_distribution_by_word(sample_texts, DIST_PNG_PATH)
-
-    for text in processed_texts:
-        print("====")
-        print(text)
-        print("====")
 
     # build per-sentence word / MI lists for the heatmap
     words = [[w.word for w in text.word_stats] for text in processed_texts]
-    mi    = [[w.mutual_information for w in text.word_stats] for text in processed_texts]
+    mi    = [[w.mutual_information for w in text.get_words()] for text in processed_texts]
 
     heatmap = visualiser.display_sentence_heatmap(words, mi)
-    print(heatmap)
 
     HTML_OUTPUT_PATH.write_text(f"<html><body>{heatmap}</body></html>", encoding="utf-8")
     print(f"\nHeatmap written to: {HTML_OUTPUT_PATH}")
