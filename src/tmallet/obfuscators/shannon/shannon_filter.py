@@ -15,8 +15,12 @@ from tmallet.utils.spacy_registry import LangConfig, SpaCyInterface
 logging.getLogger("transformers").setLevel(logging.ERROR)
 
 # == default model used for approximating Surprisal(word|context)
-DEFAULT_MODEL_EN = "bert-base-cased"
-DEFAULT_MODEL_DE = "google-bert/bert-base-multilingual-cased"
+
+# BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding (Devlin et al., NAACL 2019)
+DEFAULT_MODEL_EN = "bert-base-cased" 
+
+# German’s Next Language Model (Chan et al., COLING 2020)
+DEFAULT_MODEL_DE = "deepset/gbert-base" 
 
 # == config parameters ==
 DEFAULT_THRESHOLD = 10
