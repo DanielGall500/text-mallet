@@ -1,9 +1,13 @@
 from tmallet.obfuscators import (
     POSFilter,
+    POSFilterConfig,
     LemmaObfuscator,
     LinearScrambleObfuscator,
+    LinearScrambleConfig,
     HierarchicalScrambleObfuscator,
+    HierarchicalScrambleConfig,
     ShannonFilter,
+    ShannonFilterConfig,
 )
 from tmallet.utils import SpaCyInterface, LangConfig, flatten_dict
 from datasets import load_from_disk, concatenate_datasets
@@ -39,11 +43,22 @@ class TMallet:
         self.lang: LangConfig = lang
         self.device = "cuda" if prefer_gpu else "cpu"
 
-    def load_obfuscator(self, config: Dict):
-        self.active_config = config
-        algorithm = self.active_config["algorithm"]
+    def load_obfuscator(self, algorithm: str, config: Dict):
+        self.active_config = self._validate_config(algorithm, config)
         self.active_obfuscator = self._get_obfuscator(algorithm)
+        self.active_obfuscator.set_config(self.active_config)
         return self
+
+    def _validate_config(self, algorithm: str, config: Dict):
+        match algorithm:
+            case "pos-filter":
+                return POSFilterConfig(**config)
+            case "scramble-BoW":
+                return LinearScrambleConfig(**config)
+            case "scramble-hier":
+                return HierarchicalScrambleConfig(**config)
+            case "shannon":
+                return ShannonFilterConfig(**config)
 
     def obfuscate(self, text: Union[List[str], str]) -> Union[List[str], str]:
         if not self.active_obfuscator or not self.active_config:
@@ -54,7 +69,7 @@ class TMallet:
         if self.apply_spacy_preprocessing:
             text = self.spacy_interface.process(text)
 
-        return self.active_obfuscator.obfuscate(text, config=self.active_config)
+        return self.active_obfuscator.obfuscate(text)
 
     def _obfuscate_batch(
         self,

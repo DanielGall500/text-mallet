@@ -1,50 +1,33 @@
 from tmallet.obfuscators.base import Obfuscator
+from tmallet.obfuscators.structural.config import LinearScrambleConfig
 from nltk.tokenize.treebank import TreebankWordDetokenizer
 from nltk.tokenize import sent_tokenize
 from typing import Dict
 import random
 
-DEFAULT_SEED = 100
-DEFAULT_LINEAR_CONFIG = {"level": "document", "seed": DEFAULT_SEED}
-
 
 # the linear scrambler does not use SpaCy
 class LinearScrambleObfuscator(Obfuscator):
+    def set_config(self, config: LinearScrambleConfig):
+        random.seed(config.seed)
+        self.level = config.level if isinstance(config.level, list) else [config.level]
+
     def obfuscate(
         self,
         text: str,
-        config: Dict = DEFAULT_LINEAR_CONFIG,
     ) -> dict:
-
-        if "seed" not in config.keys():
-            seed = DEFAULT_SEED
-        else:
-            seed = config["seed"]
-        random.seed(seed)
-
-        if "level" not in config.keys():
-            raise ValueError(
-                "Please pass a configuration with the 'level' parameter to determine whether scrambling occurs at document or sentence level."
-            )
-        level = config["level"]
-
-        # check if multiple replacement mechanisms were specified
-        is_multiple_levels = isinstance(level, list)
-        if not is_multiple_levels:
-            level = [level]
-
         result = {}
-        for l in level:
-            match l:
+        for lvl in self.level:
+            match lvl:
                 case "sentence":
                     sentences = sent_tokenize(text)
                     scrambled_sentences = [self._linear_scramble(s) for s in sentences]
                     join_scrambled_sentences = " ".join(scrambled_sentences)
-                    result[l] = join_scrambled_sentences
+                    result[lvl] = join_scrambled_sentences
                 case "document":
-                    result[l] = self._linear_scramble(text)
+                    result[lvl] = self._linear_scramble(text)
                 case _:
-                    raise ValueError(f"Invalid scrambling level: {level}")
+                    raise ValueError(f"Invalid scrambling level: {lvl}")
         return { "scramble-linear": result }
 
     def _linear_scramble(self, text) -> str:

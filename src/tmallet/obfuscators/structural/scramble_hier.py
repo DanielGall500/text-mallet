@@ -1,39 +1,26 @@
 from tmallet.obfuscators.base import SpaCyObfuscator
+from tmallet.obfuscators.structural.config import HierarchicalScrambleConfig
 from nltk.tokenize.treebank import TreebankWordDetokenizer
 from spacy.tokens import Token, Doc
 from typing import Dict
 import random
 
-DEFAULT_SEED = 100
-DEFAULT_HIERARCHICAL_CONFIG = {"algorithm": "scramble-hier", "strength": "weak", "seed": DEFAULT_SEED}
-
 
 class HierarchicalScrambleObfuscator(SpaCyObfuscator):
+    def set_config(self, config: HierarchicalScrambleConfig):
+        random.seed(config.seed)
+        self.strength = config.strength if isinstance(config.strength, list) else [config.strength]
+
     def obfuscate(
         self,
         doc: Doc,
-        config: Dict = DEFAULT_HIERARCHICAL_CONFIG,
     ) -> dict:
-        seed = config.get("seed", DEFAULT_SEED)
-        random.seed(seed)
-
-        if "strength" not in config.keys():
-            raise ValueError(
-                "Please pass a configuration with the 'strength' parameter for this algorithm."
-            )
-        strength = config["strength"]
-
-        # todo: turn this into a helper function
-        # check if multiple replacement mechanisms were specified
-        is_multiple_strengths = isinstance(strength, list)
-        if not is_multiple_strengths:
-            strength = [strength]
 
         doc_as_sents = [sent.as_doc() for sent in doc.sents]
 
         # operate at the sentence level
         result = {}
-        for s in strength:
+        for s in self.strength:
             scrambled_sentences = [self._hierarchical_scramble(d, strength=s) for d in doc_as_sents]
             scrambled = " ".join(scrambled_sentences).strip()
             result[s] = scrambled
@@ -137,23 +124,6 @@ def scramble_hier_strong(tree, flip_prob=0.5):
     random.shuffle(r_siblings)
 
     return dict(l_siblings + r_siblings)
-
-
-"""
-def scramble_hier_strong(tree, swap_probability: float = 1.0):
-    swapped_tree = {}
-    for (word, direction), children in tree.items():
-        # Randomly decide whether to swap this node's direction
-        if random.random() < swap_probability:
-            new_direction = "L" if direction == "R" else "R"
-        else:
-            new_direction = direction
-
-        swapped_children = scramble_hier_strong(children, swap_probability)
-        swapped_tree[(word, new_direction)] = swapped_children
-    return swapped_tree
-"""
-
 
 def get_nested_dict_from_list(l: list[tuple]) -> dict:
     nested = {}

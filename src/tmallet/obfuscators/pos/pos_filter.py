@@ -1,73 +1,36 @@
 from os import replace
+from tmallet.obfuscators.pos.config import POSFilterConfig, FilterType
 from tmallet.obfuscators.replacement_token import (
     ReplacementMechanism,
-    get_replacement_tok,
     DEFAULT_TOKEN,
 )
 from tmallet.obfuscators.base import SpaCyObfuscator
 from nltk.tokenize.treebank import TreebankWordDetokenizer
-from typing import Literal, Dict, List
+from typing import List
 from spacy.tokens import Doc
 
-DEFAULT_CONFIG = {"algorithm": "pos-filter", 
-                  "filter_type": "retain",
-                  "pos_tags": ["NOUN", "PROPN"],
-                  "replacement_mechanism": "DEFAULT"}
-
-
 class POSFilter(SpaCyObfuscator):
-    POS = Literal["NOUN", "PROPN", "VERB"]
-    FilterType = Literal[
-        "retain", "remove"
-    ]
-
     def __init__(self):
         self.detok = TreebankWordDetokenizer()
+
+    def set_config(self, config: POSFilterConfig):
+        self.filter_type = config.filter_type if isinstance(config.filter_type, list) else [config.filter_type]
+        self.pos_tags = config.pos_tags if isinstance(config.pos_tags, list) else [config.pos_tags]
+        self.replacement_mechanism = config.replacement_mechanism if isinstance(config.replacement_mechanism, list) else [config.replacement_mechanism]
 
     def obfuscate(
         self,
         doc: Doc,
-        config: Dict = DEFAULT_CONFIG,
     ) -> str:
-        if "filter_type" not in config.keys():
-            raise ValueError(
-                "Please pass a configuration with the 'filter_type' parameter for this algorithm."
-            )
-        filter_type = config["filter_type"]
-
-        if "pos_tags" not in config.keys():
-            raise ValueError(
-                "Please pass a configuration with the 'pos_tags' parameter for this algorithm."
-            )
-        tgt_pos_tags = config["pos_tags"]
-
-        if "replacement_mechanism" not in config.keys():
-            raise ValueError(
-                "Please pass a configuration with the 'replacement_mechanism' parameter for this algorithm."
-            )
-        replacement_mechanism: ReplacementMechanism | List[ReplacementMechanism]= config["replacement_mechanism"]
-
-        is_multiple_filters = isinstance(filter_type, list)
-        if not is_multiple_filters:
-            filter_type = [filter_type]
-
-        is_multiple_pos_tags = isinstance(tgt_pos_tags, list)
-        if not is_multiple_pos_tags:
-            tgt_pos_tags = [tgt_pos_tags]
-
-        is_multiple_replacement_mechanisms = isinstance(replacement_mechanism, list)
-        if not is_multiple_replacement_mechanisms:
-            replacement_mechanism = [replacement_mechanism]
-
         results = {}
-        for ft in filter_type:
+        for ft in self.filter_type:
             results[ft] = {}
-            for mech in replacement_mechanism:
+            for mech in self.replacement_mechanism:
                 match ft:
                     case "retain":
-                        results[ft][mech] = self._keep_only(doc, tgt_pos_tags, mech)
+                        results[ft][mech] = self._keep_only(doc, self.pos_tags, mech)
                     case "remove":
-                        results[ft][mech] = self._keep_all_except(doc, tgt_pos_tags, mech)
+                        results[ft][mech] = self._keep_all_except(doc, self.pos_tags, mech)
                     case _:
                         raise ValueError(f"Please provide a valid filter type: {ft}.")
         return { "pos-filter": results }
@@ -75,7 +38,7 @@ class POSFilter(SpaCyObfuscator):
     def _keep_only(
         self,
         doc: Doc,
-        pos_tags: list[POS],
+        pos_tags: list[str],
         replacement_mechanism: ReplacementMechanism = "DEFAULT",
     ) -> str:
         remaining_tokens = []
@@ -106,7 +69,7 @@ class POSFilter(SpaCyObfuscator):
     def _keep_all_except(
         self,
         doc: Doc,
-        pos_tags: list[POS],
+        pos_tags: list[str],
         replacement_mechanism: ReplacementMechanism = "DEFAULT",
     ) -> str:
         remaining_tokens = []
