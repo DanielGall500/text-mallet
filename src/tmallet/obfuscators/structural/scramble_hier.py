@@ -9,7 +9,9 @@ import random
 class HierarchicalScrambleObfuscator(SpaCyObfuscator):
     def set_config(self, config: HierarchicalScrambleConfig):
         random.seed(config.seed)
-        self.strength = config.strength if isinstance(config.strength, list) else [config.strength]
+        self.strength = (
+            config.strength if isinstance(config.strength, list) else [config.strength]
+        )
 
     def obfuscate(
         self,
@@ -21,10 +23,12 @@ class HierarchicalScrambleObfuscator(SpaCyObfuscator):
         # operate at the sentence level
         result = {}
         for s in self.strength:
-            scrambled_sentences = [self._hierarchical_scramble(d, strength=s) for d in doc_as_sents]
+            scrambled_sentences = [
+                self._hierarchical_scramble(d, strength=s) for d in doc_as_sents
+            ]
             scrambled = " ".join(scrambled_sentences).strip()
             result[s] = scrambled
-        return { "scramble-hier" : result }
+        return {"scramble-hier": result}
 
     def _hierarchical_scramble(self, doc: Doc, strength: str) -> str:
         d = {}
@@ -124,6 +128,7 @@ def scramble_hier_strong(tree, flip_prob=0.5):
     random.shuffle(r_siblings)
 
     return dict(l_siblings + r_siblings)
+
 
 def get_nested_dict_from_list(l: list[tuple]) -> dict:
     nested = {}

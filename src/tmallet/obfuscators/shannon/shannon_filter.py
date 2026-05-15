@@ -6,7 +6,11 @@ from tmallet.obfuscators.replacement_token import (
     get_replacement_tok,
     DEFAULT_TOKEN,
 )
-from tmallet.obfuscators.shannon.config import ShannonFilterConfig, DEFAULT_MODEL_EN, DEFAULT_MODEL_DE
+from tmallet.obfuscators.shannon.config import (
+    ShannonFilterConfig,
+    DEFAULT_MODEL_EN,
+    DEFAULT_MODEL_DE,
+)
 from typing import Dict, Union, List
 from nltk.tokenize.treebank import TreebankWordDetokenizer
 import logging
@@ -14,6 +18,7 @@ import logging
 from tmallet.utils.spacy_registry import LangConfig, SpaCyInterface
 
 logging.getLogger("transformers").setLevel(logging.ERROR)
+
 
 def get_replacement_mechanism(mechanism, word_index, pos_tags=None):
     match mechanism:
@@ -28,6 +33,7 @@ def get_replacement_mechanism(mechanism, word_index, pos_tags=None):
                 f"Please provide a valid replacement mechanism (provided {mechanism})."
             )
     return replacement_tok
+
 
 class ShannonFilter(Obfuscator):
     """
@@ -54,10 +60,18 @@ class ShannonFilter(Obfuscator):
 
     def set_config(self, config: ShannonFilterConfig):
         # check if multiple thresholds were specified
-        self.threshold = config.threshold if isinstance(config.threshold, list) else [config.threshold]
+        self.threshold = (
+            config.threshold
+            if isinstance(config.threshold, list)
+            else [config.threshold]
+        )
 
         # check if multiple replacement mechanisms were specified
-        self.replacement_mechanism = config.replacement_mechanism if isinstance(config.replacement_mechanism, list) else [config.replacement_mechanism]
+        self.replacement_mechanism = (
+            config.replacement_mechanism
+            if isinstance(config.replacement_mechanism, list)
+            else [config.replacement_mechanism]
+        )
 
         self.as_upper_bound = config.as_upper_bound
         self.as_lower_bound = config.as_lower_bound
@@ -116,15 +130,23 @@ class ShannonFilter(Obfuscator):
 
             reconstructed[thresh] = {
                 "as_upper_bound": (
-                    {rm: self.detok.detokenize(resulting_output_upper_bound[rm]) for rm in self.replacement_mechanism}
-                    if self.as_upper_bound else None
+                    {
+                        rm: self.detok.detokenize(resulting_output_upper_bound[rm])
+                        for rm in self.replacement_mechanism
+                    }
+                    if self.as_upper_bound
+                    else None
                 ),
-                "as_lower_bound": (   
-                    {rm: self.detok.detokenize(resulting_output_lower_bound[rm]) for rm in self.replacement_mechanism}
-                    if self.as_lower_bound else None
+                "as_lower_bound": (
+                    {
+                        rm: self.detok.detokenize(resulting_output_lower_bound[rm])
+                        for rm in self.replacement_mechanism
+                    }
+                    if self.as_lower_bound
+                    else None
                 ),
             }
             if self.output_mi_values:
                 reconstructed[thresh]["mi_values"] = mi_values
 
-        return { "mi": reconstructed }
+        return {"mi": reconstructed}

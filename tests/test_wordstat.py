@@ -24,7 +24,6 @@ def test_mutual_information_known_word():
 def test_mutual_information_punctuation_returns_zero():
     for ch in string.punctuation:
         ws = WordStat(word=ch, contextual_surprisal=2.0)
-        print(ws.mutual_information)
         assert ws.mutual_information == 0
 
 

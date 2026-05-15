@@ -22,8 +22,7 @@ torch.set_num_threads(1)
 
 ObfuscationTechnique = Literal[
     "lemmatize",  # convert words to their roots
-    "pos-filter"
-    "scramble-hier",  # dependency-parsing structural obfuscation
+    "pos-filter" "scramble-hier",  # dependency-parsing structural obfuscation
     "scramble-BoW",  # randomly shuffle words at the sentence or document level
     "shannon",  # filter based on an approximation of word importance
 ]

@@ -28,7 +28,7 @@ class LinearScrambleObfuscator(Obfuscator):
                     result[lvl] = self._linear_scramble(text)
                 case _:
                     raise ValueError(f"Invalid scrambling level: {lvl}")
-        return { "scramble-linear": result }
+        return {"scramble-linear": result}
 
     def _linear_scramble(self, text) -> str:
         words = text.split()

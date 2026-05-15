@@ -8,8 +8,10 @@ from tmallet.obfuscators.shannon.config import ShannonFilterConfig
 
 from tmallet.obfuscators.structural.scramble_linear import LinearScrambleObfuscator
 from tmallet.obfuscators.structural.scramble_hier import HierarchicalScrambleObfuscator
-from tmallet.obfuscators.structural.config import LinearScrambleConfig, HierarchicalScrambleConfig
-
+from tmallet.obfuscators.structural.config import (
+    LinearScrambleConfig,
+    HierarchicalScrambleConfig,
+)
 
 __all__ = [
     "POSFilter",

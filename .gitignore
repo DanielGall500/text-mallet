@@ -4,3 +4,5 @@ helper/
 *.venv*
 *cache*
 sync.sh
+infai-experiments/
+examples/dep/

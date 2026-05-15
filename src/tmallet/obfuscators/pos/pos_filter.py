@@ -9,14 +9,25 @@ from nltk.tokenize.treebank import TreebankWordDetokenizer
 from typing import List
 from spacy.tokens import Doc
 
+
 class POSFilter(SpaCyObfuscator):
     def __init__(self):
         self.detok = TreebankWordDetokenizer()
 
     def set_config(self, config: POSFilterConfig):
-        self.filter_type = config.filter_type if isinstance(config.filter_type, list) else [config.filter_type]
-        self.pos_tags = config.pos_tags if isinstance(config.pos_tags, list) else [config.pos_tags]
-        self.replacement_mechanism = config.replacement_mechanism if isinstance(config.replacement_mechanism, list) else [config.replacement_mechanism]
+        self.filter_type = (
+            config.filter_type
+            if isinstance(config.filter_type, list)
+            else [config.filter_type]
+        )
+        self.pos_tags = (
+            config.pos_tags if isinstance(config.pos_tags, list) else [config.pos_tags]
+        )
+        self.replacement_mechanism = (
+            config.replacement_mechanism
+            if isinstance(config.replacement_mechanism, list)
+            else [config.replacement_mechanism]
+        )
 
     def obfuscate(
         self,
@@ -30,10 +41,12 @@ class POSFilter(SpaCyObfuscator):
                     case "retain":
                         results[ft][mech] = self._keep_only(doc, self.pos_tags, mech)
                     case "remove":
-                        results[ft][mech] = self._keep_all_except(doc, self.pos_tags, mech)
+                        results[ft][mech] = self._keep_all_except(
+                            doc, self.pos_tags, mech
+                        )
                     case _:
                         raise ValueError(f"Please provide a valid filter type: {ft}.")
-        return { "pos-filter": results }
+        return {"pos-filter": results}
 
     def _keep_only(
         self,

@@ -2,9 +2,11 @@ from pydantic import BaseModel, ConfigDict
 from typing import List
 from enum import Enum
 
+
 class FilterType(str, Enum):
     Retain = "retain"
     Remove = "remove"
+
 
 class POSTag(str, Enum):
     ADJ = "ADJ"
@@ -26,7 +28,8 @@ class POSTag(str, Enum):
     X = "X"
     SPACE = "SPACE"
 
+
 class POSFilterConfig(BaseModel):
     filter_type: FilterType | List[FilterType] = "retain"
-    pos_tags: List[POSTag] = ["NOUN","PROPN"]
+    pos_tags: List[POSTag] = ["NOUN", "PROPN"]
     replacement_mechanism: str | List[str] = "def"

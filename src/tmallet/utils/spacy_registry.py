@@ -41,7 +41,7 @@ class SpaCyInterface:
                         "morphologizer",
                         "attribute_ruler",
                         "lemmatizer",
-                        "sentencizer"
+                        "sentencizer",
                     ]:
                         nlp.disable_pipe(name)
             case "ner":
