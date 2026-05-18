@@ -22,7 +22,7 @@ print(dataset.to_pandas().head())
 # -- Obfuscation Config --
 algorithm = "shannon"
 config = {
-    "threshold": [2.5, 5, 7.5, 10, 12.5],
+    "threshold": [7.5],
     "as_upper_bound": True,
     "as_lower_bound": True,
     "replacement_mechanism": ["DELETE", "DEFAULT", "POS"] 
