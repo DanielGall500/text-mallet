@@ -40,7 +40,7 @@ class TMallet:
     def __init__(self, lang: LangConfig = "en", prefer_gpu: bool = False):
         self.spacy_interface = SpaCyInterface(lang=lang, prefer_gpu=prefer_gpu)
         self.lang: LangConfig = lang
-        self.device = "cuda" if prefer_gpu else "cpu"
+        self.prefer_gpu = prefer_gpu
 
     def load_obfuscator(self, algorithm: str, config: Dict):
         self.active_config = self._validate_config(algorithm, config)
@@ -131,7 +131,7 @@ class TMallet:
                 return ShannonFilter(
                     lang=self.lang,
                     spacy_interface=self.spacy_interface,
-                    device=self.device,
+                    prefer_gpu=self.prefer_gpu,
                 )
             case _:
                 raise ValueError(

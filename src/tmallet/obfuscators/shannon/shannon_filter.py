@@ -1,17 +1,11 @@
 from tmallet.obfuscators.base import Obfuscator
-from tmallet.obfuscators.shannon.impl.calc import ShannonBERT
-from tmallet.obfuscators.shannon.impl.analysis import ShannonAnalyser
+from tmallet.obfuscators.shannon.shannon_bert import ShannonBERT
 from tmallet.obfuscators.replacement_token import (
-    ReplacementMechanism,
-    get_replacement_tok,
     DEFAULT_TOKEN,
 )
 from tmallet.obfuscators.shannon.config import (
     ShannonFilterConfig,
-    DEFAULT_MODEL_EN,
-    DEFAULT_MODEL_DE,
 )
-from typing import Dict, Union, List
 from nltk.tokenize.treebank import TreebankWordDetokenizer
 import logging
 
@@ -44,17 +38,12 @@ class ShannonFilter(Obfuscator):
     """
 
     def __init__(
-        self, lang: LangConfig, spacy_interface: SpaCyInterface, device: str = "cpu"
+        self,
+        lang: LangConfig,
+        spacy_interface: SpaCyInterface,
+        prefer_gpu: bool = False,
     ):
-        match lang:
-            case "en":
-                model_name = DEFAULT_MODEL_EN
-            case "de":
-                model_name = DEFAULT_MODEL_DE
-            case _:
-                raise ValueError("Please provide a valid language (`en` or `de`.")
-
-        self.shannon = ShannonBERT(model_name=model_name, device=device)
+        self.shannon = ShannonBERT(lang=lang, prefer_gpu=prefer_gpu)
         self.detok = TreebankWordDetokenizer()
         self.spacy_interface = spacy_interface
 

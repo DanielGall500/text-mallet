@@ -5,6 +5,7 @@ from tmallet.obfuscators.morph.lemmatise import LemmaObfuscator
 
 from tmallet.obfuscators.shannon.shannon_filter import ShannonFilter
 from tmallet.obfuscators.shannon.config import ShannonFilterConfig
+from tmallet.obfuscators.shannon.shannon_bert import ShannonBERT
 
 from tmallet.obfuscators.structural.scramble_linear import LinearScrambleObfuscator
 from tmallet.obfuscators.structural.scramble_hier import HierarchicalScrambleObfuscator
@@ -18,7 +19,8 @@ __all__ = [
     "POSFilterConfig",
     "LemmaObfuscator",
     "ShannonFilter",
-    "ShannonConfig",
+    "ShannonFilterConfig",
+    "ShannonBERT",
     "LinearScrambleObfuscator",
     "LinearScrambleConfig",
     "HierarchicalScrambleObfuscator",

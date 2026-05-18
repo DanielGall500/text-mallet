@@ -1,7 +1,6 @@
-from wordfreq import word_frequency, get_frequency_dict
+from tmallet.obfuscators.shannon.visualise import ShannonVisualiser
+from wordfreq import get_frequency_dict
 from transformers import AutoTokenizer, AutoModelForMaskedLM
-from tmallet.obfuscators.base import SpaCyObfuscator
-from spacy.tokens import Doc
 from nltk.tokenize import sent_tokenize
 from typing import List, Optional
 from dataclasses import dataclass
@@ -12,25 +11,37 @@ import math
 import torch
 import torch.nn.functional as F
 import nltk
-import string
 import unicodedata
 
 nltk.download("punkt_tab", quiet=True)
-DEFAULT_LANG = "en"
-freq_dict = get_frequency_dict(DEFAULT_LANG, "best")
 
-# get 25th percentile frequency for cases
-# where the word is not found inthe corpus.
-# this is due to the fact that the word is often
-# a name, dialectal spelling, and so on.
-freqs = list(freq_dict.values())
-FREQ_P25 = np.percentile(freqs, 5)
+# == default model used for approximating Surprisal(word|context)
+
+# ModernBERT (Warner et al., ACL 2025)
+DEFAULT_MODEL_EN = "bert-base-cased"
+
+# ModernGBERT 134M (Wunderle et al., 2025)
+DEFAULT_MODEL_DE = "LSX-UniWue/ModernGBERT_134M"
+
+freq_dict_en = get_frequency_dict("en", "best")
+freqs_en = list(freq_dict_en.values())
+freq_en_p5 = np.percentile(freqs_en, 5)
+
+freq_dict_de = get_frequency_dict("de", "best")
+freqs_de = list(freq_dict_de.values())
+freq_de_p5 = np.percentile(freqs_de, 5)
+
+freq_dict = {
+    "en": {"dict": freq_dict_en, "p5": freq_en_p5},
+    "de": {"dict": freq_dict_de, "p5": freq_de_p5},
+}
 
 
 @dataclass
 class WordStat:
     word: str
     contextual_surprisal: float
+    lang: str
 
     def __str__(self) -> str:
         return f"(w: {self.word}, I(w): {round(self.mutual_information,4)})"
@@ -53,9 +64,11 @@ class WordStat:
         # if not found, then try the same word but lowercase,
         # if not again, then it's likely names, dialectal spellings, etc,
         # give default 25th percentile freq (rare)
-        prior_prob = freq_dict.get(self.word)
+        prior_prob = freq_dict[self.lang]["dict"].get(self.word)
         if not prior_prob:
-            prior_prob = freq_dict.get(self.word.lower(), FREQ_P25)
+            prior_prob = freq_dict[self.lang]["dict"].get(
+                self.word.lower(), freq_dict[self.lang]["p5"]
+            )
 
         prior_surprisal = -math.log2(prior_prob)
 
@@ -111,20 +124,51 @@ class ShannonBERT:
 
     def __init__(
         self,
-        model_name: str = "distilbert/distilbert-base-cased",
-        device: Optional[str] = None,
+        lang: str,
+        prefer_gpu: bool = False,
     ):
+        self.lang = lang
+
+        match lang:
+            case "en":
+                model_name = DEFAULT_MODEL_EN
+            case "de":
+                model_name = DEFAULT_MODEL_DE
+            case _:
+                raise ValueError("Please provide a valid language (`en` or `de`.")
+
         self.model_name = model_name
 
-        if device is None:
+        if prefer_gpu:
             self.device = "cuda" if torch.cuda.is_available() else "cpu"
         else:
-            self.device = device
+            self.device = "cpu"
 
         self.tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)
         self.model = AutoModelForMaskedLM.from_pretrained(model_name)
         self.model.to(self.device)
         self.model.eval()
+
+    def get_distribution_by_word(self, texts: List[str], plot_to: Optional[str] = None):
+        all_mi_values = []
+        mi_count = 0
+
+        for text in texts:
+            mi_vals = self.calculate_mutual_info(text)
+            all_mi_values.append(mi_vals)
+            mi_count += len(mi_vals)
+
+        print("Total MI Values: ", mi_count)
+
+        if plot_to:
+            visualiser = ShannonVisualiser()
+            visualiser.prepare_data(
+                mutual_info=all_mi_values,
+                flatten=True,
+            )
+            density = visualiser.plot_density(show_median=True)
+            density.save(plot_to, width=10, height=5, dpi=400)
+        return all_mi_values
 
     def calculate_mutual_info(self, text: str):
         text_stats = self.get_text_stats(text)
@@ -204,7 +248,9 @@ class ShannonBERT:
                     words_in_sent, word_surp_in_sent
                 ):
                     word_stat = WordStat(
-                        word=word, contextual_surprisal=word_contextual_surprisal
+                        lang=self.lang,
+                        word=word,
+                        contextual_surprisal=word_contextual_surprisal,
                     )
                     all_words.append(word_stat)
             else:
