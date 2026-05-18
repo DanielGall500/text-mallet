@@ -151,14 +151,10 @@ class ShannonBERT:
 
     def get_distribution_by_word(self, texts: List[str], plot_to: Optional[str] = None):
         all_mi_values = []
-        mi_count = 0
 
         for text in texts:
             mi_vals = self.calculate_mutual_info(text)
             all_mi_values.append(mi_vals)
-            mi_count += len(mi_vals)
-
-        print("Total MI Values: ", mi_count)
 
         if plot_to:
             visualiser = ShannonVisualiser()
