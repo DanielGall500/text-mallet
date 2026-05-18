@@ -46,23 +46,34 @@ This approach ensures that the original copyright-protected text never enters th
 ## Usage
 
 ### Basic Obfuscation
+There are multiple general obfuscation approaches to choose from, separated into three general categories:
+* Structural Obfuscation 
+* Part-of-Speech Filtering 
+* Mutual-Information Filtering
+
+Let's start with an example of POS filtering, where we retain (`filter_type: 'retain'`) any common and proper nouns (`pos_tags: ["NOUN","PROPN"]`).
 ```python
 from tmallet import TMallet
 
+sample_text = "Leipzig is the most populous city in the German state of Saxony. The city has a population of 633,592 residents as of 31 December 2025. It is the eighth-largest city in Germany and is part of the Central German Metropolitan Region. Leipzig is located about 150 km (90 mi) southwest of Berlin, in the southernmost part of the North German Plain (the Leipzig Bay), at the confluence of the White Elster and its tributaries Pleiße and Parthe.", 
+
+# Choose your obfuscation algorithm and configuration.
+algorithm = "pos-filter"
 config = {
-    "algorithm": "retain-noun-propn", 
-    "replacement_mechanism": "POS"
+    "filter_type": "retain",
+    "pos_tags": ["NOUN","PROPN"],
+    "replacement_mechanism": "DEFAULT",
+    "seed": 100,
 }
 
-tmallet = TMallet(lang="en")
-tmallet.load_obfuscator(config)
+# Load the TMallet Obfuscator for a language, algorithm, and configuration.
+tmallet = TMallet(lang=lang, prefer_gpu=True)
+tmallet.load_obfuscator(algorithm, config)
 
-text = """
-A Soyuz rocket launched two Galileo satellites into orbit on Friday,
-marking a crucial step for Europe’s planned navigation system,
-operator Arianespace announced.
-"""
-obfuscated_text = tmallet.obfuscate(text, config)
+# Obfuscate!
+obfuscated = tmallet.obfuscate(sample)
+obfuscated_text = obfuscated["pos-filter"]["retain"]["POS"]
+print(obfuscated_text)
 ```
 Output
 ```bash
@@ -78,32 +89,38 @@ We can apply a filter to set upper or lower bounds on such an MI score, filering
 ```python
 from tmallet import TMallet
 
+algorithm = "shannon", 
 config = {
-    "algorithm": "shannon", 
     "threshold": 8,
     "as_upper_bound": True,
     "as_lower_bound": True,
     "replacement_mechanism": "DEFAULT"
 }
 
-tmallet = TMallet(lang="en")
-tmallet.load_obfuscator(config)
+tmallet = TMallet(lang=lang, prefer_gpu=True)
+tmallet.load_obfuscator(algorithm, config)
 
-...
-text = """
-Three-dimensional printing is being used to make metal parts 
-for aircraft and space vehicles.
-"""
-obfuscated_text = mallet.obfuscate(text)
+text = "Leipzig is the most populous city in the German state of Saxony. The city has a population of 633,592 residents as of 31 December 2025. It is the eighth-largest city in Germany and is part of the Central German Metropolitan Region. Leipzig is located about 150 km (90 mi) southwest of Berlin, in the southernmost part of the North German Plain (the Leipzig Bay), at the confluence of the White Elster and its tributaries Pleiße and Parthe."
+obfuscated = tmallet.obfuscate(text)
+print(obfuscated)
 ```
 
 Output
-```
-==Mutual-Information Obfuscation==
-Threshold:  8
-Lower Bounded:  Three _ dimensional printing _ _ used _ _ metal parts _ aircraft _ space vehicles _
-Upper Bounded:  _ - _ _ is being _ to make _ _ for _ and _ _.
-==================================
+```json
+{
+  "7.5": {
+    "as_upper_bound": {
+      "DELETE": "is the in the of . The a of, as of . It is the - in and is of the . is () of, in the of  the (the Bay), at the of the White and and.",
+      "DEFAULT": "_ is the _ _ _ in the _ _ of _ . The _ _ a _ of _, _ _ as of _ _ _ . It is the _ - _ _  in _ and is _ of the _ _ _ _ . _ is _ _ _ _ (_ _) _ of _, in the _ _ of the _ _ _ (the _ Bay), at the _ of the Wh ite _ and _ _ _ and _.",
+      "POS": "PROPN is the ADV ADJ NOUN in the ADJ NOUN of PROPN . The NOUN AUX a NOUN of NUM, NUM NOUN  as of NUM PROPN NUM . It is the ADV - ADJ NOUN in PROPN and is NOUN of the ADJ ADJ PROPN PROPN . PROPN is VERB ADP  NUM NOUN (NUM NOUN) ADV of PROPN, in the ADJ NOUN of the ADJ ADJ PROPN (the PROPN Bay), at the NOUN of the White  PROPN and PRON NOUN PROPN and PROPN."
+    },
+    "as_lower_bound": {
+      "DELETE": "Leipzig most populous city German state Saxony city has population 633 592 residents 31  December 2025 eighth largest city Germany part Central German Metropolitan Region Leipzig located about 150 km 90  mi southwest Berlin southernmost part North German Plain Leipzig confluence Elster its tributaries Pleiße Pa rthe",
+      "DEFAULT": "Leipzig _ _ most populous city _ _ German state _ Saxony _ _ city has _ population _ 6 33 _ 592 residents _ _ 31 December 2025 _ _ _ _ eighth _ largest city _ Germany _ _ part _ _ Central German Metrop olitan Region _ Leipzig _ located about 150 km _ 90 mi _ southwest _ Berlin _ _ _ southernmost part _ _ North Germ an Plain _ _ Leipzig _ _ _ _ _ confluence _ _ _ Elster _ its tributaries Pleiße _ Parthe _",
+      "POS": "Leipzig AUX DET most populous city ADP DET German state ADP Saxony PUNCT DET city has DET  population ADP 633 PUNCT 592 residents ADP ADP 31 December 2025 PUNCT PRON AUX DET eighth PUNCT largest city ADP G ermany CCONJ AUX part ADP DET Central German Metropolitan Region PUNCT Leipzig AUX located about 150 km PUNCT 90 m i PUNCT southwest ADP Berlin PUNCT ADP DET southernmost part ADP DET North German Plain PUNCT DET Leipzig PROPN PU NCT PUNCT ADP DET confluence ADP DET PROPN Elster CCONJ its tributaries Pleiße CCONJ Parthe PUNCT"
+    }
+  }
+}
 ```
 
 If we obfuscate too strongly using mutual information, we'll end up with obfuscated sentences like:
@@ -118,15 +135,13 @@ Here's an overview of an approximation of pointwise word-level mutual informatio
 ```python
 from datasets import load_dataset
 
-# Load your dataset
+# 1. Load in a dataset from HF
 dataset = load_dataset("your_huggingface_dataset")
 
-# Obfuscate a column
-config = {"algorithm": "lemmatize"}
+# 2. Set up the text-mallet obfuscator as above
+...
 
-tmallet = TMallet()
-tmallet.load_obfuscator(config)
-
+# 3. Perform obfuscation over an entire dataset,
 obfuscated_dataset = tmallet.obfuscate_dataset(
     dataset=dataset,
     column="text",
@@ -136,13 +151,11 @@ obfuscated_dataset = tmallet.obfuscate_dataset(
 )
 ```
 
-### Obfuscate Large Datasets with Checkpointing
-
-For large datasets, use chunked processing to save progress:
+Alternatively, you can also use chunking to save progress as you obfuscate:
 ```python
 ...
 
-obfuscated_dataset = mallet.obfuscate_dataset_by_chunk(
+obfuscated_dataset = tmallet.obfuscate_dataset_by_chunk(
     dataset=dataset,
     column="text",
     column_obfuscated="text_obfuscated",
@@ -165,30 +178,32 @@ There are four primary means of obfuscation provided:
 
 #### 1. Lemmatisation
 **Description**: Reduces words to their base or dictionary form. A very light form of obfuscation, particularly to remove shallow elements of writing style.
-To use it pass a `config` with `algorithm` set to `lemmatize`.
+To use it simply set `algorithm` set to `lemmatize`. A configuration is not required.
 
 #### 2. Scrambling
 **Description**: Scrambling involves jumbling the words in a sentence or text. You can choose from the following scrambling algorithms:
-- `scramble-hier-weak`: Use dependency parsing to scramble words (child nodes i.e. words follow their head) that of the same head and the same side of said head.
-- `scramble-hier-strong`: Use dependency parsing to scramble words (child nodes i.e. words follow their head) of the same head. 
-- `scramble-BoW-sentence`: Randomly scramble words (within sentences) without concern for language structure.
-- `scramble-BoW-document`: Randomly scramble words (across the entire text) without concern for language structure.
+- `scramble-hier`
+    - `weak` Use dependency parsing to scramble words (child nodes i.e. words follow their head) that of the same head and the same side of said head.
+    - `strong`: Use dependency parsing to scramble words (child nodes i.e. words follow their head) of the same head. 
+
+- `scramble-BoW`
+    - `sentence`: Randomly scramble words (within sentences) without concern for language structure.
+    - `document`: Randomly scramble words (across the entire text) without concern for language structure.
 
 #### 3. Replacement of Nouns / Proper Nouns
 **Description**: Adjusts different word types by either deleting them or replacing them with POS tags.
-Algorithms
-- `retain-noun`: Keep only nouns.
-- `retain-noun-propn`: Keep only nouns and proper nouns.
-- `remove-noun`: Keep everything but nouns.
-- `remove-noun-propn`: Keep everything but nouns and proper nouns.
+Algorithm: `pos-filter`
 
-Additional Configuration Options:
+Configuration Options:
 | Parameter            | Type    | Description                                      | Default Value |
 |----------------------|---------|--------------------------------------------------|---------------|
+| `filter_type`   | str or List[str]   | Choose whether targeted POS tags are removed or retained.     | `"retain"`        |
+| `pos_tags`   | str or List[str]   | Choose the POS tags targeted in the filtering.     | `["NOUN","PROPN"]`        |
 | `replacement_mechanism`   | str    | Determines how filtered words are replaced in the text. Can be one of "DEFAULT" (replaced with a default character, typically an underscore), "DELETE", or "POS" (replaced with the corresponding part-of-speech tag).     | `DEFAULT`        |
 
 #### 4. Mutual Information Obfuscation
 **Description**: Applies Shannon entropy-based text transformation, replacing words based on a threshold of Mutual Information. To use this pass `shannon` to the `algorithm` parameter in the configuration.
+Algorithm: `shannon`
 
 Additional Configuration Options:
 | Parameter      | Type    | Description                                      | Default Value |
