@@ -72,6 +72,10 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1"><a class="reference internal" href="methods/pos_filtering.html">POS Filtering</a></li>
 <li class="toctree-l1"><a class="reference internal" href="methods/mutual_information.html">Mutual Information</a></li>
 </ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Docs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Pipeline</a></li>
+</ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Project Info</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
@@ -87,7 +91,9 @@ data-aria-dark="Switch to auto color mode">
       <i class="i-lucide close"></i>
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
-<li><a class="reference internal" href="#coming-soon">Coming soon</a></li>
+<li><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li><a class="reference internal" href="#standard-installation">Standard Installation</a></li>
+<li><a class="reference internal" href="#verification">Verification</a></li>
 </ul>
 </div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
   </aside>
@@ -120,12 +126,35 @@ data-aria-dark="Switch to auto color mode">
   <article class="yue" role="main">
           <section id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h1>
-<section id="coming-soon">
-<h2>Coming soon<a class="headerlink" href="#coming-soon" title="Link to this heading">¶</a></h2>
-<p>This section is still in progress.</p>
-<p>In the meantime, you can:
-- Check the README
-- Look at the usage examples</p>
+<p>This section guides you through setting up <code class="docutils literal notranslate"><span class="pre">text-mallet</span></code> on your local environment.</p>
+<section id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading">¶</a></h2>
+<p>Before installing, ensure you have Python 3.8 or higher installed on your system. It is highly recommended to use a virtual environment to avoid version conflicts with other packages:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>venv
+</span><span data-line="2"><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w">  </span><span class="c1"># On Windows use: venv\Scripts\activate</span>
+</span></pre></div>
+</div>
+</section>
+<section id="standard-installation">
+<h2>Standard Installation<a class="headerlink" href="#standard-installation" title="Link to this heading">¶</a></h2>
+<p>You can install the stable release of <code class="docutils literal notranslate"><span class="pre">text-mallet</span></code> directly from PyPI using <code class="docutils literal notranslate"><span class="pre">pip</span></code>. Run the following command in your terminal:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">pip<span class="w"> </span>install<span class="w"> </span>text-mallet
+</span></pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Depending on the obfuscation algorithms you plan to use, you may also need to download the corresponding language models for spaCy. For instance, for standard English processing:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">python<span class="w"> </span>-m<span class="w"> </span>spacy<span class="w"> </span>download<span class="w"> </span>en_core_web_trf
+</span></pre></div>
+</div>
+</div>
+</section>
+<section id="verification">
+<h2>Verification<a class="headerlink" href="#verification" title="Link to this heading">¶</a></h2>
+<p>To verify that <code class="docutils literal notranslate"><span class="pre">text-mallet</span></code> was installed successfully, you can run a quick check in your terminal or Python interpreter:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import text_mallet; print(text_mallet.__version__)&quot;</span>
+</span></pre></div>
+</div>
 </section>
 </section>
 

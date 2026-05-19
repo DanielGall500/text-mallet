@@ -38,6 +38,12 @@ Contents
    methods/mutual_information
 
 .. toctree::
+   :maxdepth: 2
+   :caption: Docs
+
+   pipeline
+
+.. toctree::
    :maxdepth: 1
    :caption: Project Info
 

@@ -72,6 +72,10 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1"><a class="reference internal" href="../methods/pos_filtering.html">POS Filtering</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../methods/mutual_information.html">Mutual Information</a></li>
 </ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Docs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../pipeline.html">Pipeline</a></li>
+</ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Project Info</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
@@ -87,7 +91,18 @@ data-aria-dark="Switch to auto color mode">
       <i class="i-lucide close"></i>
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
-<li><a class="reference internal" href="#coming-soon">Coming soon</a></li>
+<li><a class="reference internal" href="#quick-start">Quick Start</a><ul>
+<li><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#available-algorithms">Available Algorithms</a><ul>
+<li><a class="reference internal" href="#lemmatisation">Lemmatisation</a></li>
+<li><a class="reference internal" href="#scrambling">Scrambling</a></li>
+<li><a class="reference internal" href="#part-of-speech-filtering">Part-of-Speech Filtering</a></li>
+<li><a class="reference internal" href="#mutual-information-filtering">Mutual Information Filtering</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#dataset-obfuscation">Dataset Obfuscation</a></li>
 </ul>
 </div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
   </aside>
@@ -120,12 +135,100 @@ data-aria-dark="Switch to auto color mode">
   <article class="yue" role="main">
           <section id="basics">
 <h1>Basics<a class="headerlink" href="#basics" title="Link to this heading">¶</a></h1>
-<section id="coming-soon">
-<h2>Coming soon<a class="headerlink" href="#coming-soon" title="Link to this heading">¶</a></h2>
-<p>This section is still in progress.</p>
-<p>In the meantime, you can:
-- Check the README
-- Look at the usage examples</p>
+<p><code class="docutils literal notranslate"><span class="pre">text-mallet</span></code> is a lightweight text obfuscation package for transforming text into less human-readable forms while preserving partial utility for NLP tasks such as:</p>
+<ul class="simple">
+<li><p>Classification</p></li>
+<li><p>Retrieval</p></li>
+<li><p>Topic modelling</p></li>
+<li><p>Semantic similarity</p></li>
+</ul>
+<p>The package currently supports:</p>
+<ul class="simple">
+<li><p>English</p></li>
+<li><p>German</p></li>
+</ul>
+<section id="quick-start">
+<h2>Quick Start<a class="headerlink" href="#quick-start" title="Link to this heading">¶</a></h2>
+<p>Using <code class="docutils literal notranslate"><span class="pre">text-mallet</span></code> consists of three simple steps:</p>
+<ol class="arabic simple">
+<li><p>Create a <code class="docutils literal notranslate"><span class="pre">TMallet</span></code> instance</p></li>
+<li><p>Load an obfuscation algorithm</p></li>
+<li><p>Obfuscate text</p></li>
+</ol>
+<section id="example">
+<h3>Example<a class="headerlink" href="#example" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">tmallet</span><span class="w"> </span><span class="kn">import</span> <span class="n">TMallet</span>
+</span><span data-line="2">
+</span><span data-line="3"><span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;Leipzig is the most populous city in the German state of Saxony.&quot;</span>
+</span><span data-line="4">
+</span><span data-line="5"><span class="n">algorithm</span> <span class="o">=</span> <span class="s2">&quot;pos-filter&quot;</span>
+</span><span data-line="6">
+</span><span data-line="7"><span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
+</span><span data-line="8">    <span class="s2">&quot;filter_type&quot;</span><span class="p">:</span> <span class="s2">&quot;retain&quot;</span><span class="p">,</span>
+</span><span data-line="9">    <span class="s2">&quot;pos_tags&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;NOUN&quot;</span><span class="p">,</span> <span class="s2">&quot;PROPN&quot;</span><span class="p">],</span>
+</span><span data-line="10">    <span class="s2">&quot;replacement_mechanism&quot;</span><span class="p">:</span> <span class="s2">&quot;DEFAULT&quot;</span><span class="p">,</span>
+</span><span data-line="11"><span class="p">}</span>
+</span><span data-line="12">
+</span><span data-line="13"><span class="n">tmallet</span> <span class="o">=</span> <span class="n">TMallet</span><span class="p">(</span><span class="n">lang</span><span class="o">=</span><span class="s2">&quot;en&quot;</span><span class="p">,</span> <span class="n">prefer_gpu</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span data-line="14">
+</span><span data-line="15"><span class="n">tmallet</span><span class="o">.</span><span class="n">load_obfuscator</span><span class="p">(</span><span class="n">algorithm</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+</span><span data-line="16">
+</span><span data-line="17"><span class="n">obfuscated</span> <span class="o">=</span> <span class="n">tmallet</span><span class="o">.</span><span class="n">obfuscate</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+</span><span data-line="18">
+</span><span data-line="19"><span class="nb">print</span><span class="p">(</span><span class="n">obfuscated</span><span class="p">)</span>
+</span></pre></div>
+</div>
+</section>
+</section>
+<section id="available-algorithms">
+<h2>Available Algorithms<a class="headerlink" href="#available-algorithms" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">text-mallet</span></code> currently provides four general obfuscation approaches, which are adjusted based on your configuration.
+For details on configuring any individual such method, please see their respective page in the docs.</p>
+<section id="lemmatisation">
+<h3>Lemmatisation<a class="headerlink" href="#lemmatisation" title="Link to this heading">¶</a></h3>
+<p>Reduce words to their base forms.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">algorithm</span> <span class="o">=</span> <span class="s2">&quot;lemmatize&quot;</span>
+</span></pre></div>
+</div>
+</section>
+<section id="scrambling">
+<h3>Scrambling<a class="headerlink" href="#scrambling" title="Link to this heading">¶</a></h3>
+<p>Shuffle word order while preserving varying amounts of structure.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">algorithm</span> <span class="o">=</span> <span class="s2">&quot;scramble-hier&quot;</span>
+</span></pre></div>
+</div>
+<p>or</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">algorithm</span> <span class="o">=</span> <span class="s2">&quot;scramble-BoW&quot;</span>
+</span></pre></div>
+</div>
+</section>
+<section id="part-of-speech-filtering">
+<h3>Part-of-Speech Filtering<a class="headerlink" href="#part-of-speech-filtering" title="Link to this heading">¶</a></h3>
+<p>Filter or retain selected POS tags.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">algorithm</span> <span class="o">=</span> <span class="s2">&quot;pos-filter&quot;</span>
+</span></pre></div>
+</div>
+</section>
+<section id="mutual-information-filtering">
+<h3>Mutual Information Filtering<a class="headerlink" href="#mutual-information-filtering" title="Link to this heading">¶</a></h3>
+<p>Filter words based on an approximation of word importance.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">algorithm</span> <span class="o">=</span> <span class="s2">&quot;shannon&quot;</span>
+</span></pre></div>
+</div>
+</section>
+</section>
+<section id="dataset-obfuscation">
+<h2>Dataset Obfuscation<a class="headerlink" href="#dataset-obfuscation" title="Link to this heading">¶</a></h2>
+<p>You can also obfuscate entire HuggingFace datasets.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">obfuscated_dataset</span> <span class="o">=</span> <span class="n">tmallet</span><span class="o">.</span><span class="n">obfuscate_dataset</span><span class="p">(</span>
+</span><span data-line="2">    <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
+</span><span data-line="3">    <span class="n">column</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">,</span>
+</span><span data-line="4">    <span class="n">column_obfuscated</span><span class="o">=</span><span class="s2">&quot;text_obfuscated&quot;</span><span class="p">,</span>
+</span><span data-line="5">    <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
+</span><span data-line="6">    <span class="n">batch_size</span><span class="o">=</span><span class="mi">100</span>
+</span><span data-line="7"><span class="p">)</span>
+</span></pre></div>
+</div>
 </section>
 </section>
 
