@@ -1,5 +1,6 @@
 from tmallet.obfuscators.base import Obfuscator
 from tmallet.obfuscators.shannon.shannon_bert import ShannonBERT
+from tmallet.obfuscators.shannon.visualise import ShannonVisualiser
 from tmallet.obfuscators.replacement_token import (
     DEFAULT_TOKEN,
 )
@@ -47,6 +48,15 @@ class ShannonFilter(Obfuscator):
         self.detok = TreebankWordDetokenizer()
         self.spacy_interface = spacy_interface
 
+    def visualise(self):
+        shannon_visualiser = ShannonVisualiser()
+        current_text_stat = self.shannon.get_current_text_stat()
+        mi_vals = current_text_stat.get_mutual_infos()
+        labels = current_text_stat.get_word_labels()
+        # shannon_visualiser.prepare_data(mi_vals, labels)
+        vis_html = shannon_visualiser.display_sentence_heatmap(labels, mi_vals)
+        return vis_html
+
     def set_config(self, config: ShannonFilterConfig):
         # check if multiple thresholds were specified
         self.threshold = (
@@ -65,13 +75,13 @@ class ShannonFilter(Obfuscator):
         self.as_upper_bound = config.as_upper_bound
         self.as_lower_bound = config.as_lower_bound
         self.output_mi_values = config.output_mi_values
+        self.max_context_length = config.max_context_length
+        self.shannon.set_max_context_length(self.max_context_length)
 
         self.uses_pos_tagger = "POS" in self.replacement_mechanism
 
-    # todo: improve function SOC
     def obfuscate(self, text: str) -> dict:
         shannon_stats_text = self.shannon.get_text_stats(text)
-        words = shannon_stats_text.get_words()
         word_labels = shannon_stats_text.get_word_labels()
         mi_values = shannon_stats_text.get_mutual_infos()
 

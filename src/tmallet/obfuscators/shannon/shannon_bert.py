@@ -121,13 +121,16 @@ class ShannonBERT:
         model_name: Name of the pretrained BERT model (default: 'bert-base-cased')
         device: Device to run the model on ('cuda', 'cpu', or None for auto-detection)
     """
+    current_text_stat = None
 
     def __init__(
         self,
         lang: str,
         prefer_gpu: bool = False,
+        max_context_length: int = 8192
     ):
         self.lang = lang
+        self.max_context_length = max_context_length
 
         match lang:
             case "en":
@@ -148,6 +151,9 @@ class ShannonBERT:
         self.model = AutoModelForMaskedLM.from_pretrained(model_name)
         self.model.to(self.device)
         self.model.eval()
+
+    def set_max_context_length(self, max_l: int):
+        self.max_context_length = max_l
 
     def get_distribution_by_word(self, texts: List[str], plot_to: Optional[str] = None):
         all_mi_values = []
@@ -171,17 +177,73 @@ class ShannonBERT:
         return [word.mutual_information for word in text_stats.word_stats]
 
     def get_text_stats(self, text: str):
+        all_words = []
+
+        enc = self.tokenizer(
+            text,
+            truncation=True,
+            max_length=self.max_context_length,
+            return_tensors="pt",
+            return_offsets_mapping=True,
+        )
+
+        input_ids = enc["input_ids"][0].to(self.device)
+        offsets = enc["offset_mapping"][0]
+        word_ids = enc.word_ids()
+
+        surprisals = torch.zeros(len(input_ids), device=self.device)
+        with torch.no_grad():
+            for i, wid in enumerate(word_ids):
+                if wid is None:
+                    continue
+                masked = input_ids.clone()
+                masked[i] = self.tokenizer.mask_token_id
+                logits = self.model(masked.unsqueeze(0).to(self.device)).logits[0, i]
+                log_probs = F.log_softmax(logits, dim=-1)
+                surprisals[i] = -log_probs[input_ids[i]]
+
+        word_surprisal = {}
+        word_spans = {}
+        for i, wid in enumerate(word_ids):
+            if wid is None:
+                continue
+            word_surprisal.setdefault(wid, 0.0)
+            word_surprisal[wid] += surprisals[i].item()
+            word_spans.setdefault(wid, [offsets[i][0], offsets[i][1]])
+            word_spans[wid][0] = min(word_spans[wid][0], offsets[i][0])
+            word_spans[wid][1] = max(word_spans[wid][1], offsets[i][1])
+
+        words_in_text = [text[start:end] for wid, (start, end) in word_spans.items()]
+        word_surp_in_text = [word_surprisal[wid] for wid in word_spans.keys()]
+
+        if len(words_in_text) != len(word_surp_in_text):
+            raise ValueError("Words does not match surprisal calculations.")
+
+        for word, word_contextual_surprisal in zip(words_in_text, word_surp_in_text):
+            all_words.append(WordStat(
+                lang=self.lang,
+                word=word,
+                contextual_surprisal=word_contextual_surprisal,
+            ))
+
+        self.current_text_stat = TextStat(text=text, word_stats=all_words)
+        return self.current_text_stat
+
+    def get_current_text_stat(self):
+        return self.current_text_stat
+
+    """
+    def get_text_stats(self, text: str):
         text_by_sent = sent_tokenize(text)
 
         # stores results for all words in the entire text, though
         # individual MI scores are computed at the sentence level.
         all_words = []
         for sentence in text_by_sent:
-            # TODO: Look into truncation aspect
             enc = self.tokenizer(
                 sentence,
                 truncation=True,
-                max_length=512,
+                max_length=8192,
                 return_tensors="pt",
                 return_offsets_mapping=True,
             )
@@ -253,6 +315,7 @@ class ShannonBERT:
                 raise ValueError("Words does not match surprisal calculations.")
 
         return TextStat(text=text, word_stats=all_words)
+    """
 
     def get_text_stats_batch(
         self,
