@@ -212,6 +212,7 @@ Additional Configuration Options:
 | `replacement_mechanism`   | str    | Determines how filtered words are replaced in the text. Can be one of "DEFAULT" (replaced with a default character, typically an underscore), "DELETE", or "POS" (replaced with the corresponding part-of-speech tag).     | `DEFAULT`        |
 | `as_upper_bound`    | bool     | Whether all words with a MI value above the threshold should be filtered.             | `True`          |
 | `as_lower_bound`    | bool     | Whether all words with a MI value below the threshold should be filtered.             | `True`          |
+| `max_context_length`    | int     | Maximum context length for the BERT model used.             | `8192`          |
 | `output_mi_values`    | bool     | Whether the MI values themselves should be provided.             | `False`          |
 
 #### Acknowledgements
