@@ -1,9 +1,7 @@
 from tmallet.obfuscators.base import Obfuscator
 from tmallet.obfuscators.shannon.shannon_bert import ShannonBERT
 from tmallet.obfuscators.shannon.visualise import ShannonVisualiser
-from tmallet.obfuscators.replacement_token import (
-    DEFAULT_TOKEN,
-)
+from tmallet.utils.helper import get_replacement_mechanism, apply_obfuscation
 from tmallet.obfuscators.shannon.config import (
     ShannonFilterConfig,
 )
@@ -13,21 +11,6 @@ import logging
 from tmallet.utils.spacy_registry import LangConfig, SpaCyInterface
 
 logging.getLogger("transformers").setLevel(logging.ERROR)
-
-
-def get_replacement_mechanism(mechanism, word_index, pos_tags=None):
-    match mechanism:
-        case "POS":
-            replacement_tok = pos_tags[word_index]
-        case "DEFAULT":
-            replacement_tok = DEFAULT_TOKEN
-        case "DELETE":
-            replacement_tok = None
-        case _:
-            raise ValueError(
-                f"Please provide a valid replacement mechanism (provided {mechanism})."
-            )
-    return replacement_tok
 
 
 class ShannonFilter(Obfuscator):
@@ -53,7 +36,6 @@ class ShannonFilter(Obfuscator):
         current_text_stat = self.shannon.get_current_text_stat()
         mi_vals = current_text_stat.get_mutual_infos()
         labels = current_text_stat.get_word_labels()
-        # shannon_visualiser.prepare_data(mi_vals, labels)
         vis_html = shannon_visualiser.display_sentence_heatmap(labels, mi_vals)
         return vis_html
 
@@ -72,8 +54,14 @@ class ShannonFilter(Obfuscator):
             else [config.replacement_mechanism]
         )
 
-        self.as_upper_bound = config.as_upper_bound
-        self.as_lower_bound = config.as_lower_bound
+        self.bounds = config.bound
+        if isinstance(self.bounds, list):
+            self.as_upper_bound = "upper" in self.bounds
+            self.as_lower_bound = "lower" in self.bounds
+        else:
+            self.as_upper_bound = self.bounds == "upper"
+            self.as_lower_bound = self.bounds == "lower"
+
         self.output_mi_values = config.output_mi_values
         self.max_context_length = config.max_context_length
         self.shannon.set_max_context_length(self.max_context_length)
@@ -95,8 +83,10 @@ class ShannonFilter(Obfuscator):
 
         reconstructed = {}
         for thresh in self.threshold:
-            resulting_output_lower_bound = {rm: [] for rm in self.replacement_mechanism}
-            resulting_output_upper_bound = {rm: [] for rm in self.replacement_mechanism}
+            resulting_output = {
+                "upper": {rm: [] for rm in self.replacement_mechanism},
+                "lower": {rm: [] for rm in self.replacement_mechanism},
+            }
 
             for i, word_text in enumerate(word_labels):
                 # compute replacement tokens once per position
@@ -109,43 +99,39 @@ class ShannonFilter(Obfuscator):
                     mechanism_tok = mechanism_tokens[rm]
                     is_below_threshold = mi_values[i] < thresh
 
-                    if self.as_upper_bound:
-                        if is_below_threshold:
-                            resulting_output_upper_bound[rm].append(word_text)
-                        elif rm == "DEFAULT" or rm == "POS":
-                            resulting_output_upper_bound[rm].append(mechanism_tok)
-                        else:
-                            # word is deleted, do nothing
-                            pass
+                    apply_obfuscation(
+                        resulting_output,
+                        word_text,
+                        rm,
+                        mechanism_tok,
+                        self.as_upper_bound and is_below_threshold,
+                        "upper",
+                    )
+                    apply_obfuscation(
+                        resulting_output,
+                        word_text,
+                        rm,
+                        mechanism_tok,
+                        self.as_lower_bound and not is_below_threshold,
+                        "lower",
+                    )
 
-                    if self.as_lower_bound:
-                        if not is_below_threshold:
-                            resulting_output_lower_bound[rm].append(word_text)
-                        elif rm == "DEFAULT" or rm == "POS":
-                            resulting_output_lower_bound[rm].append(mechanism_tok)
-                        else:
-                            # word is deleted, do nothing
-                            pass
-
-            reconstructed[thresh] = {
-                "as_upper_bound": (
-                    {
-                        rm: self.detok.detokenize(resulting_output_upper_bound[rm])
+            if self.as_lower_bound and self.as_upper_bound:
+                reconstructed[thresh] = {}
+                for bound in self.bounds:
+                    reconstructed[thresh][bound] = {
+                        rm: self.detok.detokenize(resulting_output[bound][rm])
                         for rm in self.replacement_mechanism
                     }
-                    if self.as_upper_bound
-                    else None
-                ),
-                "as_lower_bound": (
-                    {
-                        rm: self.detok.detokenize(resulting_output_lower_bound[rm])
-                        for rm in self.replacement_mechanism
-                    }
-                    if self.as_lower_bound
-                    else None
-                ),
-            }
+            else:
+                active_bound = "upper" if self.as_upper_bound else "lower"
+                reconstructed[thresh] = {
+                    rm: self.detok.detokenize(resulting_output[active_bound][rm])
+                    for rm in self.replacement_mechanism
+                }
+
+            final_output = {"mi": reconstructed}
             if self.output_mi_values:
-                reconstructed[thresh]["mi_values"] = mi_values
+                final_output["mi_values"] = mi_values
 
-        return {"mi": reconstructed}
+        return final_output

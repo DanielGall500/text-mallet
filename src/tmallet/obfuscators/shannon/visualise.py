@@ -247,45 +247,6 @@ class ShannonVisualiser:
 
         return plot
 
-    """
-    def plot_density(
-        self,
-        fill: str = "#2ecc71",
-        alpha: float = 0.5,
-        title: str = "Distribution of Word-Level Mutual Information",
-        xlabel: str = "Mutual Information",
-        ylabel: str = "Density",
-        show_median: bool = False,
-    ):
-        if self.data is None:
-            raise ValueError("No data available. Use prepare_data() first.")
-
-        # bounds required so that it doesn't try to fill in negative space
-        # as if any values are negative
-        plot = (
-            ggplot(self.data, aes(x="mutual_info"))
-            + geom_density(fill=fill, alpha=alpha, bounds=(0, float('inf')))
-            + labs(title=title, x=xlabel, y=ylabel)
-            + scale_x_continuous(limits=(-5, 15))
-            + theme_minimal()
-        )
-
-        if show_median:
-            median_val = self.data["mutual_info"].median()
-            plot += geom_vline(xintercept=median_val, linetype="dashed", color="red")
-            plot += annotate(
-                "text",
-                x=median_val,
-                y=0,  # vertical position (0 at baseline, adjust if needed)
-                label=f"Median = {median_val:.2f}",
-                color="red",
-                va="bottom",  # vertical alignment
-                ha="left",  # horizontal alignment
-            )
-
-        return plot
-    """
-
     def display_sentence_heatmap(self, words, mutual_info, colormap="Reds"):
         # Handle both single sentences and multiple sentences
         if isinstance(words[0], list):
@@ -310,6 +271,10 @@ class ShannonVisualiser:
         mutual_info = np.array(mutual_info)
 
         # Normalize mutual_info to 0-1
+        print(words)
+        print("====")
+        print(mutual_info)
+        print("====")
         norm = (mutual_info - mutual_info.min()) / (
             mutual_info.max() - mutual_info.min() + 1e-10
         )
