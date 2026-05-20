@@ -53,7 +53,7 @@ class TMallet:
 
         Args:
             lang (LangConfig, optional): The target language configuration - either "en" (English) or "de" (German). Defaults to "en". Let us know if you'd be interested in support for further languages.
-            prefer_gpu (bool, optional): If True, attempts to allocate spaCy operations 
+            prefer_gpu (bool, optional): If True, attempts to allocate spaCy operations
                 on the GPU. Defaults to False.
         """
         self.spacy_interface = SpaCyInterface(lang=lang, prefer_gpu=prefer_gpu)
@@ -116,7 +116,7 @@ class TMallet:
             column_obfuscated (str): Target base column key for saving the output.
             obfuscator (Union[Obfuscator, SpaCyObfuscator]): Instantiated algorithm engine.
             config (Dict): Parameters required for text conversion.
-            multi (bool, optional): If True, flattens a complex nested dictionary output 
+            multi (bool, optional): If True, flattens a complex nested dictionary output
                 directly into the batch root elements. Defaults to True.
 
         Raises:
@@ -169,7 +169,7 @@ class TMallet:
             column_obfuscated (str): Target base column key for saving the output.
             config (Dict): Configuration properties outlining parameters and algorithm name.
             batch_size (int, optional): Size of chunk arrays processed together. Defaults to 10.
-            num_proc (Optional[int], optional): CPU core count split handling parallel tasks. 
+            num_proc (Optional[int], optional): CPU core count split handling parallel tasks.
                 Defaults to None.
 
         Returns:
@@ -208,7 +208,7 @@ class TMallet:
     ) -> None:
         """Processes a large dataset by slicing it into manageable chunks saved to disk.
 
-        Ensures fault tolerance by loading existing saved cache checkpoints 
+        Ensures fault tolerance by loading existing saved cache checkpoints
         from a folder structure if a massive operation was interrupted midway.
 
         Args:
@@ -217,11 +217,11 @@ class TMallet:
             column_obfuscated (str): Target base column key for saving the output.
             config (Dict): Configuration properties outlining parameters and algorithm name.
             save_chunks_to_folder (Path): System path directory to log or load disk checkpoints.
-            chunk_size (int, optional): Slices of dataset mapped out during step intervals. 
+            chunk_size (int, optional): Slices of dataset mapped out during step intervals.
                 Defaults to 5_000.
-            batch_size (int, optional): Inner array size configuration mapped to `.map`. 
+            batch_size (int, optional): Inner array size configuration mapped to `.map`.
                 Defaults to 100.
-            num_proc (Optional[int], optional): CPU processing core parallelism configuration limit. 
+            num_proc (Optional[int], optional): CPU processing core parallelism configuration limit.
                 Defaults to None.
 
         Returns:
@@ -302,4 +302,3 @@ class TMallet:
                 raise ValueError(
                     f"Input {algorithm} invalid. Please provide a valid obfuscation algorithm."
                 )
-
