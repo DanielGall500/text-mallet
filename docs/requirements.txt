@@ -21,9 +21,7 @@ curated-transformers==0.1.1
 cycler==0.12.1
 cymem==2.0.13
 datasets==4.8.5
-de_dep_news_trf @ https://github.com/explosion/spacy-models/releases/download/de_dep_news_trf-3.8.0/de_dep_news_trf-3.8.0-py3-none-any.whl#sha256=6da411d41d5b0465beb1725549039e05caf00fec9ae1dc41794c8f7555824905
 dill==0.4.1
-en_core_web_trf @ https://github.com/explosion/spacy-models/releases/download/en_core_web_trf-3.8.0/en_core_web_trf-3.8.0-py3-none-any.whl#sha256=272a31e9d8530d1e075351d30a462d7e80e31da23574f1b274e200f3fff35bf5
 filelock==3.29.0
 fonttools==4.63.0
 frozenlist==1.8.0
@@ -100,7 +98,6 @@ srsly==2.5.3
 statsmodels==0.14.6
 sympy==1.14.0
 syntok==1.4.4
--e git+ssh://git@github.com/DanielGall500/reef.git@21886ffc68d408ff04184e462590b09b9600e327#egg=text_mallet
 thinc==8.3.13
 tokenizers==0.22.2
 torch==2.12.0
