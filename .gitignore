@@ -6,3 +6,6 @@ helper/
 sync.sh
 infai-experiments/
 examples/dep/
+*experiments/
+sync*
+.env/
