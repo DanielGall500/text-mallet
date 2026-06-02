@@ -1,26 +1,63 @@
+import random
+
+from sacremoses import MosesDetokenizer
+from spacy.tokens import Doc, Token
+
 from tmallet.obfuscators.base import SpaCyObfuscator
 from tmallet.obfuscators.structural.config import HierarchicalScrambleConfig
-from nltk.tokenize.treebank import TreebankWordDetokenizer
-from spacy.tokens import Token, Doc
-from typing import Dict
-import random
+
+detokenizer = MosesDetokenizer()
 
 
 class HierarchicalScrambleObfuscator(SpaCyObfuscator):
+    """
+    Obfuscates text by scrambling the structure based on dependency parsing information.
+
+    Traverses the dependency tree of a sentence and scrambles the
+    order of tokens at different levels of the hierarchy (left and right branches).
+    It supports different levels of scrambling strength ("weak" or "strong").
+    """
+
     def set_config(self, config: HierarchicalScrambleConfig):
         random.seed(config.seed)
         self.strength = (
             config.strength if isinstance(config.strength, list) else [config.strength]
         )
+        self.is_single_obfuscation: bool = len(self.strength) == 1
 
     def obfuscate(
         self,
         doc: Doc,
-    ) -> dict:
+    ) -> dict | str:
+        """
+        Main obfuscation entry point.
 
+        Determines whether to run single or multiple obfuscation passes based on
+        the configured strength(s).
+
+        Args:
+            doc: The spaCy Doc object to obfuscate.
+
+        Returns:
+            A string if only one strength is configured, otherwise a dictionary
+            containing the results for all configured strengths.
+        """
+        if self.is_single_obfuscation:
+            return self._obfuscate_single(doc)
+        else:
+            return self._obfuscate_multi(doc)
+
+    def _obfuscate_single(self, doc: Doc) -> str:
         doc_as_sents = [sent.as_doc() for sent in doc.sents]
+        strength = self.strength[0]
+        scrambled_sentences = [
+            self._hierarchical_scramble(d, strength=strength) for d in doc_as_sents
+        ]
+        scrambled = " ".join(scrambled_sentences).strip()
+        return scrambled
 
-        # operate at the sentence level
+    def _obfuscate_multi(self, doc: Doc) -> dict:
+        doc_as_sents = [sent.as_doc() for sent in doc.sents]
         result = {}
         for s in self.strength:
             scrambled_sentences = [
@@ -46,7 +83,7 @@ class HierarchicalScrambleObfuscator(SpaCyObfuscator):
         else:
             raise ValueError(f"Invalid hierarchical scramble strength: {strength}.")
 
-        linearised = TreebankWordDetokenizer().detokenize(linearised)
+        linearised = detokenizer.detokenize(linearised)
         return linearised
 
     def _get_route_to_root(

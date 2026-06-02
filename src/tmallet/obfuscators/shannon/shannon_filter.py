@@ -1,13 +1,14 @@
+import logging
+
+from sacremoses import MosesDetokenizer
+
 from tmallet.obfuscators.base import Obfuscator
-from tmallet.obfuscators.shannon.shannon_bert import ShannonBERT
-from tmallet.obfuscators.shannon.visualise import ShannonVisualiser
-from tmallet.utils.helper import get_replacement_mechanism, apply_obfuscation
+from tmallet.obfuscators.replacement_token import ReplacementMechanism
 from tmallet.obfuscators.shannon.config import (
     ShannonFilterConfig,
 )
-from nltk.tokenize.treebank import TreebankWordDetokenizer
-import logging
-
+from tmallet.obfuscators.shannon.shannon_bert import ShannonBERT
+from tmallet.utils.helper import apply_obfuscation, get_replacement_mechanism
 from tmallet.utils.spacy_registry import LangConfig, SpaCyInterface
 
 logging.getLogger("transformers").setLevel(logging.ERROR)
@@ -28,18 +29,17 @@ class ShannonFilter(Obfuscator):
         prefer_gpu: bool = False,
     ):
         self.shannon = ShannonBERT(lang=lang, prefer_gpu=prefer_gpu)
-        self.detok = TreebankWordDetokenizer()
+        self.detok = MosesDetokenizer()
         self.spacy_interface = spacy_interface
 
-    def visualise(self):
-        shannon_visualiser = ShannonVisualiser()
-        current_text_stat = self.shannon.get_current_text_stat()
-        mi_vals = current_text_stat.get_mutual_infos()
-        labels = current_text_stat.get_word_labels()
-        vis_html = shannon_visualiser.display_sentence_heatmap(labels, mi_vals)
-        return vis_html
-
     def set_config(self, config: ShannonFilterConfig):
+        """
+        Sets the configuration parameters for the ShannonFilter.
+
+        This method processes the configuration object to set internal states,
+        handling cases where multiple thresholds, bounds, or replacement
+        mechanisms might be provided as lists.
+        """
         # check if multiple thresholds were specified
         self.threshold = (
             config.threshold
@@ -68,7 +68,70 @@ class ShannonFilter(Obfuscator):
 
         self.uses_pos_tagger = "POS" in self.replacement_mechanism
 
-    def obfuscate(self, text: str) -> dict:
+        self.is_single_obfuscation: bool = (
+            len(self.threshold) == 1
+            and len(self.replacement_mechanism) == 1
+            and len(self.bounds) == 1
+        ) or (not self.output_mi_values)
+
+    def obfuscate(self, text: str) -> dict | str:
+        """
+        Main obfuscation function for mutual information obfuscation of text.
+        Returns a string if a single mode is used, or a dictionary if
+        multiple modes (e.g., multiple thresholds or bounds) are configured.
+        """
+        return (
+            self._obfuscate_single(text)
+            if self.is_single_obfuscation
+            else self._obfuscate_multi(text)
+        )
+
+    def _obfuscate_single(self, text: str) -> str:
+        """
+        Obfuscate using a configuration intended for a single output string.
+        """
+        shannon_stats_text = self.shannon.get_text_stats(text)
+        word_labels = shannon_stats_text.get_word_labels()
+        mi_values = shannon_stats_text.get_mutual_infos()
+
+        # check if we need to parse the text for POS tags
+        pos_tags = None
+        if self.uses_pos_tagger:
+            # note: this is the only case where the spacy interface
+            # is used by the obfuscation class itself and
+            # not handled by the pipeline
+            pos_tags = self.spacy_interface.get_pos_tags_for_tokens(word_labels)
+
+        thresh = self.threshold[0]
+        mech = ReplacementMechanism(self.replacement_mechanism[0])
+        result = []
+
+        for i, word_text in enumerate(word_labels):
+            # compute replacement tokens once per position
+            mechanism_tok = get_replacement_mechanism(mech, i, pos_tags)
+
+            for rm in self.replacement_mechanism:
+                is_below_threshold = mi_values[i] < thresh
+
+                # apply obfuscation
+                if (self.as_upper_bound and is_below_threshold) or (
+                    self.as_lower_bound and not is_below_threshold
+                ):
+                    result.append(word_text)
+                elif rm == "default" or rm == "POS":
+                    result.append(mechanism_tok)
+                else:
+                    # word is deleted, do nothing
+                    pass
+
+        result = self.detok.detokenize(result)
+
+        return result
+
+    def _obfuscate_multi(self, text: str) -> dict:
+        """
+        Obfuscate using a configuration intended for dict output.
+        """
         shannon_stats_text = self.shannon.get_text_stats(text)
         word_labels = shannon_stats_text.get_word_labels()
         mi_values = shannon_stats_text.get_mutual_infos()
@@ -91,13 +154,13 @@ class ShannonFilter(Obfuscator):
             for i, word_text in enumerate(word_labels):
                 # compute replacement tokens once per position
                 mechanism_tokens = {
-                    rm: get_replacement_mechanism(rm, i, pos_tags)
+                    rm: get_replacement_mechanism(ReplacementMechanism(rm), i, pos_tags)
                     for rm in self.replacement_mechanism
                 }
+                is_below_threshold = mi_values[i] < thresh
 
                 for rm in self.replacement_mechanism:
                     mechanism_tok = mechanism_tokens[rm]
-                    is_below_threshold = mi_values[i] < thresh
 
                     apply_obfuscation(
                         resulting_output,
@@ -132,6 +195,6 @@ class ShannonFilter(Obfuscator):
 
             final_output = {"mi": reconstructed}
             if self.output_mi_values:
-                final_output["mi_values"] = mi_values
+                final_output["mi_values"] = [round(mi, 2) for mi in mi_values]
 
         return final_output
