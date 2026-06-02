@@ -1,27 +1,27 @@
-from tmallet.obfuscators.shannon.visualise import ShannonVisualiser
-from wordfreq import get_frequency_dict
-from transformers import AutoTokenizer, AutoModelForMaskedLM
-from nltk.tokenize import sent_tokenize
-from typing import List, Optional
-from dataclasses import dataclass
-from datasets import Dataset
-from tqdm import tqdm
-import numpy as np
 import math
+import unicodedata
+from dataclasses import dataclass
+from typing import List, Optional
+
+import numpy as np
 import torch
 import torch.nn.functional as F
-import nltk
-import unicodedata
+from datasets import Dataset
+from tqdm import tqdm
+from transformers import AutoModelForMaskedLM, AutoTokenizer
+from wordfreq import get_frequency_dict
 
-nltk.download("punkt_tab", quiet=True)
+from tmallet.obfuscators.shannon.visualise import ShannonVisualiser
 
 # == default model used for approximating Surprisal(word|context)
 
+# For best performance, use something like:
 # ModernBERT (Warner et al., ACL 2025)
-DEFAULT_MODEL_EN = "answerdotai/ModernBERT-base"
+# DEFAULT_MODEL_EN = "answerdotai/ModernBERT-base"
+DEFAULT_MODEL_EN = "bert-base-cased"
 
-# Boldt Dense-Core (Aynetdinov et al., 2026)
-DEFAULT_MODEL_DE = "Boldt/Boldt-DC-350M"
+# ModernGBERT: German-only 1B Encoder Model (Ehrmanntraut et al., 2025)
+DEFAULT_MODEL_DE = "LSX-UniWue/ModernGBERT_134M"
 
 freq_dict_en = get_frequency_dict("en", "best")
 freqs_en = list(freq_dict_en.values())
@@ -44,7 +44,7 @@ class WordStat:
     lang: str
 
     def __str__(self) -> str:
-        return f"(w: {self.word}, I(w): {round(self.mutual_information,4)})"
+        return f"(w: {self.word}, I(w): {round(self.mutual_information, 4)})"
 
     @property
     def contextual_probability(self):
