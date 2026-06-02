@@ -1,32 +1,11 @@
-import json
-from pathlib import Path
-
-from datasets import load_dataset
-
 from tmallet import TMallet
-
-# -- Parameters --
-test_one_sample = True
-
-OUTPUT_FOLDER = "results"
-OBFUS_TYPE = "pos-filter"
-
-CHUNK_SIZE = 5
-BATCH_SIZE = 1
-save_chunks_to = Path(OUTPUT_FOLDER) / f"{OBFUS_TYPE}-obfus"
-
-subset_n = 10
-dataset_repo = "codelion/fineweb-edu-1B"
-dataset = load_dataset(dataset_repo)["train"]
-dataset = dataset.select(range(subset_n))
-print(dataset.to_pandas().head())
 
 # -- Obfuscation Config --
 algorithm = "pos-filter"
 config = {
-    "filter_type": ["retain", "remove"],
+    "filter_type": ["retain"],
     "pos_tags": ["NOUN", "PROPN"],
-    "replacement_mechanism": ["delete", "default", "POS"],
+    "replacement_mechanism": ["POS"],
     "seed": 100,
 }
 
@@ -37,22 +16,9 @@ test_languages = {
 
 # -- Load Text Mallet and Obfuscate --
 for lang, sample in test_languages.items():
-    tmallet = TMallet(lang=lang, prefer_gpu=False)
+    tmallet = TMallet(lang=lang, prefer_gpu=True)
     tmallet.load_obfuscator(algorithm, config)
 
-    if test_one_sample:
-        obfuscated_text_sample = tmallet.obfuscate(sample)
-        print(json.dumps(obfuscated_text_sample, indent=4))
-    else:
-        obfuscated_text_by_chunk = tmallet.obfuscate_dataset_by_chunk(
-            dataset=dataset,
-            column="text",
-            column_obfuscated="text_shannon",
-            config=config,
-            save_chunks_to_folder=save_chunks_to,
-            chunk_size=CHUNK_SIZE,
-            batch_size=BATCH_SIZE,
-            num_proc=None,
-            device="cuda",
-        )
-        print(obfuscated_text_by_chunk.to_pandas().describe())
+    obfuscated_text_sample = tmallet.obfuscate(sample)
+    print("==Result==")
+    print(obfuscated_text_sample)

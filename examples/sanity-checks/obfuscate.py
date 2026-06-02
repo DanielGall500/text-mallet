@@ -1,7 +1,9 @@
-from tmallet import TMallet
-from datasets import load_dataset
-from pathlib import Path
 import json
+from pathlib import Path
+
+from datasets import load_dataset
+
+from tmallet import TMallet
 
 # -- Parameters --
 test_one_sample = True
@@ -23,30 +25,30 @@ print(dataset.to_pandas().head())
 configs = {
     "pos-filter": {
         "filter_type": ["retain", "remove"],
-        "pos_tags": ["NOUN","PROPN"],
-        "replacement_mechanism": ["DELETE", "DEFAULT", "POS"],
+        "pos_tags": ["NOUN", "PROPN"],
+        "replacement_mechanism": ["delete", "default", "POS"],
         "seed": 100,
     },
     "shannon": {
         "threshold": [2.5, 5, 7.5, 10, 12.5],
         "as_upper_bound": True,
         "as_lower_bound": True,
-        "replacement_mechanism": ["DELETE", "DEFAULT", "POS"] 
+        "replacement_mechanism": ["delete", "default", "POS"],
     },
     "scramble-hier": {
-        "algorithm": "scramble-hier", 
-        "strength": ["strong","weak"],
+        "algorithm": "scramble-hier",
+        "strength": ["strong", "weak"],
         "seed": 100,
     },
     "scramble-BoW": {
         "level": ["sentence", "document"],
         "seed": 100,
-    }
+    },
 }
 
 test_languages = {
-    "en": "Leipzig is the most populous city in the German state of Saxony. The city has a population of 633,592 residents as of 31 December 2025. It is the eighth-largest city in Germany and is part of the Central German Metropolitan Region. Leipzig is located about 150 km (90 mi) southwest of Berlin, in the southernmost part of the North German Plain (the Leipzig Bay), at the confluence of the White Elster and its tributaries Pleiße and Parthe.", 
-    "de": "Leipzig ist eine kreisfreie Stadt sowie mit 611.850 Einwohnern (31. Dezember 2024, laut Statistischem Landesamt des Freistaates Sachsen) bzw. 633 592 Einwohnern (laut Melderegister am 31. Dezember 2025) die einwohnerreichste Stadt im Freistaat Sachsen. Sie belegte 2024 in der Liste der Großstädte in Deutschland den achten Rang. Für Mitteldeutschland ist sie ein historisches Zentrum der Wirtschaft, des Handels und Verkehrs, der Verwaltung, Kultur und Bildung sowie gegenwärtig ein Zentrum für die „Kreativszene“ und eine wichtige Messe- und Universitätsstadt."
+    "en": "Leipzig is the most populous city in the German state of Saxony. The city has a population of 633,592 residents as of 31 December 2025. It is the eighth-largest city in Germany and is part of the Central German Metropolitan Region. Leipzig is located about 150 km (90 mi) southwest of Berlin, in the southernmost part of the North German Plain (the Leipzig Bay), at the confluence of the White Elster and its tributaries Pleiße and Parthe.",
+    "de": "Leipzig ist eine kreisfreie Stadt sowie mit 611.850 Einwohnern (31. Dezember 2024, laut Statistischem Landesamt des Freistaates Sachsen) bzw. 633 592 Einwohnern (laut Melderegister am 31. Dezember 2025) die einwohnerreichste Stadt im Freistaat Sachsen. Sie belegte 2024 in der Liste der Großstädte in Deutschland den achten Rang. Für Mitteldeutschland ist sie ein historisches Zentrum der Wirtschaft, des Handels und Verkehrs, der Verwaltung, Kultur und Bildung sowie gegenwärtig ein Zentrum für die „Kreativszene“ und eine wichtige Messe- und Universitätsstadt.",
 }
 
 all_results_all_langs = {}
@@ -65,17 +67,16 @@ for lang, sample in test_languages.items():
             all_results.update(obfuscated_text_sample)
         else:
             obfuscated_text_by_chunk = tmallet.obfuscate_dataset_by_chunk(
-                dataset=dataset, 
-                column="text", 
+                dataset=dataset,
+                column="text",
                 column_obfuscated="text_shannon",
                 config=config,
                 save_chunks_to_folder=save_chunks_to,
                 chunk_size=CHUNK_SIZE,
                 batch_size=BATCH_SIZE,
                 num_proc=None,
-                device="cuda"
+                device="cuda",
             )
             # print(obfuscated_text_by_chunk.to_pandas().describe())
     all_results_all_langs[lang] = all_results
 print(json.dumps(all_results_all_langs, indent=4))
-
