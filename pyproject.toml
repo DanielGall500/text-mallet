@@ -5,14 +5,14 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "text-mallet"
 version = "0.1.0"
-description = "Toolkit for Text Obfuscation."
+description = "Toolkit for Obfuscating Text Through Transformations."
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [
-    {name = "Daniel Gallagher", email = "gallagher@infai.org"}
+    {name = "Daniel Gallagher", email = "gallagher.eu@protonmail.com"}
 ]
-keywords = ["nlp", "obfuscation", "anonymisation", "copyright-protection"]
+keywords = ["nlp", "obfuscation", "copyright-protection", "derived text formats"]
 classifiers = [
     "Intended Audience :: Developers",
     "Programming Language :: Python :: 3",
@@ -20,23 +20,32 @@ classifiers = [
 
 dependencies = [
     "spacy>=3.0.0",
-    "nltk>=3.6.0",
-    "wordfreq>=3.1.1"
+    "wordfreq>=3.1.1",
+    "pydantic>=2.13.2",
+    "sacremoses>=0.1.1",
+    "syntok>=1.4.4",
+    "pandas>=3.0.1",
+    "transformers>=5.9.0",
+    "datasets>=4.8.5",
+    "torch>=2.12.0",
+    "plotnine>=0.15.4",
 ]
 
 [project.optional-dependencies]
-de = ["de_dep_news_trf @ https://github.com/explosion/spacy-models/releases/download/de_dep_news_trf-3.x.x/de_dep_news_trf-3.x.x-py3-none-any.whl"]
-en = ["en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.x.x/en_core_web_sm-3.x.x-py3-none-any.whl"]
+en = ["en_core_web_trf @ https://github.com/explosion/spacy-models/releases/download/en_core_web_trf-3.8.0/en_core_web_trf-3.8.0-py3-none-any.whl"]
+de = ["de_dep_news_trf @ https://github.com/explosion/spacy-models/releases/download/de_dep_news_trf-3.8.0/de_dep_news_trf-3.8.0-py3-none-any.whl"]
 
 dev = [
     "pytest>=7.0.0",
     "black>=23.0.0",
+    "sphinx>=9.1.0",
+    "shibuya"
 ]
 
 [project.urls]
-Homepage = "https://github.com/DanielGall500/reef"
+Homepage = "https://text-mallet.readthedocs.io/"
 Repository = "https://github.com/DanielGall500/reef"
-Documentation = "https://github.com/DanielGall500/reef"
+Documentation = "https://text-mallet.readthedocs.io/"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
