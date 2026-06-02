@@ -1,28 +1,27 @@
+import os
+from functools import partial
+from itertools import islice
+from pathlib import Path
+from typing import Literal
+
+from datasets import Dataset, concatenate_datasets, load_dataset, load_from_disk
+
 from tmallet.obfuscators import (
+    HierarchicalScrambleConfig,
+    HierarchicalScrambleObfuscator,
+    LinearScrambleConfig,
+    LinearScrambleObfuscator,
     POSFilter,
     POSFilterConfig,
-    LemmaObfuscator,
-    LinearScrambleObfuscator,
-    LinearScrambleConfig,
-    HierarchicalScrambleObfuscator,
-    HierarchicalScrambleConfig,
     ShannonFilter,
     ShannonFilterConfig,
 )
-from tmallet.utils import SpaCyInterface, LangConfig, flatten_dict
-from datasets import load_from_disk, concatenate_datasets
 from tmallet.obfuscators.base import Obfuscator, SpaCyObfuscator
-from typing import Literal, Dict, Union, List, Optional
-from functools import partial
-from pathlib import Path
-import torch
-import os
-
-torch.set_num_threads(1)
+from tmallet.utils import LangConfig, SpaCyInterface, flatten_dict
 
 ObfuscationTechnique = Literal[
-    "lemmatize",  # convert words to their roots
-    "pos-filter" "scramble-hier",  # dependency-parsing structural obfuscation
+    "pos-filter",  # retain or remove specific POS tags
+    "scramble-hier",  # dependency-parsing structural obfuscation
     "scramble-BoW",  # randomly shuffle words at the sentence or document level
     "shannon",  # filter based on an approximation of word importance
 ]
@@ -46,7 +45,7 @@ class TMallet:
     apply_spacy_preprocessing: bool = False
     is_obfuscation_set_up: bool = False
     active_obfuscator = None
-    active_config = None
+    active_config: dict | None = None
 
     def __init__(self, lang: LangConfig = "en", prefer_gpu: bool = False):
         """Initialises the TMallet pipeline.
@@ -56,11 +55,17 @@ class TMallet:
             prefer_gpu (bool, optional): If True, attempts to allocate spaCy operations
                 on the GPU. Defaults to False.
         """
-        self.spacy_interface = SpaCyInterface(lang=lang, prefer_gpu=prefer_gpu)
+        self.spacy_interface: SpaCyInterface = SpaCyInterface(
+            lang=lang, prefer_gpu=prefer_gpu
+        )
         self.lang: LangConfig = lang
         self.prefer_gpu = prefer_gpu
 
-    def load_obfuscator(self, algorithm: str, config: Dict):
+    def load_obfuscator(
+        self,
+        algorithm: ObfuscationTechnique,
+        config: dict[str, str],
+    ):
         """Validates configuration and dynamically instantiates an obfuscation algorithm.
 
         Args:
@@ -75,7 +80,7 @@ class TMallet:
         self.active_obfuscator.set_config(self.active_config)
         return self
 
-    def obfuscate(self, text: Union[List[str], str]) -> Union[List[str], str]:
+    def obfuscate(self, text: list[str] | str) -> dict | str:
         """Obfuscates standalone text strings or lists of strings.
 
         Requires an obfuscator to be loaded via `load_obfuscator` prior to invocation.
@@ -87,7 +92,7 @@ class TMallet:
             RuntimeError: If an obfuscator and configuration have not been loaded yet.
 
         Returns:
-            Union[List[str], str]: The modified, obfuscated text or collection of texts.
+            Dict: The modified, obfuscated text or collection of texts in the form of a dictionary.
         """
         if not self.active_obfuscator or not self.active_config:
             raise RuntimeError(
@@ -101,21 +106,17 @@ class TMallet:
 
     def _obfuscate_batch(
         self,
-        batch,
+        batch: dict,
         column: str,
         column_obfuscated: str,
-        obfuscator: Union[Obfuscator | SpaCyObfuscator],
-        config: Dict,
         multi: bool = True,
-    ):
+    ) -> dict:
         """Processes a single dictionary batch extracted from a Dataset pipeline wrapper.
 
         Args:
             batch (Dict[str, Any]): A batch slice containing lists mapped to column keys.
             column (str): The column key containing the raw text strings.
             column_obfuscated (str): Target base column key for saving the output.
-            obfuscator (Union[Obfuscator, SpaCyObfuscator]): Instantiated algorithm engine.
-            config (Dict): Parameters required for text conversion.
             multi (bool, optional): If True, flattens a complex nested dictionary output
                 directly into the batch root elements. Defaults to True.
 
@@ -127,39 +128,32 @@ class TMallet:
         """
         if column not in batch.keys():
             raise KeyError(
-                f"Invalid column provided. Please choose one of {batch.columns}"
+                f"Invalid column provided. Please choose one of {list(batch.keys())}"
             )
         texts = batch[column]
 
-        is_using_spacy = issubclass(type(obfuscator), SpaCyObfuscator)
-        if is_using_spacy:
-            texts = self.nlp.pipe(texts)
-
         if not multi:
-            batch[column_obfuscated] = [
-                obfuscator.obfuscate(text, config=config) for text in texts
-            ]
+            batch[column_obfuscated] = [self.obfuscate(text) for text in texts]
         else:
-            # a list of dictionaries, each containing the obfuscated formats under a key
-            obfuscation_output = [
-                obfuscator.obfuscate(text, config=config) for text in texts
-            ]
+            obfuscation_output = [flatten_dict(self.obfuscate(text)) for text in texts]
 
-            # for each dictionary (one per sample)
-            for output in obfuscation_output:
-                flatten = flatten_dict(output)
-                batch.update(flatten)
+            all_keys = obfuscation_output[0].keys()
+            batch.update(
+                {
+                    key: [sample[key] for sample in obfuscation_output]
+                    for key in all_keys
+                }
+            )
 
         return batch
 
     def obfuscate_dataset(
         self,
-        dataset,
+        dataset: Dataset,
         column: str,
         column_obfuscated: str,
-        config: Dict,
         batch_size: int = 10,
-        num_proc: Optional[int] = None,
+        num_proc: int | None = None,
     ):
         """Maps obfuscation across an entire HuggingFace/compatible dataset object sequentially.
 
@@ -167,7 +161,6 @@ class TMallet:
             dataset (Dataset): The underlying dataset collection containing columns of data.
             column (str): Key of the column containing raw target text.
             column_obfuscated (str): Target base column key for saving the output.
-            config (Dict): Configuration properties outlining parameters and algorithm name.
             batch_size (int, optional): Size of chunk arrays processed together. Defaults to 10.
             num_proc (Optional[int], optional): CPU core count split handling parallel tasks.
                 Defaults to None.
@@ -175,16 +168,11 @@ class TMallet:
         Returns:
             Dataset: A newly updated copy of the dataset containing obfuscation columns.
         """
-        algorithm = config["algorithm"]
-        obfuscator = self._get_obfuscator(algorithm)
-
         obfuscated_dataset = dataset.map(
             partial(
                 self._obfuscate_batch,
                 column=column,
                 column_obfuscated=column_obfuscated,
-                obfuscator=obfuscator,
-                config=config,
             ),
             batched=True,
             batch_size=batch_size,
@@ -197,70 +185,83 @@ class TMallet:
 
     def obfuscate_dataset_by_chunk(
         self,
-        dataset,
+        dataset_repo: str,
         column: str,
         column_obfuscated: str,
-        config: Dict,
         save_chunks_to_folder: Path,
+        dataset_config: str | None = None,
+        dataset_split: str = "train",
         chunk_size: int = 5_000,
         batch_size: int = 100,
-        num_proc: Optional[int] = None,
-    ) -> None:
-        """Processes a large dataset by slicing it into manageable chunks saved to disk.
-
-        Ensures fault tolerance by loading existing saved cache checkpoints
-        from a folder structure if a massive operation was interrupted midway.
+        num_proc: int | None = None,
+        num_samples: int | None = None,
+    ) -> Dataset:
+        """Streams a dataset from the Hub in chunks, obfuscates each chunk,
+        and saves checkpoints to disk for fault tolerance.
 
         Args:
-            dataset (Dataset): The large input dataset collection.
+            dataset_repo (str): HuggingFace Hub repo ID or local path for load_dataset.
             column (str): Key of the column containing raw target text.
             column_obfuscated (str): Target base column key for saving the output.
-            config (Dict): Configuration properties outlining parameters and algorithm name.
-            save_chunks_to_folder (Path): System path directory to log or load disk checkpoints.
-            chunk_size (int, optional): Slices of dataset mapped out during step intervals.
-                Defaults to 5_000.
-            batch_size (int, optional): Inner array size configuration mapped to `.map`.
-                Defaults to 100.
-            num_proc (Optional[int], optional): CPU processing core parallelism configuration limit.
-                Defaults to None.
+            save_chunks_to_folder (Path): Directory to save/load disk checkpoints.
+            dataset_config (Optional[str]): Dataset config/subset name passed to load_dataset.
+            dataset_split (str): Split to stream (e.g. "train", "validation"). Defaults to "train".
+            chunk_size (int): Number of examples per chunk. Defaults to 5_000.
+            batch_size (int): Inner batch size passed to .map. Defaults to 100.
+            num_proc (Optional[int]): CPU parallelism for .map. Defaults to None.
+            num_samples (Optional[int]): Optional cap on total examples to process.
 
         Returns:
-            Dataset: A unified concatenated dataset collection composed of processed fragments.
+            Dataset: Concatenated dataset of all processed chunks.
         """
-        processed_chunks = []
-        num_samples = len(dataset)
+        stream = load_dataset(
+            dataset_repo,
+            dataset_config,
+            split=dataset_split,
+            streaming=True,
+        )
+        if num_samples:
+            stream = stream.take(num_samples)
 
-        for start in range(0, num_samples, chunk_size):
-            end = min(start + chunk_size, num_samples)
+        iterator = iter(stream)
+        processed_chunks = []
+        chunk_index = 0
+
+        while True:
+            start = chunk_index * chunk_size
+            end = start + chunk_size
             ckpt_path = Path(save_chunks_to_folder) / f"obfuscated_ckpt_{start}_{end}"
 
             if os.path.exists(ckpt_path):
                 print(f"Loading checkpoint {ckpt_path}")
                 chunk = load_from_disk(ckpt_path)
+                # Advance stream past already-processed examples
+                list(islice(iterator, chunk_size))
             else:
+                rows = list(islice(iterator, chunk_size))
+                if not rows:
+                    break  # Stream exhausted
                 print(f"Processing examples {start}:{end}")
-                chunk = dataset.select(range(start, end))
-
+                chunk = Dataset.from_list(rows)
                 chunk = self.obfuscate_dataset(
                     chunk,
                     column=column,
                     column_obfuscated=column_obfuscated,
-                    config=config,
                     batch_size=batch_size,
                     num_proc=num_proc,
                 )
-
                 chunk.save_to_disk(ckpt_path)
 
             processed_chunks.append(chunk)
-        obfuscated_dataset = concatenate_datasets(processed_chunks)
+            chunk_index += 1
 
+        obfuscated_dataset = concatenate_datasets(processed_chunks)
         return obfuscated_dataset
 
     def get_active_obfuscator(self):
         return self.active_obfuscator
 
-    def _validate_config(self, algorithm: str, config: Dict):
+    def _validate_config(self, algorithm: str, config: dict):
         match algorithm:
             case "pos-filter":
                 return POSFilterConfig(**config)
@@ -273,12 +274,8 @@ class TMallet:
 
     def _get_obfuscator(
         self, algorithm: ObfuscationTechnique
-    ) -> Union[Obfuscator, SpaCyObfuscator]:
+    ) -> Obfuscator | SpaCyObfuscator:
         match algorithm:
-            case "lemmatize":
-                self.apply_spacy_preprocessing = True
-                self.spacy_interface.set_pipeline("lemma")
-                return LemmaObfuscator()
             case "pos-filter":
                 self.apply_spacy_preprocessing = True
                 self.spacy_interface.set_pipeline("pos")
