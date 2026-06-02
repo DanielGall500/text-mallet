@@ -1,14 +1,20 @@
-from typing import Literal
+from enum import Enum
 
-ReplacementMechanism = Literal["DELETE", "DEFAULT", "POS"]
+
+class ReplacementMechanism(Enum):
+    Delete = "delete"
+    Default = "default"
+    POS = "POS"
+
+
 DEFAULT_TOKEN = "_"
 
 
 def get_replacement_tok(preference: ReplacementMechanism, pos_tag: str):
     match preference:
-        case "DELETE":
+        case "delete":
             return None
-        case "DEFAULT":
+        case "default":
             return DEFAULT_TOKEN
         case "POS":
             return pos_tag
