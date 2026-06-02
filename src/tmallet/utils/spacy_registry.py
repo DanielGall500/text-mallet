@@ -1,7 +1,7 @@
-from spacy.language import Language
-from spacy.tokens import Doc
 from typing import Literal
+
 import spacy
+from spacy.tokens import Doc
 
 LangConfig = Literal["en", "de"]
 spacy_transformer_en = "en_core_web_trf"
@@ -9,7 +9,6 @@ spacy_transformer_de = "de_dep_news_trf"
 
 
 class SpaCyInterface:
-
     def __init__(self, lang: LangConfig = "en", prefer_gpu: bool = False):
         match lang:
             case "en":
@@ -48,10 +47,6 @@ class SpaCyInterface:
                 for name in nlp.component_names:
                     if name not in ["transformer", "ner"]:
                         nlp.disable_pipe(name)
-            case "lemma":
-                for name in ["parser", "ner", "textcat"]:
-                    if nlp.has_pipe(name):
-                        nlp.disable_pipe(name)
             case "full":
                 pass  # all pipes already enabled after reset
             case _:
@@ -61,8 +56,11 @@ class SpaCyInterface:
 
         self._active_model = nlp
 
-    def process(self, text: str) -> Doc:
-        return self._active_model(text)
+    def process(self, text: list[str] | str) -> list[Doc] | Doc:
+        if isinstance(text, str):
+            return self._active_model(text)
+        else:
+            return list(self._full_model.pipe(text))
 
     def get_pos_tags_for_tokens(self, word_list: list[str]):
         """
