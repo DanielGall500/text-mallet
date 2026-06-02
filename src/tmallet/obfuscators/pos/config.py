@@ -1,6 +1,7 @@
-from pydantic import BaseModel, ConfigDict
-from typing import List
 from enum import Enum
+from typing import List
+
+from pydantic import BaseModel
 
 
 class FilterType(str, Enum):
@@ -30,6 +31,6 @@ class POSTag(str, Enum):
 
 
 class POSFilterConfig(BaseModel):
-    filter_type: FilterType | List[FilterType] = "retain"
-    pos_tags: List[POSTag] = ["NOUN", "PROPN"]
-    replacement_mechanism: str | List[str] = "def"
+    filter_type: FilterType | List[FilterType] = FilterType.Retain
+    pos_tags: List[POSTag] = [POSTag.NOUN, POSTag.PROPN]
+    replacement_mechanism: str | List[str] = "default"
