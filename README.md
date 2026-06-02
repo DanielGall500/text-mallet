@@ -111,3 +111,6 @@ That's, well, probably not very useful. Ideally, we can find a balance between t
 ```
 Here's an overview of an approximation of pointwise word-level mutual information, i.e. PMI(word; context), over 12,000 tokens taken from 10 random texts in the FineWeb-Edu dataset, for instance.
 ![Distribution of Word-Level Mutual Information](assets/mutual-info-distribution.png)
+
+#### Acknowledgements
+Part of this work was conducted within the [CORAL project](https://coral-nlp.github.io) funded by the German Federal Ministry of Research, Technology, and Space (BMFTR) under the grant number 16IS24077A. Responsibility for the content of this publication lies with the authors.
