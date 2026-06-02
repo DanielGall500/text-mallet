@@ -23,16 +23,16 @@ A lightweight text transformation engine for smashing text into [derived](https:
 
 The package natively supports text processing in **English** and **German**.
 
-## Strategic Information Erosion
+## Strategic Obfuscation
 
-When we transform text to secure it, we alter specific layers of linguistic information:
+The central aim of text obfuscation using this package is to prevent **reconstructability**. Doing so involves eroding various aspects of text, such as:
 * **Word Forms**: The exact sequence of characters.
 * **Syntactic Features**: Morpho-syntactic token properties.
 * **Meanings**: Core semantic associations.
 * **Grammatical Relations**: Hierarchical sentence dependency tree structure.
 * **Sequence Information**: Flat linear sequence boundaries.
 
-Each layer contributes to the discoverability and reconstructibility of the source text. `text-mallet` lets you target and erode these layers selectively. Because languages balance these priorities differently (e.g., English relies heavily on word order for syntax, whereas German relies on inflectional morphology with more flexible phrase sequencing), the framework offers fine-grained adjustments per language.
+Each layer contributes to the discoverability and reconstructibility of the source text. This package provides four main approaches to obfuscation: POS filtering, mutual information filtering, hierarchical scrambling, and bag-of-words. For a more detailed overview of each method, please see the [documentation](https://text-mallet.readthedocs.io/).
 
 ### Why Obfuscate Text?
 When training models for text generation, we typically need all of the content and style of the original, fluent text. However, there are many tasks such as classification, semantic similarity scoring, topic modelling, and so on, where the original text may not be required in its original form to help model performance. There is typically a trove of public-domain data that can be used for model training, but there are still many questions around the usage of copyright-protected data in training. This package offers a route to preserve some of the value of copyrighted texts while hindering their reconstruction, whether that be through training-data reconstruction or model outputs.
