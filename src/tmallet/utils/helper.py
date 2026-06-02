@@ -1,6 +1,18 @@
+import syntok.segmenter as segmenter
+
 from tmallet.obfuscators.replacement_token import (
     DEFAULT_TOKEN,
+    ReplacementMechanism,
 )
+
+
+def sent_tokenize(text) -> list[str]:
+    # Get string as list of sentences
+    return [
+        "".join(token.spacing + token.value for token in sentence).lstrip()
+        for paragraph in segmenter.analyze(text)
+        for sentence in paragraph
+    ]
 
 
 # -- Flatten a Dictionary --
@@ -24,20 +36,27 @@ def flatten_dict(d, parent_key="", sep="_"):
 def apply_obfuscation(output_dict, word_text, rm, mechanism_tok, condition, bound):
     if condition:
         output_dict[bound][rm].append(word_text)
-    elif rm == "DEFAULT" or rm == "POS":
+    elif rm == "default" or rm == "POS":
         output_dict[bound][rm].append(mechanism_tok)
     else:
         # word is deleted, do nothing
         pass
 
 
-def get_replacement_mechanism(mechanism, word_index, pos_tags=None):
+def get_replacement_mechanism(
+    mechanism: ReplacementMechanism, word_index, pos_tags=None
+):
     match mechanism:
-        case "POS":
-            replacement_tok = pos_tags[word_index]
-        case "DEFAULT":
+        case ReplacementMechanism.POS:
+            if pos_tags:
+                replacement_tok = pos_tags[word_index]
+            else:
+                raise ValueError(
+                    "Cannot pass pos_tags as None for replacement mechanism."
+                )
+        case ReplacementMechanism.Default:
             replacement_tok = DEFAULT_TOKEN
-        case "DELETE":
+        case ReplacementMechanism.Delete:
             replacement_tok = None
         case _:
             raise ValueError(
