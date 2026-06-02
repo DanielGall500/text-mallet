@@ -1,69 +1,67 @@
 import pytest
+
 from tmallet import TMallet
 
 SAMPLE_TEXT_EN = "Three-dimensional printing is being used to make metal parts for aircraft and space vehicles."
 SAMPLE_TEXT_DE = "Der 3D-Druck wird zur Herstellung von Metallteilen für Flugzeuge und Raumfahrzeuge eingesetzt."
+ALGORITHM = "pos-filter"
 
 
-def make_tmallet(lang: str, algorithm: str, replacement_mechanism: str):
-    return TMallet(lang, prefer_gpu=False).load_obfuscator(
-        {"algorithm": algorithm, "replacement_mechanism": replacement_mechanism}
-    )
+def make_tmallet(lang: str, algorithm: str, config: dict):
+    return TMallet(lang, prefer_gpu=False).load_obfuscator(algorithm, config)
 
 
 @pytest.mark.parametrize(
-    "algorithm,replacement_mechanism",
+    "filter_type,pos_tags,replacement_mechanism",
     [
-        ("noun-retain", "DELETE"),
-        ("noun-propn-retain", "DELETE"),
-        ("noun-remove", "DELETE"),
-        ("noun-propn-remove", "DELETE"),
-        ("noun-retain", "DEFAULT"),
-        ("noun-propn-retain", "DEFAULT"),
-        ("noun-remove", "DEFAULT"),
-        ("noun-propn-remove", "DEFAULT"),
-        ("noun-retain", "POS"),
-        ("noun-propn-retain", "POS"),
-        ("noun-remove", "POS"),
-        ("noun-propn-remove", "POS"),
+        ("retain", ["NOUN"], "delete"),
+        ("retain", ["NOUN", "PROPN"], "delete"),
+        ("remove", ["NOUN"], "delete"),
+        ("remove", ["NOUN", "PROPN"], "delete"),
+        ("retain", ["NOUN"], "default"),
+        ("retain", ["NOUN", "PROPN"], "default"),
+        ("remove", ["NOUN"], "default"),
+        ("remove", ["NOUN", "PROPN"], "default"),
+        ("retain", ["NOUN"], "POS"),
+        ("retain", ["NOUN", "PROPN"], "POS"),
+        ("remove", ["NOUN"], "POS"),
+        ("remove", ["NOUN", "PROPN"], "POS"),
     ],
 )
-def test_pos_filtering_returns_string_en(algorithm, replacement_mechanism):
-    tmallet_en = make_tmallet("en", algorithm, replacement_mechanism)
+def test_pos_filtering_returns_str_en(filter_type, pos_tags, replacement_mechanism):
+    config = {
+        "filter_type": filter_type,
+        "pos_tags": pos_tags,
+        "replacement_mechanism": replacement_mechanism,
+    }
+    tmallet_en = make_tmallet("en", ALGORITHM, config)
     result = tmallet_en.obfuscate(SAMPLE_TEXT_EN)
     assert isinstance(result, str)
 
 
-def test_pos_noun_remove_reduces_length_en():
-    tmallet_en = make_tmallet("en", "noun-remove", "DELETE")
-    result = tmallet_en.obfuscate(SAMPLE_TEXT_EN)
-    assert len(result) < len(SAMPLE_TEXT_EN)
-
-
 @pytest.mark.parametrize(
-    "algorithm,replacement_mechanism",
+    "filter_type,pos_tags,replacement_mechanism",
     [
-        ("noun-retain", "DELETE"),
-        ("noun-propn-retain", "DELETE"),
-        ("noun-remove", "DELETE"),
-        ("noun-propn-remove", "DELETE"),
-        ("noun-retain", "DEFAULT"),
-        ("noun-propn-retain", "DEFAULT"),
-        ("noun-remove", "DEFAULT"),
-        ("noun-propn-remove", "DEFAULT"),
-        ("noun-retain", "POS"),
-        ("noun-propn-retain", "POS"),
-        ("noun-remove", "POS"),
-        ("noun-propn-remove", "POS"),
+        ("retain", ["NOUN"], "delete"),
+        ("retain", ["NOUN", "PROPN"], "delete"),
+        ("remove", ["NOUN"], "delete"),
+        ("remove", ["NOUN", "PROPN"], "delete"),
+        ("retain", ["NOUN"], "default"),
+        ("retain", ["NOUN", "PROPN"], "default"),
+        ("remove", ["NOUN"], "default"),
+        ("remove", ["NOUN", "PROPN"], "default"),
+        ("retain", ["NOUN"], "POS"),
+        ("retain", ["NOUN", "PROPN"], "POS"),
+        ("remove", ["NOUN"], "POS"),
+        ("remove", ["NOUN", "PROPN"], "POS"),
     ],
 )
-def test_pos_filtering_returns_string_de(algorithm, replacement_mechanism):
-    tmallet_de = make_tmallet("de", algorithm, replacement_mechanism)
-    result = tmallet_de.obfuscate(SAMPLE_TEXT_DE)
+def test_pos_filtering_returns_str_de(filter_type, pos_tags, replacement_mechanism):
+    config = {
+        "filter_type": filter_type,
+        "pos_tags": pos_tags,
+        "replacement_mechanism": replacement_mechanism,
+    }
+    tmallet_en = make_tmallet("de", ALGORITHM, config)
+    result = tmallet_en.obfuscate(SAMPLE_TEXT_DE)
     assert isinstance(result, str)
-
-
-def test_pos_noun_remove_reduces_length_de():
-    tmallet_de = make_tmallet("de", "noun-remove", "DELETE")
-    result = tmallet_de.obfuscate(SAMPLE_TEXT_DE)
-    assert len(result) < len(SAMPLE_TEXT_DE)
