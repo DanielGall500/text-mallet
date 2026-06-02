@@ -2,11 +2,11 @@
 <html lang="en" data-accent-color="violet" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>POS Filtering - text-mallet 0.0.1 documentation</title><link rel="author" title="About these documents" href="../about.html" /><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Mutual Information" href="mutual_information.html" /><link rel="prev" title="Structural" href="structural.html" /><script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>POS Filtering - text-mallet 0.0.1 documentation</title><link rel="author" title="About these documents" href="../about.html" /><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Mutual Information Filtering" href="mutual_information.html" /><link rel="prev" title="Structural" href="structural.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=e1a1ceaf" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=44020203" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=9454f7d5" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,7 +17,8 @@
   --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
 }
 </style>
-    <meta property="og:type" content="website"/><meta property="og:title" content="POS Filtering"/>
+    
+  <meta property="og:type" content="website"/><meta property="og:title" content="POS Filtering"/>
     <meta name="twitter:card" content="summary"/>
   </head>
 <body><div class="sy-head">
@@ -67,10 +68,9 @@ data-aria-dark="Switch to auto color mode">
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Obfuscation Methods</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="lemmatization.html">Lemmatization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="structural.html">Structural</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">POS Filtering</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mutual_information.html">Mutual Information</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mutual_information.html">Mutual Information Filtering</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Docs</span></p>
 <ul>
@@ -91,7 +91,9 @@ data-aria-dark="Switch to auto color mode">
       <i class="i-lucide close"></i>
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
-<li><a class="reference internal" href="#coming-soon">Coming soon</a></li>
+<li><a class="reference internal" href="#configuration">Configuration</a></li>
+<li><a class="reference internal" href="#example-usage">Example Usage</a></li>
+<li><a class="reference internal" href="#expected-output">Expected Output</a></li>
 </ul>
 </div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
   </aside>
@@ -124,12 +126,57 @@ data-aria-dark="Switch to auto color mode">
   <article class="yue" role="main">
           <section id="pos-filtering">
 <h1>POS Filtering<a class="headerlink" href="#pos-filtering" title="Link to this heading">¶</a></h1>
-<section id="coming-soon">
-<h2>Coming soon<a class="headerlink" href="#coming-soon" title="Link to this heading">¶</a></h2>
-<p>This section is still in progress.</p>
-<p>In the meantime, you can:
-- Check the README
-- Look at the usage examples</p>
+<p>The <strong>POS Filtering</strong> algorithm allows you to selectively retain or remove specific Part-of-Speech (POS) tags in your text while obfuscating the remainder.</p>
+<section id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Link to this heading">¶</a></h2>
+<p>To use the POS Filter, initialize the obfuscator with the <code class="docutils literal notranslate"><span class="pre">&quot;pos-filter&quot;</span></code> algorithm string and provide a configuration dictionary.</p>
+<ul class="simple">
+<li><p><strong>filter_type</strong> (list of str): Determines the filtering behavior. For example, <code class="docutils literal notranslate"><span class="pre">&quot;retain&quot;</span></code> keeps the specified tags and obfuscates the rest, while <code class="docutils literal notranslate"><span class="pre">&quot;remove&quot;</span></code> removes the specified tags.</p></li>
+<li><p><strong>pos_tags</strong> (list of str): A list of Universal Part-of-Speech (UPOS) tags to target (e.g. <code class="docutils literal notranslate"><span class="pre">[&quot;NOUN&quot;,</span> <span class="pre">&quot;PROPN&quot;]</span></code>).</p></li>
+<li><p><strong>replacement_mechanism</strong> (list of str): Defines how the obfuscated words are masked. Setting this to <code class="docutils literal notranslate"><span class="pre">[&quot;POS&quot;]</span></code> replaces the hidden words with their respective UPOS tags. Can also be <code class="docutils literal notranslate"><span class="pre">&quot;default&quot;</span></code> for a default token (underscore) or <code class="docutils literal notranslate"><span class="pre">&quot;delete&quot;</span></code> to just delete the word entirely.</p></li>
+<li><p><strong>seed</strong> (int): An integer seed to ensure reproducibility across runs.</p></li>
+</ul>
+</section>
+<section id="example-usage">
+<h2>Example Usage<a class="headerlink" href="#example-usage" title="Link to this heading">¶</a></h2>
+<p>The following example demonstrates how to configure the POS filter to retain nouns and proper nouns in both English and German text. All other words are replaced with their underlying POS tags.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">tmallet</span><span class="w"> </span><span class="kn">import</span> <span class="n">TMallet</span>
+</span><span data-line="2">
+</span><span data-line="3"><span class="c1"># 1. Define the Obfuscation Configuration</span>
+</span><span data-line="4"><span class="n">algorithm</span> <span class="o">=</span> <span class="s2">&quot;pos-filter&quot;</span>
+</span><span data-line="5"><span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
+</span><span data-line="6">    <span class="s2">&quot;filter_type&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;retain&quot;</span><span class="p">],</span>
+</span><span data-line="7">    <span class="s2">&quot;pos_tags&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;NOUN&quot;</span><span class="p">,</span> <span class="s2">&quot;PROPN&quot;</span><span class="p">],</span>
+</span><span data-line="8">    <span class="s2">&quot;replacement_mechanism&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POS&quot;</span><span class="p">],</span>
+</span><span data-line="9">    <span class="s2">&quot;seed&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+</span><span data-line="10"><span class="p">}</span>
+</span><span data-line="11">
+</span><span data-line="12"><span class="c1"># 2. Define Sample Texts</span>
+</span><span data-line="13"><span class="n">test_languages</span> <span class="o">=</span> <span class="p">{</span>
+</span><span data-line="14">    <span class="s2">&quot;en&quot;</span><span class="p">:</span> <span class="s2">&quot;Leipzig is the most populous city in the German state of Saxony. The city has a population of 633,592 residents as of 31 December 2025. It is the eighth-largest city in Germany and is part of the Central German Metropolitan Region. Leipzig is located about 150 km (90 mi) southwest of Berlin, in the southernmost part of the North German Plain (the Leipzig Bay), at the confluence of the White Elster and its tributaries Pleiße and Parthe.&quot;</span><span class="p">,</span>
+</span><span data-line="15">    <span class="s2">&quot;de&quot;</span><span class="p">:</span> <span class="s2">&quot;Leipzig ist eine kreisfreie Stadt sowie mit 611.850 Einwohnern (31. Dezember 2024, laut Statistischem Landesamt des Freistaates Sachsen) bzw. 633 592 Einwohnern (laut Melderegister am 31. Dezember 2025) die einwohnerreichste Stadt im Freistaat Sachsen. Sie belegte 2024 in der Liste der Großstädte in Deutschland den achten Rang. Für Mitteldeutschland ist sie ein historisches Zentrum der Wirtschaft, des Handels und Verkehrs, der Verwaltung, Kultur und Bildung sowie gegenwärtig ein Zentrum für die „Kreativszene“ und eine wichtige Messe- und Universitätsstadt.&quot;</span><span class="p">,</span>
+</span><span data-line="16"><span class="p">}</span>
+</span><span data-line="17">
+</span><span data-line="18"><span class="c1"># 3. Load Text Mallet and Obfuscate</span>
+</span><span data-line="19"><span class="k">for</span> <span class="n">lang</span><span class="p">,</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">test_languages</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+</span><span data-line="20">    <span class="n">tmallet</span> <span class="o">=</span> <span class="n">TMallet</span><span class="p">(</span><span class="n">lang</span><span class="o">=</span><span class="n">lang</span><span class="p">,</span> <span class="n">prefer_gpu</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span><span data-line="21">    <span class="n">tmallet</span><span class="o">.</span><span class="n">load_obfuscator</span><span class="p">(</span><span class="n">algorithm</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+</span><span data-line="22">    <span class="n">obfuscated_text_sample</span> <span class="o">=</span> <span class="n">tmallet</span><span class="o">.</span><span class="n">obfuscate</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span>
+</span><span data-line="23">
+</span><span data-line="24">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;==Result (</span><span class="si">{</span><span class="n">lang</span><span class="si">}</span><span class="s2">)==&quot;</span><span class="p">)</span>
+</span><span data-line="25">    <span class="nb">print</span><span class="p">(</span><span class="n">obfuscated_text_sample</span><span class="p">)</span>
+</span></pre></div>
+</div>
+</section>
+<section id="expected-output">
+<h2>Expected Output<a class="headerlink" href="#expected-output" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span><span data-line="1">==Result (en)==
+</span><span data-line="2">Leipzig AUX DET ADV ADJ city ADP DET ADJ state ADP Saxony PUNCT DET city AUX DET population ADP NUM residents ADP ADP NUM December NUM PUNCT PRON AUX DET ADV PUNCT ADJ city ADP Germany CCONJ AUX part ADP DET ADJ ADJ Metropolitan Region PUNCT Leipzig AUX VERB ADP NUM km PUNCT NUM mi PUNCT ADV ADP Berlin PUNCT ADP DET ADJ part ADP DET ADJ German Plain PUNCT DET Leipzig Bay PUNCT PUNCT ADP DET confluence ADP DET White Elster CCONJ PRON tributaries Pleiße CCONJ Parthe PUNCT
+</span><span data-line="3">
+</span><span data-line="4">==Result (de)==
+</span><span data-line="5">Leipzig AUX DET ADJ Stadt CCONJ ADP NUM Einwohnern PUNCT ADJ Dezember NUM PUNCT ADP ADJ Landesamt DET Freistaates Sachsen PUNCT CCONJ NUM SPACE NUM Einwohnern PUNCT ADP Melderegister ADP ADJ Dezember NUM PUNCT DET ADJ Stadt ADP Freistaat Sachsen PUNCT PRON VERB NUM ADP DET Liste DET Großstädte ADP Deutschland DET ADJ Rang PUNCT ADP Mitteldeutschland AUX PRON DET ADJ Zentrum DET Wirtschaft PUNCT DET Handels CCONJ Verkehrs PUNCT DET Verwaltung PUNCT Kultur CCONJ Bildung CCONJ ADV DET Zentrum ADP DET PUNCT Kreativszene PUNCT CCONJ DET ADJ X CCONJ Universitätsstadt PUNCT
+</span></pre></div>
+</div>
 </section>
 </section>
 
@@ -148,7 +195,7 @@ data-aria-dark="Switch to auto color mode">
     <a href="mutual_information.html">
       <div class="page-info">
         <span>Next</span>
-        <div class="title">Mutual Information</div>
+        <div class="title">Mutual Information Filtering</div>
       </div>
       <i class="i-lucide chevron-right"></i>
     </a>
@@ -176,5 +223,5 @@ data-aria-dark="Switch to auto color mode">
       <script src="../_static/documentation_options.js?v=d45e8c67"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
-      <script src="../_static/shibuya.js?v=cac61aee"></script></body>
+      <script src="../_static/shibuya.js?v=50760d75"></script></body>
 </html>

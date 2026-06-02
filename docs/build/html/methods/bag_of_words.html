@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="violet" data-content_root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Linear Scramble - text-mallet 0.0.1 documentation</title><link rel="author" title="About these documents" href="../about.html" /><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=e1a1ceaf" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=9454f7d5" />
+    <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    
+  <meta property="og:type" content="website"/><meta property="og:title" content="Linear Scramble"/>
+    <meta name="twitter:card" content="summary"/>
+  </head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="../index.html">
+      
+      
+      <strong>text-mallet</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials"></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quick Start</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../usage/basics.html">Basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/datasets.html">Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/large_datasets.html">Large Datasets</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Obfuscation Methods</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="structural_hier.html">Hierarchical Scramble</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pos_filtering.html">POS Filtering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mutual_information.html">Mutual Information Filtering</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Docs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../pipeline.html">Pipeline</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Project Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+</ul>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#configuration">Configuration</a></li>
+<li><a class="reference internal" href="#example-usage">Example Usage</a></li>
+<li><a class="reference internal" href="#expected-output">Expected Output</a></li>
+</ul>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name">text-mallet</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">Linear Scramble</strong>
+        <meta itemprop="position" content="2" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <article class="yue" role="main">
+          <section id="linear-scramble">
+<h1>Linear Scramble<a class="headerlink" href="#linear-scramble" title="Link to this heading">¶</a></h1>
+<p>The <strong>Linear Scramble</strong> algorithm (<code class="docutils literal notranslate"><span class="pre">&quot;scramble-BoW&quot;</span></code>) obfuscates text using a flat Bag-of-Words (BoW) randomisation approach. Unlike structural scramblers, this method completely ignores syntax and grammar, randomly shuffling the linear order of words.</p>
+<p>Since it relies purely on basic string splitting and Python’s native pseudorandom number generation, <strong>it does not require heavy external NLP frameworks like spaCy or BERT</strong>. This makes it an incredibly fast, lightweight option for baseline anonymization or vocabulary-preserving obfuscation.</p>
+<section id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Link to this heading">¶</a></h2>
+<p>To use the Linear Scramble filter, initialise the obfuscator with the <code class="docutils literal notranslate"><span class="pre">&quot;scramble-BoW&quot;</span></code> algorithm string and provide a configuration dictionary.</p>
+<ul>
+<li><p><strong>level</strong> (str or list of str): Dictates the structural boundary within which words are shuffled.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;sentence&quot;</span></code>: Tokenizes the text into sentences first, then shuffles the words <em>within</em> each individual sentence. Sentence boundaries are preserved.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;document&quot;</span></code>: Shuffles all words across the entire text input simultaneously, destroying sentence boundaries completely.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You can pass a single string (e.g., <code class="docutils literal notranslate"><span class="pre">&quot;document&quot;</span></code>) to return a flat string, or a list of levels (e.g., <code class="docutils literal notranslate"><span class="pre">[&quot;sentence&quot;,</span> <span class="pre">&quot;document&quot;]</span></code>) to receive a nested dictionary containing results for all configured variations under the <code class="docutils literal notranslate"><span class="pre">&quot;scramble-linear&quot;</span></code> key.</p>
+</div>
+</li>
+<li><p><strong>seed</strong> (int): An integer seed passed to the random number generator to ensure reproducible shuffles across runs.</p></li>
+</ul>
+</section>
+<section id="example-usage">
+<h2>Example Usage<a class="headerlink" href="#example-usage" title="Link to this heading">¶</a></h2>
+<p>The following example demonstrates how to execute a document-level linear scramble on a sample text.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">tmallet</span><span class="w"> </span><span class="kn">import</span> <span class="n">TMallet</span>
+</span><span data-line="2">
+</span><span data-line="3"><span class="c1"># 1. Define the Obfuscation Configuration</span>
+</span><span data-line="4"><span class="n">algorithm</span> <span class="o">=</span> <span class="s2">&quot;scramble-BoW&quot;</span>
+</span><span data-line="5"><span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
+</span><span data-line="6">    <span class="s2">&quot;level&quot;</span><span class="p">:</span> <span class="s2">&quot;document&quot;</span><span class="p">,</span>
+</span><span data-line="7"><span class="p">}</span>
+</span><span data-line="8">
+</span><span data-line="9"><span class="c1"># 2. Define Sample Text</span>
+</span><span data-line="10"><span class="n">sample</span> <span class="o">=</span> <span class="s2">&quot;Leipzig is the most populous city in the German state of Saxony. The city has a population of 633,592 residents as of 31 December 2025. It is the eighth-largest city in Germany and is part of the Central German Metropolitan Region. Leipzig is located about 150 km (90 mi) southwest of Berlin, in the southernmost part of the North German Plain (the Leipzig Bay), at the confluence of the White Elster and its tributaries Pleiße and Parthe.&quot;</span>
+</span><span data-line="11">
+</span><span data-line="12"><span class="c1"># 3. Load Text Mallet and Obfuscate</span>
+</span><span data-line="13"><span class="n">tmallet</span> <span class="o">=</span> <span class="n">TMallet</span><span class="p">(</span><span class="n">lang</span><span class="o">=</span><span class="s2">&quot;en&quot;</span><span class="p">,</span> <span class="n">prefer_gpu</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span data-line="14"><span class="n">tmallet</span><span class="o">.</span><span class="n">load_obfuscator</span><span class="p">(</span><span class="n">algorithm</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+</span><span data-line="15">
+</span><span data-line="16"><span class="n">obfuscated_text_sample</span> <span class="o">=</span> <span class="n">tmallet</span><span class="o">.</span><span class="n">obfuscate</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span>
+</span><span data-line="17"><span class="nb">print</span><span class="p">(</span><span class="n">obfuscated_text_sample</span><span class="p">)</span>
+</span></pre></div>
+</div>
+</section>
+<section id="expected-output">
+<h2>Expected Output<a class="headerlink" href="#expected-output" title="Link to this heading">¶</a></h2>
+<p>Notice that punctuation characters remain attached to the words they modified during basic token splitting, and the entire paragraph structure is flattened into a single randomized sequence.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span><span data-line="1">southernmost 150 eighth-largest most the (90 Central located Bay), Parthe. mi) in city of German Germany part population the is Plain of populous and as Leipzig the German the the km White its Metropolitan Berlin, and Leipzig in the confluence 2025. of of city It Elster is Region. December tributaries The state Saxony. (the southwest the residents the of city Leipzig German is in is Pleiße of a has at part about of 31 and North 633,592
+</span></pre></div>
+</div>
+</section>
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>2026, InfAI e.V.</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials"></div>
+    </div>
+  </div>
+</footer>
+      <script src="../_static/documentation_options.js?v=d45e8c67"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/shibuya.js?v=50760d75"></script></body>
+</html>

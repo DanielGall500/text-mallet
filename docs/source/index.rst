@@ -6,8 +6,7 @@ derived formats while preserving utility for downstream NLP tasks such
 as classification, retrieval, and topic modeling.
 
 The package focuses on reducing the risk of privacy or copyright
-infringement by degrading reconstructable linguistic information,
-while retaining task-relevant signals.
+infringement by degrading reconstructable information, while retaining task-relevant signals.
 
 
 Contents
@@ -18,28 +17,22 @@ Contents
    :caption: Getting Started
 
    installation
-   quickstart
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Usage
-
    usage/basics
+   usage/configurations
    usage/datasets
-   usage/large_datasets
 
 .. toctree::
    :maxdepth: 1
    :caption: Obfuscation Methods
 
-   methods/lemmatization
-   methods/structural
+   methods/structural_hier
+   methods/bag_of_words
    methods/pos_filtering
    methods/mutual_information
 
 .. toctree::
    :maxdepth: 2
-   :caption: Docs
+   :caption: API
 
    pipeline
 
@@ -48,9 +41,6 @@ Contents
    :caption: Project Info
 
    about
-   contributing
-   changelog
-   license
 
 
 Overview
@@ -59,7 +49,6 @@ Overview
 Text can be transformed along multiple linguistic dimensions:
 
 - **Word Forms** (surface character sequences)
-- **Root Forms** (lemmas)
 - **Syntactic and Morphological Features**
 - **Semantic Content**
 - **Grammatical Relations**
@@ -94,77 +83,3 @@ This package enables:
 
 Rather than replacing clean data, obfuscated text is intended to
 *complement* existing datasets.
-
-
-Quick Example
--------------
-
-The following example demonstrates how to use ``TMallet`` to obfuscate text
-based on part-of-speech replacement.
-
-.. code-block:: python
-
-    from tmallet import TMallet
-
-    mallet = TMallet()
-
-    text = """
-    A Soyuz rocket launched two Galileo satellites into orbit on Friday,
-    marking a crucial step for Europe’s planned navigation system,
-    operator Arianespace announced.
-    """
-
-    config = {
-        "algorithm": "retain-noun-propn",
-        "replacement_mechanism": "POS"
-    }
-
-    obfuscated_text = mallet.obfuscate(text, config)
-
-
-Output
-------
-
-.. code-block:: text
-
-    DET Soyuz rocket VERB NUM Galileo satellites ADP orbit ADP Friday PUNCT
-    VERB DET ADJ step ADP Europe PART VERB navigation system PUNCT
-    operator Arianespace VERB
-
-Core Obfuscation Strategies
---------------------------
-
-``text-mallet`` provides four primary approaches:
-
-1. **Lemmatization**
-   - Light obfuscation
-   - Removes stylistic variation
-
-2. **Scrambling**
-   - Alters word order
-   - Ranges from structure-aware to bag-of-words randomization
-
-3. **Part-of-Speech Filtering**
-   - Removes or isolates word classes
-   - Medium to strong obfuscation
-
-4. **Mutual Information Filtering**
-   - Uses Shannon entropy approximation
-   - Filters words based on contextual importance
-   - Highly configurable strength
-
-
-Design Goals
-------------
-
-- Preserve task-relevant signal
-- Minimize reconstructability of original text
-- Provide configurable and composable text transformations
-
-
-Indices and tables
-------------------
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

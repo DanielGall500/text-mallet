@@ -1,0 +1,14 @@
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <text transform="rotate(-40)" x="155" y="400" font-family="Impact, Arial Black, sans-serif" font-size="56" font-weight="bold" fill="#8B4513" text-anchor="middle" letter-spacing="1" stroke="black" stroke-width="0.8">
+    text-mallet
+  </text>
+  <g transform="translate(400,300) rotate(-40)">
+    <rect x="20" y="-30" width="48" height="240" rx="2" fill="#8B4513" stroke="black" stroke-width="1"/>
+    <rect x="20" y="-30" width="16" height="240" fill="#A0522D" opacity="0.3"/>
+    <rect x="-50" y="-55" width="200" height="100" rx="3" fill="#6B4423" stroke="black" stroke-width="1"/>
+    <line x1="-30" y1="-50" x2="-30" y2="-10" stroke="#4A2F1A" stroke-width="1" opacity="0.3"/>
+    <line x1="0" y1="-52" x2="0" y2="-8" stroke="#4A2F1A" stroke-width="1" opacity="0.3"/>
+    <line x1="30" y1="-50" x2="30" y2="-10" stroke="#4A2F1A" stroke-width="1" opacity="0.3"/>
+    <rect x="-45" y="-45" width="60" height="16" fill="#A0826D" opacity="0.4" rx="2"/>
+  </g>
+</svg>

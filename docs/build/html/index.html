@@ -6,7 +6,7 @@
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="_static/pygments.css?v=e1a1ceaf" />
-    <link rel="stylesheet" type="text/css" href="_static/shibuya.css?v=44020203" />
+    <link rel="stylesheet" type="text/css" href="_static/shibuya.css?v=9454f7d5" />
     <link media="print" rel="stylesheet" type="text/css" href="_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,7 +17,8 @@
   --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
 }
 </style>
-    <meta property="og:type" content="website"/><meta property="og:title" content="Text Mallet Documentation"/>
+    
+  <meta property="og:type" content="website"/><meta property="og:title" content="Text Mallet Documentation"/>
     <meta name="twitter:card" content="summary"/>
   </head>
 <body><div class="sy-head">
@@ -57,22 +58,18 @@ data-aria-dark="Switch to auto color mode">
         <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
-</ul>
-<p class="caption" role="heading" aria-level="3"><span class="caption-text">Usage</span></p>
-<ul>
 <li class="toctree-l1"><a class="reference internal" href="usage/basics.html">Basics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage/datasets.html">Datasets</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage/large_datasets.html">Large Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/configurations.html">Configurations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/datasets.html">Obfuscating Datasets</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Obfuscation Methods</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="methods/lemmatization.html">Lemmatization</a></li>
-<li class="toctree-l1"><a class="reference internal" href="methods/structural.html">Structural</a></li>
+<li class="toctree-l1"><a class="reference internal" href="methods/structural_hier.html">Hierarchical Scramble</a></li>
+<li class="toctree-l1"><a class="reference internal" href="methods/bag_of_words.html">Linear Scramble</a></li>
 <li class="toctree-l1"><a class="reference internal" href="methods/pos_filtering.html">POS Filtering</a></li>
-<li class="toctree-l1"><a class="reference internal" href="methods/mutual_information.html">Mutual Information</a></li>
+<li class="toctree-l1"><a class="reference internal" href="methods/mutual_information.html">Mutual Information Filtering</a></li>
 </ul>
-<p class="caption" role="heading" aria-level="3"><span class="caption-text">Docs</span></p>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">API</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="pipeline.html">Pipeline</a></li>
 </ul>
@@ -96,11 +93,6 @@ data-aria-dark="Switch to auto color mode">
 </li>
 <li><a class="reference internal" href="#overview">Overview</a></li>
 <li><a class="reference internal" href="#why-obfuscate-text">Why Obfuscate Text?</a></li>
-<li><a class="reference internal" href="#quick-example">Quick Example</a></li>
-<li><a class="reference internal" href="#output">Output</a></li>
-<li><a class="reference internal" href="#core-obfuscation-strategies">Core Obfuscation Strategies</a></li>
-<li><a class="reference internal" href="#design-goals">Design Goals</a></li>
-<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
 </ul>
 </div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
   </aside>
@@ -137,36 +129,29 @@ data-aria-dark="Switch to auto color mode">
 derived formats while preserving utility for downstream NLP tasks such
 as classification, retrieval, and topic modeling.</p>
 <p>The package focuses on reducing the risk of privacy or copyright
-infringement by degrading reconstructable linguistic information,
-while retaining task-relevant signals.</p>
+infringement by degrading reconstructable information, while retaining task-relevant signals.</p>
 <section id="contents">
 <h2>Contents<a class="headerlink" href="#contents" title="Link to this heading">¶</a></h2>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
-</ul>
-</div>
-<div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">Usage</span></p>
-<ul>
 <li class="toctree-l1"><a class="reference internal" href="usage/basics.html">Basics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage/datasets.html">Datasets</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage/large_datasets.html">Large Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/configurations.html">Configurations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/datasets.html">Obfuscating Datasets</a></li>
 </ul>
 </div>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Obfuscation Methods</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="methods/lemmatization.html">Lemmatization</a></li>
-<li class="toctree-l1"><a class="reference internal" href="methods/structural.html">Structural</a></li>
+<li class="toctree-l1"><a class="reference internal" href="methods/structural_hier.html">Hierarchical Scramble</a></li>
+<li class="toctree-l1"><a class="reference internal" href="methods/bag_of_words.html">Linear Scramble</a></li>
 <li class="toctree-l1"><a class="reference internal" href="methods/pos_filtering.html">POS Filtering</a></li>
-<li class="toctree-l1"><a class="reference internal" href="methods/mutual_information.html">Mutual Information</a></li>
+<li class="toctree-l1"><a class="reference internal" href="methods/mutual_information.html">Mutual Information Filtering</a></li>
 </ul>
 </div>
 <div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">Docs</span></p>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="pipeline.html">Pipeline</a></li>
 </ul>
@@ -183,7 +168,6 @@ while retaining task-relevant signals.</p>
 <p>Text can be transformed along multiple linguistic dimensions:</p>
 <ul class="simple">
 <li><p><strong>Word Forms</strong> (surface character sequences)</p></li>
-<li><p><strong>Root Forms</strong> (lemmas)</p></li>
 <li><p><strong>Syntactic and Morphological Features</strong></p></li>
 <li><p><strong>Semantic Content</strong></p></li>
 <li><p><strong>Grammatical Relations</strong></p></li>
@@ -214,72 +198,6 @@ morphological variation.</p>
 </ul>
 <p>Rather than replacing clean data, obfuscated text is intended to
 <em>complement</em> existing datasets.</p>
-</section>
-<section id="quick-example">
-<h2>Quick Example<a class="headerlink" href="#quick-example" title="Link to this heading">¶</a></h2>
-<p>The following example demonstrates how to use <code class="docutils literal notranslate"><span class="pre">TMallet</span></code> to obfuscate text
-based on part-of-speech replacement.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">tmallet</span><span class="w"> </span><span class="kn">import</span> <span class="n">TMallet</span>
-</span><span data-line="2">
-</span><span data-line="3"><span class="n">mallet</span> <span class="o">=</span> <span class="n">TMallet</span><span class="p">()</span>
-</span><span data-line="4">
-</span><span data-line="5"><span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
-</span><span data-line="6"><span class="s2">A Soyuz rocket launched two Galileo satellites into orbit on Friday,</span>
-</span><span data-line="7"><span class="s2">marking a crucial step for Europe’s planned navigation system,</span>
-</span><span data-line="8"><span class="s2">operator Arianespace announced.</span>
-</span><span data-line="9"><span class="s2">&quot;&quot;&quot;</span>
-</span><span data-line="10">
-</span><span data-line="11"><span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
-</span><span data-line="12">    <span class="s2">&quot;algorithm&quot;</span><span class="p">:</span> <span class="s2">&quot;retain-noun-propn&quot;</span><span class="p">,</span>
-</span><span data-line="13">    <span class="s2">&quot;replacement_mechanism&quot;</span><span class="p">:</span> <span class="s2">&quot;POS&quot;</span>
-</span><span data-line="14"><span class="p">}</span>
-</span><span data-line="15">
-</span><span data-line="16"><span class="n">obfuscated_text</span> <span class="o">=</span> <span class="n">mallet</span><span class="o">.</span><span class="n">obfuscate</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
-</span></pre></div>
-</div>
-</section>
-<section id="output">
-<h2>Output<a class="headerlink" href="#output" title="Link to this heading">¶</a></h2>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span><span data-line="1">DET Soyuz rocket VERB NUM Galileo satellites ADP orbit ADP Friday PUNCT
-</span><span data-line="2">VERB DET ADJ step ADP Europe PART VERB navigation system PUNCT
-</span><span data-line="3">operator Arianespace VERB
-</span></pre></div>
-</div>
-</section>
-<section id="core-obfuscation-strategies">
-<h2>Core Obfuscation Strategies<a class="headerlink" href="#core-obfuscation-strategies" title="Link to this heading">¶</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">text-mallet</span></code> provides four primary approaches:</p>
-<ol class="arabic simple">
-<li><p><strong>Lemmatization</strong>
-- Light obfuscation
-- Removes stylistic variation</p></li>
-<li><p><strong>Scrambling</strong>
-- Alters word order
-- Ranges from structure-aware to bag-of-words randomization</p></li>
-<li><p><strong>Part-of-Speech Filtering</strong>
-- Removes or isolates word classes
-- Medium to strong obfuscation</p></li>
-<li><p><strong>Mutual Information Filtering</strong>
-- Uses Shannon entropy approximation
-- Filters words based on contextual importance
-- Highly configurable strength</p></li>
-</ol>
-</section>
-<section id="design-goals">
-<h2>Design Goals<a class="headerlink" href="#design-goals" title="Link to this heading">¶</a></h2>
-<ul class="simple">
-<li><p>Preserve task-relevant signal</p></li>
-<li><p>Minimize reconstructability of original text</p></li>
-<li><p>Provide configurable and composable text transformations</p></li>
-</ul>
-</section>
-<section id="indices-and-tables">
-<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading">¶</a></h2>
-<ul class="simple">
-<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
-<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
-<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
-</ul>
 </section>
 </section>
 
@@ -320,5 +238,5 @@ based on part-of-speech replacement.</p>
       <script src="_static/documentation_options.js?v=d45e8c67"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
-      <script src="_static/shibuya.js?v=cac61aee"></script></body>
+      <script src="_static/shibuya.js?v=50760d75"></script></body>
 </html>

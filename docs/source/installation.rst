@@ -20,14 +20,14 @@ You can install the stable release of ``text-mallet`` directly from PyPI using `
 
 .. code-block:: bash
 
-   pip install text-mallet
+   pip install text-mallet[en]
 
 .. note::
-   Depending on the obfuscation algorithms you plan to use, you may also need to download the corresponding language models for spaCy. For instance, for standard English processing:
+   Depending on the language you want to obfuscate, you can pass in either English, German, or both as arguments when installing text-mallet:
 
    .. code-block:: bash
 
-      python -m spacy download en_core_web_trf
+      python install text-mallet[en,de]
 
 Verification
 ------------
@@ -36,4 +36,4 @@ To verify that ``text-mallet`` was installed successfully, you can run a quick c
 
 .. code-block:: bash
 
-   python -c "import text_mallet; print(text_mallet.__version__)" 
+   python -c "import text_mallet; print(text_mallet.__version__)"

@@ -1,29 +1,27 @@
+======
 Basics
 ======
 
-``text-mallet`` is a lightweight text obfuscation package for transforming text into less human-readable forms while preserving partial utility for NLP tasks such as:
+``text-mallet`` is a lightweight text obfuscation package designed to transform natural language into less human-readable formats while preserving structural and semantic utility for downstream NLP tasks, including:
 
-* Classification
-* Retrieval
-* Topic modelling
-* Semantic similarity
+* Text Classification
+* Information Retrieval
+* Topic Modeling
+* Semantic Similarity
 
-The package currently supports:
-
-* English
-* German
+The package natively supports both **English** and **German** tracking.
 
 Quick Start
 -----------
 
-Using ``text-mallet`` consists of three simple steps:
+Using ``text-mallet`` follows a simple three-step lifecycle:
 
-1. Create a ``TMallet`` instance
-2. Load an obfuscation algorithm
-3. Obfuscate text
+1. **Initialise** a ``TMallet`` instance for your target language.
+2. **Load** an obfuscation algorithm along with its configuration.
+3. **Obfuscate** your text execution layer.
 
 Example
-^^^^^^^^
+^^^^^^^
 
 .. code-block:: python
 
@@ -31,65 +29,53 @@ Example
 
    text = "Leipzig is the most populous city in the German state of Saxony."
 
+   # 1. Choose algorithm and define parameters
    algorithm = "pos-filter"
-
    config = {
        "filter_type": "retain",
        "pos_tags": ["NOUN", "PROPN"],
-       "replacement_mechanism": "DEFAULT",
+       "replacement_mechanism": "default",
    }
 
+   # 2. Spin up the engine (enable GPU acceleration if available)
    tmallet = TMallet(lang="en", prefer_gpu=True)
-
    tmallet.load_obfuscator(algorithm, config)
 
+   # 3. Transform the text
    obfuscated = tmallet.obfuscate(text)
-
    print(obfuscated)
 
 Available Algorithms
 --------------------
 
-``text-mallet`` currently provides four general obfuscation approaches, which are adjusted based on your configuration.
-For details on configuring any individual such method, please see their respective page in the docs.
-
-Lemmatisation
-^^^^^^^^^^^^^
-
-Reduce words to their base forms.
-
-.. code-block:: python
-
-   algorithm = "lemmatize"
+``text-mallet`` provides four core algorithmic approaches to text transformation. For exhaustive parameter constraints, see the :doc:`configurations` page.
 
 Scrambling
 ^^^^^^^^^^
 
-Shuffle word order while preserving varying amounts of structure.
+Shuffles word and token placements within specified boundaries. This can be done linearly or based on hierarchical dependency parsing trees.
 
 .. code-block:: python
 
-   algorithm = "scramble-hier"
-
-or
-
-.. code-block:: python
-
+   # Linear Bag-of-Words shuffling
    algorithm = "scramble-BoW"
+
+   # Syntactic dependency-tree structural shuffling
+   algorithm = "scramble-hier"
 
 Part-of-Speech Filtering
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-Filter or retain selected POS tags.
+Selectively strips out or retains words belonging to specific grammatical universal POS tag classes.
 
 .. code-block:: python
 
    algorithm = "pos-filter"
 
-Mutual Information Filtering
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Shannon Filtering
+^^^^^^^^^^^^^^^^^
 
-Filter words based on an approximation of word importance.
+Computes approximations of pointwise mutual information for each word and its context, filtering out words falling outside target boundaries.
 
 .. code-block:: python
 
@@ -98,14 +84,18 @@ Filter words based on an approximation of word importance.
 Dataset Obfuscation
 -------------------
 
-You can also obfuscate entire HuggingFace datasets.
+For larger processing jobs, ``text-mallet`` scales directly with the Hugging Face ecosystem. Rather than processing text row-by-row, load your settings once and map them across an entire dataset dataset collection.
 
 .. code-block:: python
 
+   # 1. Set up the engine state
+   tmallet.load_obfuscator(algorithm, config)
+
+   # 2. Run batched execution mapping over the dataset
    obfuscated_dataset = tmallet.obfuscate_dataset(
-       dataset=dataset,
+       dataset=my_hf_dataset,
        column="text",
        column_obfuscated="text_obfuscated",
-       config=config,
-       batch_size=100
+       batch_size=100,
+       num_proc=4
    )

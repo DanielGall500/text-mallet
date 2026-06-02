@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="violet" data-content_root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Configurations - text-mallet 0.0.1 documentation</title><link rel="author" title="About these documents" href="../about.html" /><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Obfuscating Datasets" href="datasets.html" /><link rel="prev" title="Basics" href="basics.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=e1a1ceaf" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=9454f7d5" />
+    <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    
+  <meta property="og:type" content="website"/><meta property="og:title" content="Configurations"/>
+    <meta name="twitter:card" content="summary"/>
+  </head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="../index.html">
+      
+      
+      <strong>text-mallet</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials"></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quick Start</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Usage</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="basics.html">Basics</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Configurations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="datasets.html">Obfuscating Datasets</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Obfuscation Methods</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../methods/structural_hier.html">Hierarchical Scramble</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../methods/bag_of_words.html">Linear Scramble</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../methods/pos_filtering.html">POS Filtering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../methods/mutual_information.html">Mutual Information Filtering</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Docs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../pipeline.html">Pipeline</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Project Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+</ul>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#pos-filter-configuration-pos-filter">POS Filter Configuration (<code class="docutils literal notranslate"><span class="pre">"pos-filter"</span></code>)</a></li>
+<li><a class="reference internal" href="#shannon-filter-configuration-shannon">Shannon Filter Configuration (<code class="docutils literal notranslate"><span class="pre">"shannon"</span></code>)</a></li>
+<li><a class="reference internal" href="#linear-scramble-configuration-scramble-bow">Linear Scramble Configuration (<code class="docutils literal notranslate"><span class="pre">"scramble-BoW"</span></code>)</a></li>
+<li><a class="reference internal" href="#hierarchical-scramble-configuration-scramble-hier">Hierarchical Scramble Configuration (<code class="docutils literal notranslate"><span class="pre">"scramble-hier"</span></code>)</a></li>
+</ul>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name">text-mallet</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">Configurations</strong>
+        <meta itemprop="position" content="2" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <article class="yue" role="main">
+          <section id="configurations">
+<h1>Configurations<a class="headerlink" href="#configurations" title="Link to this heading">¶</a></h1>
+<p>This page provides a comprehensive reference for the configuration models used across different text-mallet algorithms.</p>
+<section id="pos-filter-configuration-pos-filter">
+<h2>POS Filter Configuration (<code class="docutils literal notranslate"><span class="pre">&quot;pos-filter&quot;</span></code>)<a class="headerlink" href="#pos-filter-configuration-pos-filter" title="Link to this heading">¶</a></h2>
+<p>Configures token masking based on specific Part-of-Speech tags.</p>
+<div class="table-wrapper colwidths-given docutils container" id="id1">
+<table class="docutils align-default" id="id1">
+<caption><span class="caption-text">POSFilterConfig Parameters</span><a class="headerlink" href="#id1" title="Link to this table">¶</a></caption>
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 35.0%" />
+<col style="width: 15.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>filter_type</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">FilterType</span></code> or <code class="docutils literal notranslate"><span class="pre">List[FilterType]</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">FilterType.Retain</span></code></p></td>
+<td><p>Action to take on the target tags (e.g., retain them or remove them).</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>pos_tags</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">List[POSTag]</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[NOUN,</span> <span class="pre">PROPN]</span></code></p></td>
+<td><p>A collection of Universal POS tags targeted by the filter.</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>replacement_mechanism</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">str</span></code> or <code class="docutils literal notranslate"><span class="pre">List[str]</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&quot;default&quot;</span></code></p></td>
+<td><p>Strategy used to replace targeted text (e.g., replacing with the tag name).</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>—</p>
+</section>
+<section id="shannon-filter-configuration-shannon">
+<h2>Shannon Filter Configuration (<code class="docutils literal notranslate"><span class="pre">&quot;shannon&quot;</span></code>)<a class="headerlink" href="#shannon-filter-configuration-shannon" title="Link to this heading">¶</a></h2>
+<p>Configures text filtering using information-theoretic metrics calculated from an underlying language model context.</p>
+<div class="table-wrapper colwidths-given docutils container" id="id2">
+<table class="docutils align-default" id="id2">
+<caption><span class="caption-text">ShannonFilterConfig Parameters</span><a class="headerlink" href="#id2" title="Link to this table">¶</a></caption>
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 35.0%" />
+<col style="width: 15.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>threshold</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">float</span></code> or <code class="docutils literal notranslate"><span class="pre">List[float]</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">10</span></code></p></td>
+<td><p>The information surprisal ceiling or floor value used to trigger a mask.</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>bound</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">str</span></code> or <code class="docutils literal notranslate"><span class="pre">List[str]</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&quot;upper&quot;</span></code></p></td>
+<td><p>Determines if values above (<code class="docutils literal notranslate"><span class="pre">&quot;upper&quot;</span></code>) or below (<code class="docutils literal notranslate"><span class="pre">&quot;lower&quot;</span></code>) the threshold are masked.</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>replacement_mechanism</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">str</span></code> or <code class="docutils literal notranslate"><span class="pre">List[str]</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&quot;default&quot;</span></code></p></td>
+<td><p>Strategy used to replace targeted text.</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>max_context_length</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">int</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">8192</span></code></p></td>
+<td><p>Max token historical window parsed by the LM for context evaluation.</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>output_mi_values</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bool</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p>If true, outputs calculated mutual information/surprisal values along with the text.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>—</p>
+</section>
+<section id="linear-scramble-configuration-scramble-bow">
+<h2>Linear Scramble Configuration (<code class="docutils literal notranslate"><span class="pre">&quot;scramble-BoW&quot;</span></code>)<a class="headerlink" href="#linear-scramble-configuration-scramble-bow" title="Link to this heading">¶</a></h2>
+<p>Configures a lightweight, framework-free Bag-of-Words shuffling operation.</p>
+<div class="table-wrapper colwidths-given docutils container" id="id3">
+<table class="docutils align-default" id="id3">
+<caption><span class="caption-text">LinearScrambleConfig Parameters</span><a class="headerlink" href="#id3" title="Link to this table">¶</a></caption>
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 35.0%" />
+<col style="width: 15.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>level</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">str</span></code> or <code class="docutils literal notranslate"><span class="pre">List[str]</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&quot;document&quot;</span></code></p></td>
+<td><p>The text layer boundaries applied to shuffles. Allowed values are typically <code class="docutils literal notranslate"><span class="pre">&quot;sentence&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;document&quot;</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>seed</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">int</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">DEFAULT_SEED</span></code></p></td>
+<td><p>Pseudorandom generator state seed to guarantee deterministic text layouts.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>—</p>
+</section>
+<section id="hierarchical-scramble-configuration-scramble-hier">
+<h2>Hierarchical Scramble Configuration (<code class="docutils literal notranslate"><span class="pre">&quot;scramble-hier&quot;</span></code>)<a class="headerlink" href="#hierarchical-scramble-configuration-scramble-hier" title="Link to this heading">¶</a></h2>
+<p>Configures deep syntactic structural scrambled layouts using dependency trees generated by a spaCy backend.</p>
+<div class="table-wrapper colwidths-given docutils container" id="id4">
+<table class="docutils align-default" id="id4">
+<caption><span class="caption-text">HierarchicalScrambleConfig Parameters</span><a class="headerlink" href="#id4" title="Link to this table">¶</a></caption>
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 35.0%" />
+<col style="width: 15.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>strength</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">str</span></code> or <code class="docutils literal notranslate"><span class="pre">List[str]</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&quot;strong&quot;</span></code></p></td>
+<td><p>Rearrangement severity settings. Typical options are <code class="docutils literal notranslate"><span class="pre">&quot;weak&quot;</span></code> (sibling shuffling) or <code class="docutils literal notranslate"><span class="pre">&quot;strong&quot;</span></code> (sibling shuffling + directional flips).</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>seed</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">int</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">DEFAULT_SEED</span></code></p></td>
+<td><p>Pseudorandom generator seed utilized when scrambling leaf node distributions.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Multi-Obfuscation Feature</strong>: For parameters that accept a union type of a single value or a list (e.g., <code class="docutils literal notranslate"><span class="pre">str</span> <span class="pre">|</span> <span class="pre">List[str]</span></code>), passing a list of choices will cause TMallet to compute multiple obfuscation passes simultaneously. The result will be returned as a nested dictionary keyed by the options instead of a flat string. This is with the single exception of passing POS tags to the POS filter, as this must be an array and will not automatically provide the result as a dict. If you want to compute multuple obfuscation configurations at once, passing multiple parameters in the single config as an array leads to performance gains as the text is only processed a single time where possible.</p>
+</section>
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"><div class="navigation-prev">
+    <a href="basics.html">
+      <i class="i-lucide chevron-left"></i>
+      <div class="page-info">
+        <span>Previous</span><div class="title">Basics</div></div>
+    </a>
+  </div><div class="navigation-next">
+    <a href="datasets.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">Obfuscating Datasets</div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>2026, InfAI e.V.</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials"></div>
+    </div>
+  </div>
+</footer>
+      <script src="../_static/documentation_options.js?v=d45e8c67"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/shibuya.js?v=50760d75"></script></body>
+</html>

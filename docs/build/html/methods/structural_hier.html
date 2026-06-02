@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="violet" data-content_root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Hierarchical Scramble - text-mallet 0.0.1 documentation</title><link rel="author" title="About these documents" href="../about.html" /><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="POS Filtering" href="pos_filtering.html" /><link rel="prev" title="Large Datasets" href="../usage/large_datasets.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=e1a1ceaf" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=9454f7d5" />
+    <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    
+  <meta property="og:type" content="website"/><meta property="og:title" content="Hierarchical Scramble"/>
+    <meta name="twitter:card" content="summary"/>
+  </head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="../index.html">
+      
+      
+      <strong>text-mallet</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials"></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quick Start</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../usage/basics.html">Basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/datasets.html">Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/large_datasets.html">Large Datasets</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Obfuscation Methods</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Hierarchical Scramble</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pos_filtering.html">POS Filtering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mutual_information.html">Mutual Information Filtering</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Docs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../pipeline.html">Pipeline</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Project Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+</ul>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#configuration">Configuration</a></li>
+<li><a class="reference internal" href="#example-usage">Example Usage</a></li>
+<li><a class="reference internal" href="#expected-output">Expected Output</a></li>
+</ul>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name">text-mallet</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">Hierarchical Scramble</strong>
+        <meta itemprop="position" content="2" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <article class="yue" role="main">
+          <section id="hierarchical-scramble">
+<h1>Hierarchical Scramble<a class="headerlink" href="#hierarchical-scramble" title="Link to this heading">¶</a></h1>
+<p>The <strong>Hierarchical Scramble</strong> algorithm (<code class="docutils literal notranslate"><span class="pre">&quot;scramble-hier&quot;</span></code>) obfuscates text by shuffling its grammatical structure rather than masking or substituting words. By parsing sentences into dependency trees using spaCy, it rearranges tokens at various hierarchical levels (left and right branching child nodes). This method is ideal for tasks where you need to preserve the exact vocabulary and word frequencies of the original text while completely disrupting syntactic patterns, grammatical structures, and authorship stylometry. It is a lighter form of structural obfuscation when compared to linear scrambling (i.e. bag of words).</p>
+<section id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Link to this heading">¶</a></h2>
+<p>To use the Hierarchical Scramble filter, initialize the obfuscator with the <code class="docutils literal notranslate"><span class="pre">&quot;scramble-hier&quot;</span></code> algorithm string and provide a configuration dictionary.</p>
+<ul>
+<li><p><strong>strength</strong> (str or list of str): Determines the severity of the structural rearrangement.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;weak&quot;</span></code>: Traverses the dependency tree and independently shuffles left-branching and right-branching sibling nodes. The overall left-to-right orientation of phrases relative to their parent heads is preserved.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;strong&quot;</span></code>: Shuffles sibling nodes, introduces a 50% probability to randomly flip node directions (Left $leftrightarrow$ Right), and reverses child-node placement order during sentence linearization.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You can pass a single string (e.g., <code class="docutils literal notranslate"><span class="pre">&quot;weak&quot;</span></code>) to get a flat string output, or a list of strengths (e.g., <code class="docutils literal notranslate"><span class="pre">[&quot;weak&quot;,</span> <span class="pre">&quot;strong&quot;]</span></code>) to receive a nested dictionary containing results for all configured variations under the <code class="docutils literal notranslate"><span class="pre">&quot;scramble-hier&quot;</span></code> key.</p>
+</div>
+</li>
+</ul>
+</section>
+<section id="example-usage">
+<h2>Example Usage<a class="headerlink" href="#example-usage" title="Link to this heading">¶</a></h2>
+<p>The following example demonstrates how to execute both a weak and a strong hierarchical scramble pass sequentially on a sample text.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">tmallet</span><span class="w"> </span><span class="kn">import</span> <span class="n">TMallet</span>
+</span><span data-line="2">
+</span><span data-line="3"><span class="c1"># 1. Define configurations for different scrambling strengths</span>
+</span><span data-line="4"><span class="n">algorithm</span> <span class="o">=</span> <span class="s2">&quot;scramble-hier&quot;</span>
+</span><span data-line="5"><span class="n">config_weak</span> <span class="o">=</span> <span class="p">{</span>
+</span><span data-line="6">    <span class="s2">&quot;strength&quot;</span><span class="p">:</span> <span class="s2">&quot;weak&quot;</span><span class="p">,</span>
+</span><span data-line="7"><span class="p">}</span>
+</span><span data-line="8"><span class="n">config_strong</span> <span class="o">=</span> <span class="p">{</span>
+</span><span data-line="9">    <span class="s2">&quot;strength&quot;</span><span class="p">:</span> <span class="s2">&quot;strong&quot;</span><span class="p">,</span>
+</span><span data-line="10"><span class="p">}</span>
+</span><span data-line="11">
+</span><span data-line="12"><span class="c1"># 2. Define Sample Text</span>
+</span><span data-line="13"><span class="n">sample</span> <span class="o">=</span> <span class="s2">&quot;Leipzig is the most populous city in the German state of Saxony. The city has a population of 633,592 residents as of 31 December 2025. It is the eighth-largest city in Germany and is part of the Central German Metropolitan Region. Leipzig is located about 150 km (90 mi) southwest of Berlin, in the southernmost part of the North German Plain (the Leipzig Bay), at the confluence of the White Elster and its tributaries Pleiße and Parthe.&quot;</span>
+</span><span data-line="14">
+</span><span data-line="15"><span class="c1"># 3. Load Text Mallet and Obfuscate through both configurations</span>
+</span><span data-line="16"><span class="k">for</span> <span class="n">config</span> <span class="ow">in</span> <span class="p">[</span><span class="n">config_weak</span><span class="p">,</span> <span class="n">config_strong</span><span class="p">]:</span>
+</span><span data-line="17">    <span class="n">tmallet</span> <span class="o">=</span> <span class="n">TMallet</span><span class="p">(</span><span class="n">lang</span><span class="o">=</span><span class="s2">&quot;en&quot;</span><span class="p">,</span> <span class="n">prefer_gpu</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span data-line="18">    <span class="n">tmallet</span><span class="o">.</span><span class="n">load_obfuscator</span><span class="p">(</span><span class="n">algorithm</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+</span><span data-line="19">
+</span><span data-line="20">    <span class="n">obfuscated_text_sample</span> <span class="o">=</span> <span class="n">tmallet</span><span class="o">.</span><span class="n">obfuscate</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span>
+</span><span data-line="21">
+</span><span data-line="22">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;==Results (</span><span class="si">{</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;strength&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">)==&quot;</span><span class="p">)</span>
+</span><span data-line="23">    <span class="nb">print</span><span class="p">(</span><span class="n">obfuscated_text_sample</span><span class="p">)</span>
+</span></pre></div>
+</div>
+</section>
+<section id="expected-output">
+<h2>Expected Output<a class="headerlink" href="#expected-output" title="Link to this heading">¶</a></h2>
+<p>Notice how the “weak” scramble alters the local placement of descriptors but retains a vaguely recognizable progression, while the “strong” scramble completely shatters phrase order and flips clauses.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span><span data-line="1">==Results (weak)==
+</span><span data-line="2">Leipzig is. most populous the city in the German state of Saxony The city
+</span><span data-line="3">has a population of 633,592 residents as of 31 December 2025. It is part
+</span><span data-line="4">of Central German the Metropolitan Region and. the eighth - largest city
+</span><span data-line="5">in Germany Leipzig is located about 150 km) southwest of Berlin (, in southernmost the part)
+</span><span data-line="6">(of the North German Plain Leipzig the Bay 90 mi. at the confluence of the White Elster its
+</span><span data-line="7">tributaries Pleiße and Parthe and
+</span><span data-line="8">
+</span><span data-line="9">==Results (strong)==
+</span><span data-line="10">German of Saxony state the in Leipzig. most populous city the is of 2025 December 31 as.
+</span><span data-line="11">The city has population residents 633,592 of a It. and of the Central German Metropolitan Region part is the
+</span><span data-line="12">largest - eighth Germany in city located the southernmost North German Plain the of part () Bay Leipzig
+</span><span data-line="13">the in, km () 90 mi about 150 of Berlin southwest the confluence of its tributaries Pleiße Parthe and
+</span><span data-line="14">White and Elster the at is. Leipzig
+</span></pre></div>
+</div>
+</section>
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"><div class="navigation-prev">
+    <a href="../usage/large_datasets.html">
+      <i class="i-lucide chevron-left"></i>
+      <div class="page-info">
+        <span>Previous</span><div class="title">Large Datasets</div></div>
+    </a>
+  </div><div class="navigation-next">
+    <a href="pos_filtering.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">POS Filtering</div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>2026, InfAI e.V.</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials"></div>
+    </div>
+  </div>
+</footer>
+      <script src="../_static/documentation_options.js?v=d45e8c67"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/shibuya.js?v=50760d75"></script></body>
+</html>
