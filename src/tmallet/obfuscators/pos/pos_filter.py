@@ -120,15 +120,15 @@ class POSFilter(SpaCyObfuscator):
         """
         results = {}
         for ft in self.filter_type:
-            results[ft] = {}
+            results[ft.value] = {}
             for mech in self.replacement_mechanism:
                 match ft:
-                    case "retain":
-                        results[ft][mech] = self._keep_only(
+                    case FilterType.Retain:
+                        results[ft.value][mech] = self._keep_only(
                             doc, self.pos_tags, ReplacementMechanism(mech)
                         )
-                    case "remove":
-                        results[ft][mech] = self._keep_all_except(
+                    case FilterType.Remove:
+                        results[ft.value][mech] = self._keep_all_except(
                             doc, self.pos_tags, ReplacementMechanism(mech)
                         )
                     case _:
