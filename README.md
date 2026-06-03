@@ -23,6 +23,17 @@ A lightweight text transformation engine for smashing text into [derived](https:
 
 The package natively supports text processing in **English** and **German**.
 
+## Install
+```bash
+pip install text-mallet
+
+# For obfuscating English:
+python -m spacy download en_core_web_trf
+
+# For obfuscating German:
+python -m spacy download de_dep_news_trf
+```
+
 ## Strategic Obfuscation
 
 The central aim of text obfuscation using this package is to prevent **reconstructability**. Doing so involves eroding various aspects of text, such as:
