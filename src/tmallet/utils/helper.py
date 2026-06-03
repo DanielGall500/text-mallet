@@ -57,7 +57,7 @@ def get_replacement_mechanism(
         case ReplacementMechanism.Default:
             replacement_tok = DEFAULT_TOKEN
         case ReplacementMechanism.Delete:
-            replacement_tok = None
+            replacement_tok = ""
         case _:
             raise ValueError(
                 f"Please provide a valid replacement mechanism (provided {mechanism})."
