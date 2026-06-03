@@ -19,7 +19,7 @@
   </p>
 </div>
 
-A lightweight text transformation engine for smashing text into [derived](https://text-plus.org/en/themen-dokumentation/atf) formats. `text-mallet` reduces the risk of privacy or copyright infringement while preserving the structural, semantic, and syntactic utility of your data for downstream NLP tasks like classification, information retrieval, topic modeling, and semantic similarity.
+A package for applying transformations to text for creating [derived](https://text-plus.org/en/themen-dokumentation/atf) formats, intended for preventing reconstruction of the original data. This can be applied, for instance, to sensitive training data to prevent its reconstruction while preserving some usefulness of the text in pre-training on primarily encoder-based tasks such as classification and retrieval tasks. Such obfuscated representations are therefore intended to accompany non-sensitive, non-obfuscated data in the pre-training mix where the text's usage would otherwise risk infringing on copyright.
 
 The package natively supports text processing in **English** and **German**.
 
@@ -35,7 +35,6 @@ python -m spacy download de_dep_news_trf
 ```
 
 ## Strategic Obfuscation
-
 The central aim of text obfuscation using this package is to prevent **reconstructability**. Doing so involves eroding various aspects of text, such as:
 * **Word Forms**: The exact sequence of characters.
 * **Syntactic Features**: Morpho-syntactic token properties.
