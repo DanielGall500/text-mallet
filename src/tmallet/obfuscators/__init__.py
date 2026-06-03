@@ -1,3 +1,4 @@
+from tmallet.obfuscators.morph.lemmatizer import LemmaObfuscator
 from tmallet.obfuscators.pos.config import POSFilterConfig
 from tmallet.obfuscators.pos.pos_filter import POSFilter
 from tmallet.obfuscators.shannon.config import ShannonFilterConfig
@@ -20,4 +21,5 @@ __all__ = [
     "LinearScrambleConfig",
     "HierarchicalScrambleObfuscator",
     "HierarchicalScrambleConfig",
+    "LemmaObfuscator",
 ]

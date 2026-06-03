@@ -9,6 +9,7 @@ from datasets import Dataset, concatenate_datasets, load_dataset, load_from_disk
 from tmallet.obfuscators import (
     HierarchicalScrambleConfig,
     HierarchicalScrambleObfuscator,
+    LemmaObfuscator,
     LinearScrambleConfig,
     LinearScrambleObfuscator,
     POSFilter,
@@ -24,6 +25,7 @@ ObfuscationTechnique = Literal[
     "scramble-hier",  # dependency-parsing structural obfuscation
     "scramble-BoW",  # randomly shuffle words at the sentence or document level
     "shannon",  # filter based on an approximation of word importance
+    "lemmatize",  # word-level lemmatisation - still available, but no longer supported
 ]
 
 
@@ -46,9 +48,10 @@ class TMallet:
     is_obfuscation_set_up: bool = False
     active_obfuscator = None
     active_config: dict | None = None
+    active_algorithm: str | None = None
 
     def __init__(self, lang: LangConfig = "en", prefer_gpu: bool = False):
-        """Initialises the TMallet pipeline.
+        """Initialises the obfuscation pipeline.
 
         Args:
             lang (LangConfig, optional): The target language configuration - either "en" (English) or "de" (German). Defaults to "en". Let us know if you'd be interested in support for further languages.
@@ -78,6 +81,7 @@ class TMallet:
         self.active_config = self._validate_config(algorithm, config)
         self.active_obfuscator = self._get_obfuscator(algorithm)
         self.active_obfuscator.set_config(self.active_config)
+        self.active_algorithm = algorithm
         return self
 
     def obfuscate(self, text: list[str] | str) -> dict | str:
@@ -94,7 +98,11 @@ class TMallet:
         Returns:
             Dict: The modified, obfuscated text or collection of texts in the form of a dictionary.
         """
-        if not self.active_obfuscator or not self.active_config:
+        if (
+            self.active_obfuscator is None
+            and self.active_config is None
+            and not self.active_algorithm == "lemmatize"
+        ):
             raise RuntimeError(
                 "Please use `set_obfuscator` to setup the obfuscation details first."
             )
@@ -271,6 +279,8 @@ class TMallet:
                 return HierarchicalScrambleConfig(**config)
             case "shannon":
                 return ShannonFilterConfig(**config)
+            case "lemmatize":
+                return None
 
     def _get_obfuscator(
         self, algorithm: ObfuscationTechnique
@@ -295,6 +305,9 @@ class TMallet:
                     spacy_interface=self.spacy_interface,
                     prefer_gpu=self.prefer_gpu,
                 )
+            case "lemmatize":
+                self.apply_spacy_preprocessing = True
+                return LemmaObfuscator()
             case _:
                 raise ValueError(
                     f"Input {algorithm} invalid. Please provide a valid obfuscation algorithm."
