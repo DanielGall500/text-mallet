@@ -21,21 +21,20 @@ Run the following command in your terminal:
 
 .. code-block:: bash
 
-   pip install text-mallet[en]
+   pip install text-mallet
 
 .. note::
    Depending on the language you want to obfuscate, you can pass in either English, German, or both as arguments when installing text-mallet:
 
    .. code-block:: bash
 
-      # for obfuscating English
-      python install text-mallet[en]
+      python install text-mallet
 
-      # for obfuscating German
-      python install text-mallet[de]
+      # For obfuscating English:
+      python -m spacy download en_core_web_trf
 
-      # for obfuscating both
-      python install text-mallet[en,de]
+      # For obfuscating German:
+      python -m spacy download de_dep_news_trf
 
 Verification
 ------------
