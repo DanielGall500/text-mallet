@@ -6,7 +6,7 @@ This section guides you through setting up ``text-mallet`` on your local environ
 Prerequisites
 -------------
 
-Before installing, ensure you have Python 3.8 or higher installed on your system. It is highly recommended to use a virtual environment to avoid version conflicts with other packages:
+Before installing, ensure you have Python 3.10 or higher installed on your system. It is highly recommended to use a virtual environment to avoid version conflicts with other packages:
 
 .. code-block:: bash
 
@@ -16,7 +16,8 @@ Before installing, ensure you have Python 3.8 or higher installed on your system
 Standard Installation
 ---------------------
 
-You can install the stable release of ``text-mallet`` directly from PyPI using ``pip``. Run the following command in your terminal:
+You can install the most recent release of ``text-mallet`` directly from PyPI using ``pip``, making sure to pass the language you want to obfuscate.
+Run the following command in your terminal:
 
 .. code-block:: bash
 
@@ -27,6 +28,13 @@ You can install the stable release of ``text-mallet`` directly from PyPI using `
 
    .. code-block:: bash
 
+      # for obfuscating English
+      python install text-mallet[en]
+
+      # for obfuscating German
+      python install text-mallet[de]
+
+      # for obfuscating both
       python install text-mallet[en,de]
 
 Verification
