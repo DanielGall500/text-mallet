@@ -28,8 +28,6 @@ Run the following command in your terminal:
 
    .. code-block:: bash
 
-      python install text-mallet
-
       # For obfuscating English:
       python -m spacy download en_core_web_trf
 
