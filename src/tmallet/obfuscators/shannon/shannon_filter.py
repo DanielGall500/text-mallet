@@ -72,7 +72,7 @@ class ShannonFilter(Obfuscator):
             len(self.threshold) == 1
             and len(self.replacement_mechanism) == 1
             and len(self.bounds) == 1
-        ) or (not self.output_mi_values)
+        ) and (not self.output_mi_values)
 
     def obfuscate(self, text: str) -> dict | str:
         """
@@ -110,19 +110,21 @@ class ShannonFilter(Obfuscator):
             # compute replacement tokens once per position
             mechanism_tok = get_replacement_mechanism(mech, i, pos_tags)
 
-            for rm in self.replacement_mechanism:
-                is_below_threshold = mi_values[i] < thresh
+            is_below_threshold = mi_values[i] < thresh
 
-                # apply obfuscation
-                if (self.as_upper_bound and is_below_threshold) or (
-                    self.as_lower_bound and not is_below_threshold
-                ):
-                    result.append(word_text)
-                elif rm == "default" or rm == "POS":
-                    result.append(mechanism_tok)
-                else:
-                    # word is deleted, do nothing
-                    pass
+            # apply obfuscation
+            if (self.as_upper_bound and is_below_threshold) or (
+                self.as_lower_bound and not is_below_threshold
+            ):
+                result.append(word_text)
+            elif (
+                mech is ReplacementMechanism.Default
+                or mech is ReplacementMechanism.Delete
+            ):
+                result.append(mechanism_tok)
+            else:
+                # word is deleted, do nothing
+                pass
 
         result = self.detok.detokenize(result)
 
