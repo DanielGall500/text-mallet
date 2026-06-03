@@ -84,7 +84,7 @@ class TMallet:
         self.active_algorithm = algorithm
         return self
 
-    def obfuscate(self, text: list[str] | str) -> dict | str:
+    def obfuscate(self, text: str) -> dict | str:
         """Obfuscates standalone text strings or lists of strings.
 
         Requires an obfuscator to be loaded via `load_obfuscator` prior to invocation.
