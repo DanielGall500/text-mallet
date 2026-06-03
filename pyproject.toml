@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [
-    {name = "Daniel Gallagher", email = "gallagher.eu@protonmail.com"}
+    {name = "CORAL", email = "gallagher.eu@protonmail.com"}
 ]
 keywords = ["nlp", "obfuscation", "copyright-protection", "derived text formats"]
 classifiers = [
@@ -32,9 +32,6 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-en = ["en_core_web_trf @ https://github.com/explosion/spacy-models/releases/download/en_core_web_trf-3.8.0/en_core_web_trf-3.8.0-py3-none-any.whl"]
-de = ["de_dep_news_trf @ https://github.com/explosion/spacy-models/releases/download/de_dep_news_trf-3.8.0/de_dep_news_trf-3.8.0-py3-none-any.whl"]
-
 dev = [
     "pytest>=7.0.0",
     "black>=23.0.0",
