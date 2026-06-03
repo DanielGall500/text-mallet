@@ -58,21 +58,18 @@ data-aria-dark="Switch to auto color mode">
         <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
-</ul>
-<p class="caption" role="heading" aria-level="3"><span class="caption-text">Usage</span></p>
-<ul>
 <li class="toctree-l1"><a class="reference internal" href="usage/basics.html">Basics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage/datasets.html">Datasets</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage/large_datasets.html">Large Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/configurations.html">Configurations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/datasets.html">Obfuscating Datasets</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Obfuscation Methods</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="methods/structural.html">Structural</a></li>
+<li class="toctree-l1"><a class="reference internal" href="methods/structural_hier.html">Hierarchical Scramble</a></li>
+<li class="toctree-l1"><a class="reference internal" href="methods/bag_of_words.html">Linear Scramble</a></li>
 <li class="toctree-l1"><a class="reference internal" href="methods/pos_filtering.html">POS Filtering</a></li>
 <li class="toctree-l1"><a class="reference internal" href="methods/mutual_information.html">Mutual Information Filtering</a></li>
 </ul>
-<p class="caption" role="heading" aria-level="3"><span class="caption-text">Docs</span></p>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">API</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Pipeline</a></li>
 </ul>
@@ -147,7 +144,7 @@ or entire datasets.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="tmallet.TMallet.load_obfuscator">
-<span class="sig-name descname"><span class="pre">load_obfuscator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algorithm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'pos-filter'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'scramble-hier'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'scramble-BoW'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'shannon'</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tmallet/core/pipeline.html#TMallet.load_obfuscator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tmallet.TMallet.load_obfuscator" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">load_obfuscator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algorithm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'pos-filter'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'scramble-hier'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'scramble-BoW'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'shannon'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'lemmatize'</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tmallet/core/pipeline.html#TMallet.load_obfuscator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tmallet.TMallet.load_obfuscator" title="Link to this definition">¶</a></dt>
 <dd><p>Validates configuration and dynamically instantiates an obfuscation algorithm.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -167,7 +164,7 @@ or entire datasets.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tmallet.TMallet.obfuscate">
-<span class="sig-name descname"><span class="pre">obfuscate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></span><a class="reference internal" href="_modules/tmallet/core/pipeline.html#TMallet.obfuscate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tmallet.TMallet.obfuscate" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">obfuscate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></span><a class="reference internal" href="_modules/tmallet/core/pipeline.html#TMallet.obfuscate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tmallet.TMallet.obfuscate" title="Link to this definition">¶</a></dt>
 <dd><p>Obfuscates standalone text strings or lists of strings.</p>
 <p>Requires an obfuscator to be loaded via <cite>load_obfuscator</cite> prior to invocation.</p>
 <dl class="field-list simple">
