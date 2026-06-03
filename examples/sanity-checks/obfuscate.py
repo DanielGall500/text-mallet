@@ -22,18 +22,36 @@ dataset = dataset.select(range(subset_n))
 print(dataset.to_pandas().head())
 
 # -- Obfuscation Config --
-configs = {
+config_single = {
     "pos-filter": {
-        "filter_type": ["retain", "remove"],
+        "filter_type": "retain",
+        "pos_tags": ["NOUN", "PROPN"],
+        "replacement_mechanism": "POS",
+    },
+    "shannon": {
+        "threshold": 10,
+        "bound": "lower",
+        "replacement_mechanism": "default",
+    },
+    "scramble-hier": {
+        "algorithm": "scramble-hier",
+        "strength": "weak",
+    },
+    "scramble-BoW": {
+        "level": "document",
+    },
+}
+config_multi = {
+    "pos-filter": {
+        "filter_type": "retain",
         "pos_tags": ["NOUN", "PROPN"],
         "replacement_mechanism": ["delete", "default", "POS"],
         "seed": 100,
     },
     "shannon": {
-        "threshold": [2.5, 5, 7.5, 10, 12.5],
-        "as_upper_bound": True,
-        "as_lower_bound": True,
-        "replacement_mechanism": ["delete", "default", "POS"],
+        "threshold": [10, 12, 15],
+        "bound": ["lower", "upper"],
+        "replacement_mechanism": ["default", "POS"],
     },
     "scramble-hier": {
         "algorithm": "scramble-hier",
@@ -46,25 +64,26 @@ configs = {
     },
 }
 
-test_languages = {
-    "en": "Leipzig is the most populous city in the German state of Saxony. The city has a population of 633,592 residents as of 31 December 2025. It is the eighth-largest city in Germany and is part of the Central German Metropolitan Region. Leipzig is located about 150 km (90 mi) southwest of Berlin, in the southernmost part of the North German Plain (the Leipzig Bay), at the confluence of the White Elster and its tributaries Pleiße and Parthe.",
-    "de": "Leipzig ist eine kreisfreie Stadt sowie mit 611.850 Einwohnern (31. Dezember 2024, laut Statistischem Landesamt des Freistaates Sachsen) bzw. 633 592 Einwohnern (laut Melderegister am 31. Dezember 2025) die einwohnerreichste Stadt im Freistaat Sachsen. Sie belegte 2024 in der Liste der Großstädte in Deutschland den achten Rang. Für Mitteldeutschland ist sie ein historisches Zentrum der Wirtschaft, des Handels und Verkehrs, der Verwaltung, Kultur und Bildung sowie gegenwärtig ein Zentrum für die „Kreativszene“ und eine wichtige Messe- und Universitätsstadt.",
-}
+sample = "Data obfuscation is the process of modifying sensitive data in such a way that it is of no or little value to unauthorized intruders while still being usable by software or authorized personnel. Data masking can also be referred as anonymization, or tokenization, depending on different context."
 
-all_results_all_langs = {}
 
 # -- Load Text Mallet and Obfuscate --
-for lang, sample in test_languages.items():
-    tmallet = TMallet(lang=lang, prefer_gpu=True)
+tmallet = TMallet(lang="en", prefer_gpu=True)
 
-    all_results = {}
-    for algorithm, config in configs.items():
+all_results = {}
+for config_type in [config_single, config_multi]:
+    for algorithm, config in config_type.items():
         tmallet.load_obfuscator(algorithm, config)
 
         if test_one_sample:
             obfuscated_text_sample = tmallet.obfuscate(sample)
-            # print(json.dumps(obfuscated_text_sample, indent=4))
-            all_results.update(obfuscated_text_sample)
+            print("\n\n")
+            print(f"====={algorithm}=====")
+            if isinstance(obfuscated_text_sample, dict):
+                print(json.dumps(obfuscated_text_sample, indent=4))
+            else:
+                print(obfuscated_text_sample)
+                print("=====")
         else:
             obfuscated_text_by_chunk = tmallet.obfuscate_dataset_by_chunk(
                 dataset=dataset,
@@ -77,6 +96,3 @@ for lang, sample in test_languages.items():
                 num_proc=None,
                 device="cuda",
             )
-            # print(obfuscated_text_by_chunk.to_pandas().describe())
-    all_results_all_langs[lang] = all_results
-print(json.dumps(all_results_all_langs, indent=4))
