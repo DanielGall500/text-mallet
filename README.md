@@ -83,34 +83,38 @@ from tmallet import TMallet
 
 algorithm = "shannon", 
 config = {
-    "threshold": 7.5,
-    "bound": "upper"
-    "replacement_mechanism": "default"
+    "threshold": 9.5,
+    "bound": "lower",
+    "replacement_mechanism": "default",
+    "max_context_length": 128,
 }
 
 tmallet = TMallet(lang=lang, prefer_gpu=True)
 tmallet.load_obfuscator(algorithm, config)
 
-text = "Leipzig is the most populous city in the German state of Saxony. The city has a population of 633,592 residents as of 31 December 2025. It is the eighth-largest city in Germany and is part of the Central German Metropolitan Region. Leipzig is located about 150 km (90 mi) southwest of Berlin, in the southernmost part of the North German Plain (the Leipzig Bay), at the confluence of the White Elster and its tributaries Pleiße and Parthe."
+text = "Data obfuscation is the process of modifying sensitive data in such a way that it is of no or little value to unauthorized intruders while still being usable by software or authorized personnel. Data masking can also be referred as anonymization, or tokenization, depending on different context."
 obfuscated = tmallet.obfuscate(text)
 print(obfuscated)
 ```
 
 Output
-```json
-"_ is the _ _ _ in the _ _ of _ . The _ _ a _ of _, _ _ as of _ _ _ . It is the _ - _ _  in _ and is _ of the _ _ _ _ . _ is _ _ _ _ (_ _) _ of _, in the _ _ of the _ _ _ (the _ Bay), at the _ of the Wh ite _ and _ _ _ and _.",
+```
+_ _ is the _ of _ _ _ in _ a _ that it is of no or little _ to _ _ _ _ _ _ by software or _ _. _ _ can also be referred as _, or _, _ on different _.
 ```
 
 If we obfuscate too strongly using mutual information, we'll end up with obfuscated sentences like:
 ```
 , . . - ., or . the / . the . - –, . -
 ```
-That's, well, probably not very useful. Ideally, we can find a balance between the obfuscation of some words and inclusion of others. Using the bound as `lower` instead of `upper` will preserve those words which tend to be more meaningful in a text. Running the above example again with the lower bound of 7.5, we get:
+That's, well, probably not very useful. Ideally, we can find a balance between the obfuscation of some words and inclusion of others. Using the bound as `lower` instead of `upper` will preserve those words which tend to be more meaningful in a text. Running the above example again with the lower bound of 9, we get an obfuscation which preserves core semantic value while make the text more difficult to reconstruct:
 ```
-
+Data obfuscation _ _ process _ modifying sensitive data _ such _ way _ _ _ _ _ _ _ value _ unauthorized intruders while still being usable _ _ _ authorized personnel _ Data masking _ _ _ _ _ anonymization _ _ tokenization _ depending _ _ context _
 ```
 Here's an overview of an approximation of pointwise word-level mutual information, i.e. PMI(word; context), over 12,000 tokens taken from 10 random texts in the FineWeb-Edu dataset, for instance.
 ![Distribution of Word-Level Mutual Information](assets/mutual-info-distribution.png)
+
+#### Contributions
+Contributions are always welcome, this package was primarily developed in conjunction with carrying out research on the potential value of such obfuscation formats in encoder pre-training. Therefore, the package has many ways it could be improved upon and there are likely opportunities for efficiency improvements in particular.
 
 #### Acknowledgements
 Part of this work was conducted within the [CORAL project](https://coral-nlp.github.io) funded by the German Federal Ministry of Research, Technology, and Space (BMFTR) under the grant number 16IS24077A. Responsibility for the content of this publication lies with the authors.
