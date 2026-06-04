@@ -41,4 +41,4 @@ To verify that ``text-mallet`` was installed successfully, you can run a quick c
 
 .. code-block:: bash
 
-pip show text-mallet
+    pip show text-mallet
