@@ -37,8 +37,8 @@ Run the following command in your terminal:
 Verification
 ------------
 
-To verify that ``text-mallet`` was installed successfully, you can run a quick check in your terminal or Python interpreter:
+To verify that ``text-mallet`` was installed successfully, you can run a quick check in your terminal:
 
 .. code-block:: bash
 
-   python -c "import text_mallet; print(text_mallet.__version__)"
+pip show text-mallet
