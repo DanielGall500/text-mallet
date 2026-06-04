@@ -1,24 +1,12 @@
-======
-Basics
-======
-
-``text-mallet`` is a lightweight text obfuscation package designed to transform natural language into less human-readable formats while preserving structural and semantic utility for downstream NLP tasks, including:
-
-* Text Classification
-* Information Retrieval
-* Topic Modeling
-* Semantic Similarity
-
-The package natively supports both **English** and **German** tracking.
-
+===========
 Quick Start
------------
+===========
 
 Using ``text-mallet`` follows a simple three-step lifecycle:
 
 1. **Initialise** a ``TMallet`` instance for your target language.
 2. **Load** an obfuscation algorithm along with its configuration.
-3. **Obfuscate** your text execution layer.
+3. **Obfuscate** your text, or alternatively, a column in a Hugging Face dataset.
 
 Example
 ^^^^^^^
