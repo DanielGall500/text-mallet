@@ -29,7 +29,7 @@ def flatten_dict(d, parent_key="", sep="_"):
             # note that we return each item in a list rather than the item itself,
             # this is because we want to flatten dicts for batch processing,
             # which requires a list or other collection
-            items[new_key] = [v]
+            items[new_key] = v  # changed from list
     return items
 
 
