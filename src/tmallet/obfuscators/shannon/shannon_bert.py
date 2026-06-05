@@ -179,7 +179,6 @@ class ShannonBERT:
 
     def get_text_stats(self, text: str):
         all_words = []
-
         enc = self.tokenizer(
             text,
             truncation=False,
@@ -189,54 +188,62 @@ class ShannonBERT:
         full_input_ids = enc["input_ids"][0]  # (N,)
         full_offsets = enc["offset_mapping"][0]  # (N, 2)
         full_word_ids = enc.word_ids()  # list of N ints/None
-
         N = len(full_input_ids)
         surprisals = torch.zeros(N, device=self.device)
-
-        dummy = self.tokenizer("a", return_tensors="pt")["input_ids"][0]
-        n_prefix = (dummy == full_input_ids[0]).sum().item()  # usually 1 ([CLS])
-        n_suffix = (dummy == full_input_ids[-1]).sum().item()  # usually 1 ([SEP])
-        max_body = self.max_context_length - n_prefix - n_suffix  # usable positions
+        n_prefix = int(full_word_ids[0] is None)
+        n_suffix = int(full_word_ids[-1] is None)
+        context_size = 128
+        max_body = context_size - n_prefix - n_suffix
 
         with torch.no_grad():
+            masked_windows = []
+            i_in_window_list = []
+            valid_indices = []
+
             for i, wid in enumerate(full_word_ids):
-                if wid is None:  # skip [CLS] / [SEP] special tokens
+                if wid is None:
                     continue
-
-                body_start = max(
-                    n_prefix, i - max_body + 1
-                )  # include as much left ctx as possible
+                half = max_body // 2
+                body_start = max(n_prefix, i - half)
                 body_end = min(N - n_suffix, body_start + max_body)
-                body_start = max(
-                    n_prefix, body_end - max_body
-                )  # re-clamp if body_end moved
+                body_start = max(n_prefix, body_end - max_body)
 
-                # Slice out the body tokens (no special tokens yet)
                 body_ids = full_input_ids[body_start:body_end]
-
-                # Re-attach the model's own special tokens
                 prefix_ids = full_input_ids[:n_prefix]
                 suffix_ids = full_input_ids[N - n_suffix :]
-                window_ids = torch.cat(
-                    [prefix_ids, body_ids, suffix_ids]
-                )  # ≤ max_context_length
+                window_ids = torch.cat([prefix_ids, body_ids, suffix_ids])
 
-                # Position of token i inside the window
                 i_in_window = n_prefix + (i - body_start)
-
-                # ── Mask & score ────────────────────────────────────────────────
                 masked = window_ids.clone()
                 masked[i_in_window] = self.tokenizer.mask_token_id
-                logits = self.model(masked.unsqueeze(0).to(self.device)).logits[
-                    0, i_in_window
-                ]
-                log_probs = F.log_softmax(logits, dim=-1)
-                surprisals[i] = -log_probs[full_input_ids[i]]
+
+                masked_windows.append(masked)
+                i_in_window_list.append(i_in_window)
+                valid_indices.append(i)
+
+            batch_size = 128
+            for b_start in range(0, len(masked_windows), batch_size):
+                b_end = min(b_start + batch_size, len(masked_windows))
+                batch = torch.stack(masked_windows[b_start:b_end]).to(self.device)
+
+                with torch.autocast(device_type="cuda", dtype=torch.float16):
+                    batch_logits = self.model(
+                        batch
+                    ).logits  # (batch_size, context_size, vocab)
+
+                    for j, (i, i_in_window) in enumerate(
+                        zip(
+                            valid_indices[b_start:b_end],
+                            i_in_window_list[b_start:b_end],
+                        )
+                    ):
+                        token_logits = batch_logits[j, i_in_window]
+                        log_probs = F.log_softmax(token_logits, dim=-1)
+                        surprisals[i] = -log_probs[full_input_ids[i]]
 
         # ── Aggregate per-word ───────────────────────────────────────────────────
         word_surprisal: dict[int, float] = {}
         word_spans: dict[int, list] = {}
-
         for i, wid in enumerate(full_word_ids):
             if wid is None:
                 continue
@@ -251,10 +258,8 @@ class ShannonBERT:
 
         words_in_text = [text[s:e] for s, e in word_spans.values()]
         word_surp_in_text = list(word_surprisal.values())
-
         if len(words_in_text) != len(word_surp_in_text):
             raise ValueError("Words does not match surprisal calculations.")
-
         for word, word_contextual_surprisal in zip(words_in_text, word_surp_in_text):
             all_words.append(
                 WordStat(
@@ -263,7 +268,6 @@ class ShannonBERT:
                     contextual_surprisal=word_contextual_surprisal,
                 )
             )
-
         self.current_text_stat = TextStat(text=text, word_stats=all_words)
         return self.current_text_stat
 
