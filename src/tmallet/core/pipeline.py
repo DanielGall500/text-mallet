@@ -202,11 +202,11 @@ class TMallet:
         chunk_size: int = 5_000,
         batch_size: int = 100,
         num_proc: int | None = None,
+        start_index: int = 0,
         num_samples: int | None = None,
     ) -> Dataset:
         """Streams a dataset from the Hub in chunks, obfuscates each chunk,
         and saves checkpoints to disk for fault tolerance.
-
         Args:
             dataset_repo (str): HuggingFace Hub repo ID or local path for load_dataset.
             column (str): Key of the column containing raw target text.
@@ -217,8 +217,9 @@ class TMallet:
             chunk_size (int): Number of examples per chunk. Defaults to 5_000.
             batch_size (int): Inner batch size passed to .map. Defaults to 100.
             num_proc (Optional[int]): CPU parallelism for .map. Defaults to None.
-            num_samples (Optional[int]): Optional cap on total examples to process.
-
+            start_index (int): Index of the first example to process. Defaults to 0.
+            num_samples (Optional[int]): Number of examples to process from start_index.
+                                            Defaults to None (process until stream is exhausted).
         Returns:
             Dataset: Concatenated dataset of all processed chunks.
         """
@@ -228,12 +229,21 @@ class TMallet:
             split=dataset_split,
             streaming=True,
         )
-        if num_samples:
+
+        stream = stream.skip(start_index)
+        if num_samples is not None:
             stream = stream.take(num_samples)
 
         iterator = iter(stream)
         processed_chunks = []
-        chunk_index = 0
+
+        # Align chunk_index to the global position so checkpoint filenames
+        # remain consistent with absolute dataset offsets.
+        chunk_index = start_index // chunk_size
+        # Skip any partial-chunk offset within the first chunk
+        partial_offset = start_index % chunk_size
+        if partial_offset:
+            list(islice(iterator, partial_offset))
 
         while True:
             start = chunk_index * chunk_size
@@ -243,12 +253,11 @@ class TMallet:
             if os.path.exists(ckpt_path):
                 print(f"Loading checkpoint {ckpt_path}")
                 chunk = load_from_disk(ckpt_path)
-                # Advance stream past already-processed examples
                 list(islice(iterator, chunk_size))
             else:
                 rows = list(islice(iterator, chunk_size))
                 if not rows:
-                    break  # Stream exhausted
+                    break
                 print(f"Processing examples {start}:{end}")
                 chunk = Dataset.from_list(rows)
                 chunk = self.obfuscate_dataset(
