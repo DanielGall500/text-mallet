@@ -2,23 +2,6 @@
 ![English](https://img.shields.io/badge/lang-en-blue)
 ![German](https://img.shields.io/badge/lang-de-blue)
 
-<br />
-<div align="center">
-  <img src="assets/mallet.svg" alt="Logo" width="200" height="200">
-
-  <p align="center">
-        Smash Text Into Obfuscated Formats
-    <br />
-    <br />
-    <br />
-    <a href="https://text-mallet.readthedocs.io/en/latest/">Documentation</a>
-    &middot;
-    <a href="https://github.com/DanielGall500/text-hammer/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
-    &middot;
-    <a href="https://github.com/DanielGall500/text-hammer/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
-  </p>
-</div>
-
 A package for applying transformations to text for creating [derived](https://text-plus.org/en/themen-dokumentation/atf) formats, intended for preventing reconstruction of the original data. This can be applied, for instance, to sensitive training data to prevent its reconstruction while preserving some usefulness of the text in pre-training on primarily encoder-based tasks such as classification and retrieval tasks. Such obfuscated representations are therefore intended to accompany non-sensitive, non-obfuscated data in the pre-training mix where the text's usage would otherwise risk infringing on copyright.
 
 The package natively supports text processing in **English** and **German**.
