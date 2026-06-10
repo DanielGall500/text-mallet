@@ -31,7 +31,7 @@ class SpaCyInterface:
         self,
         lang: LangConfig = "en",
         prefer_gpu: bool = False,
-        model_type: Literal["sm", "md", "lg", "trf"] = "trf",
+        model_type: Literal["sm", "md", "lg", "trf"] = "lg",
     ):
         match lang:
             case "en":
