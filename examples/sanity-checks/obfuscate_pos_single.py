@@ -16,7 +16,7 @@ test_languages = {
 
 # -- Load Text Mallet and Obfuscate --
 for lang, sample in test_languages.items():
-    tmallet = TMallet(lang=lang, prefer_gpu=True)
+    tmallet = TMallet(lang=lang, prefer_gpu=True, model_type="trf")
     tmallet.load_obfuscator(algorithm, config)
 
     obfuscated_text_sample = tmallet.obfuscate(sample)

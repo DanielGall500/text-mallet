@@ -1,12 +1,10 @@
 import json
 from pathlib import Path
 
-from datasets import load_dataset
-
 from tmallet import TMallet
 
 # -- Parameters --
-test_one_sample = True
+test_one_sample = False
 
 OUTPUT_FOLDER = "results"
 OBFUS_TYPE = "all"
@@ -17,9 +15,6 @@ save_chunks_to = Path(OUTPUT_FOLDER) / f"{OBFUS_TYPE}-obfus"
 
 subset_n = 10
 dataset_repo = "codelion/fineweb-edu-1B"
-dataset = load_dataset(dataset_repo)["train"]
-dataset = dataset.select(range(subset_n))
-print(dataset.to_pandas().head())
 
 # -- Obfuscation Config --
 config_single = {
@@ -63,6 +58,12 @@ config_multi = {
         "seed": 100,
     },
 }
+config_test_dataset = {
+    "scramble-BoW": {
+        "level": ["sentence", "document"],
+        "seed": 100,
+    },
+}
 
 sample = "Data obfuscation is the process of modifying sensitive data in such a way that it is of no or little value to unauthorized intruders while still being usable by software or authorized personnel. Data masking can also be referred as anonymization, or tokenization, depending on different context."
 
@@ -70,12 +71,12 @@ sample = "Data obfuscation is the process of modifying sensitive data in such a 
 # -- Load Text Mallet and Obfuscate --
 tmallet = TMallet(lang="en", prefer_gpu=True)
 
-all_results = {}
-for config_type in [config_single, config_multi]:
-    for algorithm, config in config_type.items():
-        tmallet.load_obfuscator(algorithm, config)
+if test_one_sample:
+    all_results = {}
+    for config_type in [config_single]:
+        for algorithm, config in config_type.items():
+            tmallet.load_obfuscator(algorithm, config)
 
-        if test_one_sample:
             obfuscated_text_sample = tmallet.obfuscate(sample)
             print("\n\n")
             print(f"====={algorithm}=====")
@@ -84,15 +85,13 @@ for config_type in [config_single, config_multi]:
             else:
                 print(obfuscated_text_sample)
                 print("=====")
-        else:
-            obfuscated_text_by_chunk = tmallet.obfuscate_dataset_by_chunk(
-                dataset=dataset,
-                column="text",
-                column_obfuscated="text_shannon",
-                config=config,
-                save_chunks_to_folder=save_chunks_to,
-                chunk_size=CHUNK_SIZE,
-                batch_size=BATCH_SIZE,
-                num_proc=None,
-                device="cuda",
-            )
+else:
+    tmallet.load_obfuscator("scramble-BoW", config_test_dataset["scramble-BoW"])
+    obfuscated_text_by_chunk = tmallet.obfuscate_dataset_by_chunk(
+        dataset_repo=dataset_repo,
+        column="text",
+        column_obfuscated="text_obfus",
+        save_chunks_to_folder=save_chunks_to,
+        chunk_size=CHUNK_SIZE,
+        batch_size=BATCH_SIZE,
+    )
