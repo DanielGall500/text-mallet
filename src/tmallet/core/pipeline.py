@@ -50,16 +50,22 @@ class TMallet:
     active_config: dict | None = None
     active_algorithm: str | None = None
 
-    def __init__(self, lang: LangConfig = "en", prefer_gpu: bool = False):
+    def __init__(
+        self,
+        lang: LangConfig = "en",
+        prefer_gpu: bool = False,
+        model_type: Literal["sm", "md", "lg", "trf"] = "trf",
+    ):
         """Initialises the obfuscation pipeline.
 
         Args:
             lang (LangConfig, optional): The target language configuration - either "en" (English) or "de" (German). Defaults to "en". Let us know if you'd be interested in support for further languages.
             prefer_gpu (bool, optional): If True, attempts to allocate spaCy operations
                 on the GPU. Defaults to False.
+            model_type (str): The type of spacy model you want to use, choose from "sm", "md", "lg", and "trf".
         """
         self.spacy_interface: SpaCyInterface = SpaCyInterface(
-            lang=lang, prefer_gpu=prefer_gpu
+            lang=lang, prefer_gpu=prefer_gpu, model_type=model_type
         )
         self.lang: LangConfig = lang
         self.prefer_gpu = prefer_gpu
