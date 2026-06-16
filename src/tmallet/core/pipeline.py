@@ -211,61 +211,57 @@ class TMallet:
         start_index: int = 0,
         num_samples: int | None = None,
     ) -> Dataset:
-        """Streams a dataset from the Hub in chunks, obfuscates each chunk,
-        and saves checkpoints to disk for fault tolerance.
+        """Loads a dataset from the Hub in chunks (non-streaming), obfuscates each
+        chunk, and saves checkpoints to disk for fault tolerance.
+
         Args:
             dataset_repo (str): HuggingFace Hub repo ID or local path for load_dataset.
             column (str): Key of the column containing raw target text.
             column_obfuscated (str): Target base column key for saving the output.
             save_chunks_to_folder (Path): Directory to save/load disk checkpoints.
             dataset_config (Optional[str]): Dataset config/subset name passed to load_dataset.
-            dataset_split (str): Split to stream (e.g. "train", "validation"). Defaults to "train".
+            dataset_split (str): Split to load (e.g. "train", "validation"). Defaults to "train".
             chunk_size (int): Number of examples per chunk. Defaults to 5_000.
             batch_size (int): Inner batch size passed to .map. Defaults to 100.
             num_proc (Optional[int]): CPU parallelism for .map. Defaults to None.
             start_index (int): Index of the first example to process. Defaults to 0.
             num_samples (Optional[int]): Number of examples to process from start_index.
-                                            Defaults to None (process until stream is exhausted).
+                                            Defaults to None (process until end of dataset).
         Returns:
             Dataset: Concatenated dataset of all processed chunks.
         """
-        stream = load_dataset(
+        full_dataset = load_dataset(
             dataset_repo,
             dataset_config,
             split=dataset_split,
-            streaming=True,
+            streaming=False,
         )
 
-        stream = stream.skip(start_index)
+        total_available = len(full_dataset) - start_index
         if num_samples is not None:
-            stream = stream.take(num_samples)
+            total_to_process = min(num_samples, total_available)
+        else:
+            total_to_process = total_available
 
-        iterator = iter(stream)
+        end_index = start_index + total_to_process
+
         processed_chunks = []
+        chunk_start = start_index
 
-        # Align chunk_index to the global position so checkpoint filenames
-        # remain consistent with absolute dataset offsets.
-        chunk_index = start_index // chunk_size
-        # Skip any partial-chunk offset within the first chunk
-        partial_offset = start_index % chunk_size
-        if partial_offset:
-            list(islice(iterator, partial_offset))
+        while chunk_start < end_index:
+            chunk_end = min(chunk_start + chunk_size, end_index)
 
-        while True:
-            start = chunk_index * chunk_size
-            end = start + chunk_size
-            ckpt_path = Path(save_chunks_to_folder) / f"obfuscated_ckpt_{start}_{end}"
+            ckpt_path = (
+                Path(save_chunks_to_folder)
+                / f"obfuscated_ckpt_{chunk_start}_{chunk_end}"
+            )
 
             if os.path.exists(ckpt_path):
                 print(f"Loading checkpoint {ckpt_path}")
                 chunk = load_from_disk(ckpt_path)
-                list(islice(iterator, chunk_size))
             else:
-                rows = list(islice(iterator, chunk_size))
-                if not rows:
-                    break
-                print(f"Processing examples {start}:{end}")
-                chunk = Dataset.from_list(rows)
+                print(f"Processing examples {chunk_start}:{chunk_end}")
+                chunk = full_dataset.select(range(chunk_start, chunk_end))
                 chunk = self.obfuscate_dataset(
                     chunk,
                     column=column,
@@ -276,7 +272,7 @@ class TMallet:
                 chunk.save_to_disk(ckpt_path)
 
             processed_chunks.append(chunk)
-            chunk_index += 1
+            chunk_start = chunk_end
 
         obfuscated_dataset = concatenate_datasets(processed_chunks)
         return obfuscated_dataset
