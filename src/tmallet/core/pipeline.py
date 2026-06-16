@@ -123,7 +123,7 @@ class TMallet:
         batch: dict,
         column: str,
         column_obfuscated: str,
-        multi: bool = True,
+        multi: bool = False,
     ) -> dict:
         """Processes a single dictionary batch extracted from a Dataset pipeline wrapper.
 
