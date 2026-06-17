@@ -182,15 +182,15 @@ class ShannonFilter(Obfuscator):
                     )
 
             if self.as_lower_bound and self.as_upper_bound:
-                reconstructed[thresh] = {}
+                reconstructed[str(thresh)] = {}
                 for bound in self.bounds:
-                    reconstructed[thresh][bound] = {
+                    reconstructed[string(thresh)][bound] = {
                         rm: self.detok.detokenize(resulting_output[bound][rm])
                         for rm in self.replacement_mechanism
                     }
             else:
                 active_bound = "upper" if self.as_upper_bound else "lower"
-                reconstructed[thresh] = {
+                reconstructed[str(thresh)] = {
                     rm: self.detok.detokenize(resulting_output[active_bound][rm])
                     for rm in self.replacement_mechanism
                 }
