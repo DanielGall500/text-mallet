@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "text-mallet"
-version = "0.1.4"
+version = "0.1.5"
 description = "Toolkit for Obfuscating Text Through Transformations."
 readme = "README-PyPi.md"
 requires-python = ">=3.10"
-license = {text = "MIT"}
+license = "MIT"
 authors = [
     {name = "CORAL", email = "gallagher.eu@protonmail.com"}
 ]
