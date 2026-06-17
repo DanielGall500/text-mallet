@@ -21,27 +21,25 @@ Run the following command in your terminal:
 
 .. code-block:: bash
 
-   pip install text-mallet[en]
+   pip install text-mallet
 
 .. note::
    Depending on the language you want to obfuscate, you can pass in either English, German, or both as arguments when installing text-mallet:
 
    .. code-block:: bash
 
-      # for obfuscating English
-      python install text-mallet[en]
+      # For obfuscating English, download the English model you want to use
+      # The default is the "lg" i.e. large SpaCy model:
+      python -m spacy download en_core_web_lg
 
-      # for obfuscating German
-      python install text-mallet[de]
-
-      # for obfuscating both
-      python install text-mallet[en,de]
+      # Or alternatively, download the model for German
+      python -m spacy download de_core_news_lg
 
 Verification
 ------------
 
-To verify that ``text-mallet`` was installed successfully, you can run a quick check in your terminal or Python interpreter:
+To verify that ``text-mallet`` was installed successfully, you can run a quick check in your terminal:
 
 .. code-block:: bash
 
-   python -c "import text_mallet; print(text_mallet.__version__)"
+    pip show text-mallet

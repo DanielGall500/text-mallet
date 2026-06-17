@@ -6,7 +6,7 @@ sys.path.insert(0, os.path.abspath("../../src"))
 project = "text-mallet"
 copyright = "2026, InfAI e.V."
 author = "Daniel Gallagher"
-release = "0.0.1"
+release = "0.1.4"
 
 extensions = [
     "sphinx.ext.autodoc",

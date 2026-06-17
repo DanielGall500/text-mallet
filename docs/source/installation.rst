@@ -28,11 +28,12 @@ Run the following command in your terminal:
 
    .. code-block:: bash
 
-      # For obfuscating English:
-      python -m spacy download en_core_web_trf
+      # For obfuscating English, download the English model you want to use
+      # The default is the "lg" i.e. large SpaCy model:
+      python -m spacy download en_core_web_lg
 
-      # For obfuscating German:
-      python -m spacy download de_dep_news_trf
+      # Or alternatively, download the model for German
+      python -m spacy download de_core_news_lg
 
 Verification
 ------------

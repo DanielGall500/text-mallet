@@ -2,11 +2,11 @@
 <html lang="en" data-accent-color="violet" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Basics - text-mallet 0.0.1 documentation</title><link rel="author" title="About these documents" href="../about.html" /><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Configurations" href="configurations.html" /><link rel="prev" title="Quick Start" href="../quickstart.html" /><script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Basics - text-mallet 0.1.4 documentation</title><link rel="author" title="About these documents" href="../about.html" /><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Configurations" href="configurations.html" /><link rel="prev" title="Installation" href="../installation.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=e1a1ceaf" />
-    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=9454f7d5" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=44020203" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,8 +17,7 @@
   --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
 }
 </style>
-    
-  <meta property="og:type" content="website"/><meta property="og:title" content="Basics"/>
+    <meta property="og:type" content="website"/><meta property="og:title" content="Basics"/>
     <meta name="twitter:card" content="summary"/>
   </head>
 <body><div class="sy-head">
@@ -56,12 +55,8 @@ data-aria-dark="Switch to auto color mode">
     <div class="sy-lside-inner md:sticky">
       <div class="sy-scrollbar p-6">
         <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quick Start</a></li>
-</ul>
-<p class="caption" role="heading" aria-level="3"><span class="caption-text">Usage</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Basics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="configurations.html">Configurations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="datasets.html">Obfuscating Datasets</a></li>
@@ -73,7 +68,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1"><a class="reference internal" href="../methods/pos_filtering.html">POS Filtering</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../methods/mutual_information.html">Mutual Information Filtering</a></li>
 </ul>
-<p class="caption" role="heading" aria-level="3"><span class="caption-text">Docs</span></p>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">API</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../pipeline.html">Pipeline</a></li>
 </ul>
@@ -92,10 +87,8 @@ data-aria-dark="Switch to auto color mode">
       <i class="i-lucide close"></i>
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
-<li><a class="reference internal" href="#quick-start">Quick Start</a><ul>
-<li><a class="reference internal" href="#example">Example</a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#why-obfuscate-text">Why Obfuscate Text?</a></li>
+<li><a class="reference internal" href="#obfuscating-a-text">Obfuscating A Text</a></li>
 <li><a class="reference internal" href="#available-algorithms">Available Algorithms</a><ul>
 <li><a class="reference internal" href="#scrambling">Scrambling</a></li>
 <li><a class="reference internal" href="#part-of-speech-filtering">Part-of-Speech Filtering</a></li>
@@ -135,46 +128,60 @@ data-aria-dark="Switch to auto color mode">
   <article class="yue" role="main">
           <section id="basics">
 <h1>Basics<a class="headerlink" href="#basics" title="Link to this heading">¶</a></h1>
-<p><code class="docutils literal notranslate"><span class="pre">text-mallet</span></code> is a lightweight text obfuscation package designed to transform natural language into less human-readable formats while preserving structural and semantic utility for downstream NLP tasks, including:</p>
+<p>Text can be transformed along multiple linguistic dimensions:</p>
 <ul class="simple">
-<li><p>Text Classification</p></li>
-<li><p>Information Retrieval</p></li>
-<li><p>Topic Modeling</p></li>
-<li><p>Semantic Similarity</p></li>
+<li><p><strong>Word Forms</strong> (surface character sequences)</p></li>
+<li><p><strong>Syntactic and Morphological Features</strong></p></li>
+<li><p><strong>Semantic Content</strong></p></li>
+<li><p><strong>Grammatical Relations</strong></p></li>
+<li><p><strong>Sequence Structure</strong></p></li>
 </ul>
-<p>The package natively supports both <strong>English</strong> and <strong>German</strong> tracking.</p>
-<section id="quick-start">
-<h2>Quick Start<a class="headerlink" href="#quick-start" title="Link to this heading">¶</a></h2>
+<p>The perturbation of any given dimension naturally reduces the ability of any person or model to reconstruct said text.
+<code class="docutils literal notranslate"><span class="pre">text-mallet</span></code> thus provides mechanisms to selectively erode a text’s information, producing
+representations that are less human-readable but still useful for
+machine learning tasks. Different languages rely on these dimensions differently. For example,
+English depends heavily on word order, while German relies more on
+morphological variation.</p>
+<section id="why-obfuscate-text">
+<h2>Why Obfuscate Text?<a class="headerlink" href="#why-obfuscate-text" title="Link to this heading">¶</a></h2>
+<p>Many encoder-based training tasks do not require fully reconstructable text in order to learn.
+Tasks such as text classification, semantic similarity, topic modelling, and information retrieval can often operate effectively on degraded or transformed inputs.
+This package thus enables the possible use of sensitive or copyrighted data without exposing raw text, as well as a reduced risk of reconstruction from adversarial attacks (e.g. embedding inversion) or through model outputs</p>
+<p>Rather than replacing clean data, obfuscated text is intended to
+<em>complement</em> existing datasets. Particularly for cases where there is a sufficient basis of publicly licensed data that may be accompanied by obfuscated, proprietary data in the pre-training mix.</p>
+</section>
+<section id="obfuscating-a-text">
+<h2>Obfuscating A Text<a class="headerlink" href="#obfuscating-a-text" title="Link to this heading">¶</a></h2>
 <p>Using <code class="docutils literal notranslate"><span class="pre">text-mallet</span></code> follows a simple three-step lifecycle:</p>
 <ol class="arabic simple">
 <li><p><strong>Initialise</strong> a <code class="docutils literal notranslate"><span class="pre">TMallet</span></code> instance for your target language.</p></li>
 <li><p><strong>Load</strong> an obfuscation algorithm along with its configuration.</p></li>
-<li><p><strong>Obfuscate</strong> your text execution layer.</p></li>
+<li><p><strong>Obfuscate</strong> your text, or alternatively, a column in a Hugging Face dataset.</p></li>
 </ol>
-<section id="example">
-<h3>Example<a class="headerlink" href="#example" title="Link to this heading">¶</a></h3>
+<p>You first initialise a Text Mallet instance like so:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">tmallet</span><span class="w"> </span><span class="kn">import</span> <span class="n">TMallet</span>
 </span><span data-line="2">
-</span><span data-line="3"><span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;Leipzig is the most populous city in the German state of Saxony.&quot;</span>
-</span><span data-line="4">
-</span><span data-line="5"><span class="c1"># 1. Choose algorithm and define parameters</span>
-</span><span data-line="6"><span class="n">algorithm</span> <span class="o">=</span> <span class="s2">&quot;pos-filter&quot;</span>
-</span><span data-line="7"><span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
-</span><span data-line="8">    <span class="s2">&quot;filter_type&quot;</span><span class="p">:</span> <span class="s2">&quot;retain&quot;</span><span class="p">,</span>
-</span><span data-line="9">    <span class="s2">&quot;pos_tags&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;NOUN&quot;</span><span class="p">,</span> <span class="s2">&quot;PROPN&quot;</span><span class="p">],</span>
-</span><span data-line="10">    <span class="s2">&quot;replacement_mechanism&quot;</span><span class="p">:</span> <span class="s2">&quot;default&quot;</span><span class="p">,</span>
-</span><span data-line="11"><span class="p">}</span>
-</span><span data-line="12">
-</span><span data-line="13"><span class="c1"># 2. Spin up the engine (enable GPU acceleration if available)</span>
-</span><span data-line="14"><span class="n">tmallet</span> <span class="o">=</span> <span class="n">TMallet</span><span class="p">(</span><span class="n">lang</span><span class="o">=</span><span class="s2">&quot;en&quot;</span><span class="p">,</span> <span class="n">prefer_gpu</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span data-line="15"><span class="n">tmallet</span><span class="o">.</span><span class="n">load_obfuscator</span><span class="p">(</span><span class="n">algorithm</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
-</span><span data-line="16">
-</span><span data-line="17"><span class="c1"># 3. Transform the text</span>
-</span><span data-line="18"><span class="n">obfuscated</span> <span class="o">=</span> <span class="n">tmallet</span><span class="o">.</span><span class="n">obfuscate</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
-</span><span data-line="19"><span class="nb">print</span><span class="p">(</span><span class="n">obfuscated</span><span class="p">)</span>
+</span><span data-line="3"><span class="n">tmallet</span> <span class="o">=</span> <span class="n">TMallet</span><span class="p">(</span><span class="n">lang</span><span class="o">=</span><span class="s2">&quot;en&quot;</span><span class="p">,</span> <span class="n">prefer_gpu</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">model_type</span><span class="o">=</span><span class="s2">&quot;lg&quot;</span><span class="p">)</span>
 </span></pre></div>
 </div>
-</section>
+<p>We have three initial decisions to make, (1) the language (“en” or “de), (2) whether to use a GPU if available, and (3) the type of SpaCy model to use (defaults to large, i.e. “lg”)
+We then define the algorithm and configuration:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;Leipzig is the most populous city in the German state of Saxony.&quot;</span>
+</span><span data-line="2">
+</span><span data-line="3"><span class="n">algorithm</span> <span class="o">=</span> <span class="s2">&quot;pos-filter&quot;</span>
+</span><span data-line="4"><span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
+</span><span data-line="5">    <span class="s2">&quot;filter_type&quot;</span><span class="p">:</span> <span class="s2">&quot;retain&quot;</span><span class="p">,</span>
+</span><span data-line="6">    <span class="s2">&quot;pos_tags&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;NOUN&quot;</span><span class="p">,</span> <span class="s2">&quot;PROPN&quot;</span><span class="p">],</span>
+</span><span data-line="7">    <span class="s2">&quot;replacement_mechanism&quot;</span><span class="p">:</span> <span class="s2">&quot;default&quot;</span><span class="p">,</span>
+</span><span data-line="8"><span class="p">}</span>
+</span><span data-line="9">
+</span><span data-line="10"><span class="n">tmallet</span><span class="o">.</span><span class="n">load_obfuscator</span><span class="p">(</span><span class="n">algorithm</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+</span></pre></div>
+</div>
+<p>Lastly, we can obfuscate the text simply like so:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">obfuscated</span> <span class="o">=</span> <span class="n">tmallet</span><span class="o">.</span><span class="n">obfuscate</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+</span></pre></div>
+</div>
 </section>
 <section id="available-algorithms">
 <h2>Available Algorithms<a class="headerlink" href="#available-algorithms" title="Link to this heading">¶</a></h2>
@@ -230,10 +237,10 @@ data-aria-dark="Switch to auto color mode">
   </svg>
   <span>Back to top</span>
 </button><div class="navigation flex print:hidden"><div class="navigation-prev">
-    <a href="../quickstart.html">
+    <a href="../installation.html">
       <i class="i-lucide chevron-left"></i>
       <div class="page-info">
-        <span>Previous</span><div class="title">Quick Start</div></div>
+        <span>Previous</span><div class="title">Installation</div></div>
     </a>
   </div><div class="navigation-next">
     <a href="configurations.html">
@@ -264,8 +271,8 @@ data-aria-dark="Switch to auto color mode">
     </div>
   </div>
 </footer>
-      <script src="../_static/documentation_options.js?v=d45e8c67"></script>
+      <script src="../_static/documentation_options.js?v=fd825880"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
-      <script src="../_static/shibuya.js?v=50760d75"></script></body>
+      <script src="../_static/shibuya.js?v=cac61aee"></script></body>
 </html>

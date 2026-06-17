@@ -2,11 +2,11 @@
 <html lang="en" data-accent-color="violet" data-content_root="./">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Installation - text-mallet 0.0.1 documentation</title><link rel="author" title="About these documents" href="about.html" /><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Basics" href="usage/basics.html" /><link rel="prev" title="Text Mallet Documentation" href="index.html" /><script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Installation - text-mallet 0.1.4 documentation</title><link rel="author" title="About these documents" href="about.html" /><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Quick Start" href="usage/basics.html" /><link rel="prev" title="Text Mallet Documentation" href="index.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="_static/pygments.css?v=e1a1ceaf" />
-    <link rel="stylesheet" type="text/css" href="_static/shibuya.css?v=9454f7d5" />
+    <link rel="stylesheet" type="text/css" href="_static/shibuya.css?v=44020203" />
     <link media="print" rel="stylesheet" type="text/css" href="_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,8 +17,7 @@
   --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
 }
 </style>
-    
-  <meta property="og:type" content="website"/><meta property="og:title" content="Installation"/>
+    <meta property="og:type" content="website"/><meta property="og:title" content="Installation"/>
     <meta name="twitter:card" content="summary"/>
   </head>
 <body><div class="sy-head">
@@ -58,7 +57,7 @@ data-aria-dark="Switch to auto color mode">
         <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage/basics.html">Basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/basics.html">Quick Start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage/configurations.html">Configurations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage/datasets.html">Obfuscating Datasets</a></li>
 </ul>
@@ -136,28 +135,26 @@ data-aria-dark="Switch to auto color mode">
 <h2>Standard Installation<a class="headerlink" href="#standard-installation" title="Link to this heading">¶</a></h2>
 <p>You can install the most recent release of <code class="docutils literal notranslate"><span class="pre">text-mallet</span></code> directly from PyPI using <code class="docutils literal notranslate"><span class="pre">pip</span></code>, making sure to pass the language you want to obfuscate.
 Run the following command in your terminal:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">pip<span class="w"> </span>install<span class="w"> </span>text-mallet<span class="o">[</span>en<span class="o">]</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">pip<span class="w"> </span>install<span class="w"> </span>text-mallet
 </span></pre></div>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Depending on the language you want to obfuscate, you can pass in either English, German, or both as arguments when installing text-mallet:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># for obfuscating English</span>
-</span><span data-line="2">python<span class="w"> </span>install<span class="w"> </span>text-mallet<span class="o">[</span>en<span class="o">]</span>
-</span><span data-line="3">
-</span><span data-line="4"><span class="c1"># for obfuscating German</span>
-</span><span data-line="5">python<span class="w"> </span>install<span class="w"> </span>text-mallet<span class="o">[</span>de<span class="o">]</span>
-</span><span data-line="6">
-</span><span data-line="7"><span class="c1"># for obfuscating both</span>
-</span><span data-line="8">python<span class="w"> </span>install<span class="w"> </span>text-mallet<span class="o">[</span>en,de<span class="o">]</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># For obfuscating English, download the English model you want to use</span>
+</span><span data-line="2"><span class="c1"># The default is the &quot;lg&quot; i.e. large SpaCy model:</span>
+</span><span data-line="3">python<span class="w"> </span>-m<span class="w"> </span>spacy<span class="w"> </span>download<span class="w"> </span>en_core_web_lg
+</span><span data-line="4">
+</span><span data-line="5"><span class="c1"># Or alternatively, download the model for German</span>
+</span><span data-line="6">python<span class="w"> </span>-m<span class="w"> </span>spacy<span class="w"> </span>download<span class="w"> </span>de_core_news_lg
 </span></pre></div>
 </div>
 </div>
 </section>
 <section id="verification">
 <h2>Verification<a class="headerlink" href="#verification" title="Link to this heading">¶</a></h2>
-<p>To verify that <code class="docutils literal notranslate"><span class="pre">text-mallet</span></code> was installed successfully, you can run a quick check in your terminal or Python interpreter:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import text_mallet; print(text_mallet.__version__)&quot;</span>
+<p>To verify that <code class="docutils literal notranslate"><span class="pre">text-mallet</span></code> was installed successfully, you can run a quick check in your terminal:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">pip<span class="w"> </span>show<span class="w"> </span>text-mallet
 </span></pre></div>
 </div>
 </section>
@@ -178,7 +175,7 @@ Run the following command in your terminal:</p>
     <a href="usage/basics.html">
       <div class="page-info">
         <span>Next</span>
-        <div class="title">Basics</div>
+        <div class="title">Quick Start</div>
       </div>
       <i class="i-lucide chevron-right"></i>
     </a>
@@ -203,8 +200,8 @@ Run the following command in your terminal:</p>
     </div>
   </div>
 </footer>
-      <script src="_static/documentation_options.js?v=d45e8c67"></script>
+      <script src="_static/documentation_options.js?v=fd825880"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
-      <script src="_static/shibuya.js?v=50760d75"></script></body>
+      <script src="_static/shibuya.js?v=cac61aee"></script></body>
 </html>

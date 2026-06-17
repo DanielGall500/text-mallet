@@ -2,11 +2,11 @@
 <html lang="en" data-accent-color="violet" data-content_root="./">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>text-mallet 0.0.1 documentation</title><link rel="author" title="About these documents" href="about.html" /><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Installation" href="installation.html" /><script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>text-mallet 0.1.4 documentation</title><link rel="author" title="About these documents" href="about.html" /><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Installation" href="installation.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="_static/pygments.css?v=e1a1ceaf" />
-    <link rel="stylesheet" type="text/css" href="_static/shibuya.css?v=9454f7d5" />
+    <link rel="stylesheet" type="text/css" href="_static/shibuya.css?v=44020203" />
     <link media="print" rel="stylesheet" type="text/css" href="_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,8 +17,7 @@
   --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
 }
 </style>
-    
-  <meta property="og:type" content="website"/><meta property="og:title" content="Text Mallet Documentation"/>
+    <meta property="og:type" content="website"/><meta property="og:title" content="Documentation"/>
     <meta name="twitter:card" content="summary"/>
   </head>
 <body><div class="sy-head">
@@ -88,12 +87,10 @@ data-aria-dark="Switch to auto color mode">
       <i class="i-lucide close"></i>
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#examples">Examples</a></li>
 <li><a class="reference internal" href="#contents">Contents</a><ul>
 </ul>
 </li>
-<li><a class="reference internal" href="#examples">Examples</a></li>
-<li><a class="reference internal" href="#overview">Overview</a></li>
-<li><a class="reference internal" href="#why-obfuscate-text">Why Obfuscate Text?</a></li>
 </ul>
 </div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
   </aside>
@@ -111,7 +108,7 @@ data-aria-dark="Switch to auto color mode">
         <span>/</span>
         <meta itemprop="position" content="1" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <strong itemprop="name">Text Mallet Documentation</strong>
+        <strong itemprop="name">Documentation</strong>
         <meta itemprop="position" content="2" />
       </li></ol>
     <div class="xl:hidden ml-1">
@@ -124,46 +121,33 @@ data-aria-dark="Switch to auto color mode">
 </div><div class="flex flex-col break-words justify-between">
       <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
   <article class="yue" role="main">
-          <section id="text-mallet-documentation">
-<h1>Text Mallet Documentation<a class="headerlink" href="#text-mallet-documentation" title="Link to this heading">¶</a></h1>
-<p><strong>text-mallet</strong> is a toolkit for transforming text into obfuscated or
+          <section id="documentation">
+<h1>Documentation<a class="headerlink" href="#documentation" title="Link to this heading">¶</a></h1>
+<div class="table-wrapper colwidths-given borderless docutils container">
+<table class="borderless docutils align-default">
+<colgroup>
+<col style="width: 65.0%" />
+<col style="width: 35.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><strong>text-mallet</strong> is a toolkit for transforming text into obfuscated or
 derived formats while preserving utility for downstream NLP tasks such
-as classification, retrieval, and topic modeling.</p>
-<p>The package focuses on reducing the risk of privacy or copyright
-infringement by degrading reconstructable information, while retaining task-relevant signals.</p>
-<section id="contents">
-<h2>Contents<a class="headerlink" href="#contents" title="Link to this heading">¶</a></h2>
-<div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage/basics.html">Basics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage/configurations.html">Configurations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage/datasets.html">Obfuscating Datasets</a></li>
-</ul>
+as classification, retrieval, and topic modelling.</p>
+<p>We primarily focus on preventing the risk of copyright infringement by
+degrading the information content of the text sufficiently to prevent
+reconstructability (an increasingly difficult task) while also preserving
+some utility of the texts for model training, particularly encoder-only.</p>
+<p><strong>What is a potential use case?</strong></p>
+<p>For instance, a use case is at the Deutsche National Bibliothek (German National Library),
+where they have a significant amount of text that is copyright protected and wish to
+use it in an obfuscated, non-human-readable form to build open-source classification models.</p>
+</td>
+<td><img alt="Text Mallet Logo" class="align-center" src="_images/text-mallet.png" />
+</td>
+</tr>
+</tbody>
+</table>
 </div>
-<div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">Obfuscation Methods</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="methods/structural_hier.html">Hierarchical Scramble</a></li>
-<li class="toctree-l1"><a class="reference internal" href="methods/bag_of_words.html">Linear Scramble</a></li>
-<li class="toctree-l1"><a class="reference internal" href="methods/pos_filtering.html">POS Filtering</a></li>
-<li class="toctree-l1"><a class="reference internal" href="methods/mutual_information.html">Mutual Information Filtering</a></li>
-</ul>
-</div>
-<div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">API</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Pipeline</a></li>
-</ul>
-</div>
-<div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">Project Info</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
-</ul>
-</div>
-</section>
 <section id="examples">
 <h2>Examples<a class="headerlink" href="#examples" title="Link to this heading">¶</a></h2>
 <div style="padding: 1.5rem 0; font-family: sans-serif;">
@@ -336,41 +320,40 @@ infringement by degrading reconstructable information, while retaining task-rele
 </div>
 
 </div></section>
-<section id="overview">
-<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">¶</a></h2>
-<p>Text can be transformed along multiple linguistic dimensions:</p>
-<ul class="simple">
-<li><p><strong>Word Forms</strong> (surface character sequences)</p></li>
-<li><p><strong>Syntactic and Morphological Features</strong></p></li>
-<li><p><strong>Semantic Content</strong></p></li>
-<li><p><strong>Grammatical Relations</strong></p></li>
-<li><p><strong>Sequence Structure</strong></p></li>
+<section id="contents">
+<h2>Contents<a class="headerlink" href="#contents" title="Link to this heading">¶</a></h2>
+<blockquote>
+<div><div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/basics.html">Basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/configurations.html">Configurations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage/datasets.html">Obfuscating Datasets</a></li>
 </ul>
-<p>Each of these contributes information to the final text. <code class="docutils literal notranslate"><span class="pre">text-mallet</span></code>
-provides mechanisms to selectively erode this information, producing
-representations that are less human-readable but still useful for
-machine learning tasks.</p>
-<p>Different languages rely on these dimensions differently. For example,
-English depends heavily on word order, while German relies more on
-morphological variation.</p>
-</section>
-<section id="why-obfuscate-text">
-<h2>Why Obfuscate Text?<a class="headerlink" href="#why-obfuscate-text" title="Link to this heading">¶</a></h2>
-<p>Many NLP tasks do not require fully reconstructable text. Tasks such as:</p>
-<ul class="simple">
-<li><p>Text classification</p></li>
-<li><p>Semantic similarity</p></li>
-<li><p>Topic modeling</p></li>
-<li><p>Information retrieval</p></li>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Obfuscation Methods</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="methods/structural_hier.html">Hierarchical Scramble</a></li>
+<li class="toctree-l1"><a class="reference internal" href="methods/bag_of_words.html">Linear Scramble</a></li>
+<li class="toctree-l1"><a class="reference internal" href="methods/pos_filtering.html">POS Filtering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="methods/mutual_information.html">Mutual Information Filtering</a></li>
 </ul>
-<p>can often operate effectively on degraded or transformed inputs.</p>
-<p>This package enables:</p>
-<ul class="simple">
-<li><p>Possible use of sensitive or copyrighted data without exposing raw text</p></li>
-<li><p>Reduced risk of reconstruction from adversarial attacks (e.g. embedding inversion) or thorugh model outputs</p></li>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Pipeline</a></li>
 </ul>
-<p>Rather than replacing clean data, obfuscated text is intended to
-<em>complement</em> existing datasets.</p>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Project Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
+</ul>
+</div>
+</div></blockquote>
 </section>
 </section>
 
@@ -408,8 +391,8 @@ morphological variation.</p>
     </div>
   </div>
 </footer>
-      <script src="_static/documentation_options.js?v=d45e8c67"></script>
+      <script src="_static/documentation_options.js?v=fd825880"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
-      <script src="_static/shibuya.js?v=50760d75"></script></body>
+      <script src="_static/shibuya.js?v=cac61aee"></script></body>
 </html>

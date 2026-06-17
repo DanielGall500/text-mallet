@@ -1,6 +1,35 @@
-===========
-Quick Start
-===========
+======
+Basics
+======
+
+Text can be transformed along multiple linguistic dimensions:
+
+- **Word Forms** (surface character sequences)
+- **Syntactic and Morphological Features**
+- **Semantic Content**
+- **Grammatical Relations**
+- **Sequence Structure**
+
+The perturbation of any given dimension naturally reduces the ability of any person or model to reconstruct said text.
+``text-mallet`` thus provides mechanisms to selectively erode a text's information, producing
+representations that are less human-readable but still useful for
+machine learning tasks. Different languages rely on these dimensions differently. For example,
+English depends heavily on word order, while German relies more on
+morphological variation.
+
+
+Why Obfuscate Text?
+-------------------
+
+Many encoder-based training tasks do not require fully reconstructable text in order to learn.
+Tasks such as text classification, semantic similarity, topic modelling, and information retrieval can often operate effectively on degraded or transformed inputs.
+This package thus enables the possible use of sensitive or copyrighted data without exposing raw text, as well as a reduced risk of reconstruction from adversarial attacks (e.g. embedding inversion) or through model outputs
+
+Rather than replacing clean data, obfuscated text is intended to
+*complement* existing datasets. Particularly for cases where there is a sufficient basis of publicly licensed data that may be accompanied by obfuscated, proprietary data in the pre-training mix.
+
+Obfuscating A Text
+------------------
 
 Using ``text-mallet`` follows a simple three-step lifecycle:
 
@@ -8,16 +37,21 @@ Using ``text-mallet`` follows a simple three-step lifecycle:
 2. **Load** an obfuscation algorithm along with its configuration.
 3. **Obfuscate** your text, or alternatively, a column in a Hugging Face dataset.
 
-Example
-^^^^^^^
+You first initialise a Text Mallet instance like so:
 
 .. code-block:: python
 
    from tmallet import TMallet
 
+   tmallet = TMallet(lang="en", prefer_gpu=True, model_type="lg")
+
+We have three initial decisions to make, (1) the language ("en" or "de), (2) whether to use a GPU if available, and (3) the type of SpaCy model to use (defaults to large, i.e. "lg")
+We then define the algorithm and configuration:
+
+.. code-block:: python
+
    text = "Leipzig is the most populous city in the German state of Saxony."
 
-   # 1. Choose algorithm and define parameters
    algorithm = "pos-filter"
    config = {
        "filter_type": "retain",
@@ -25,13 +59,13 @@ Example
        "replacement_mechanism": "default",
    }
 
-   # 2. Spin up the engine (enable GPU acceleration if available)
-   tmallet = TMallet(lang="en", prefer_gpu=True)
    tmallet.load_obfuscator(algorithm, config)
 
-   # 3. Transform the text
+Lastly, we can obfuscate the text simply like so:
+
+.. code-block:: python
+
    obfuscated = tmallet.obfuscate(text)
-   print(obfuscated)
 
 Available Algorithms
 --------------------

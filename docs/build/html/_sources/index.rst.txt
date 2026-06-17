@@ -1,47 +1,31 @@
-Text Mallet Documentation
-=========================
+Documentation
+=============
 
-**text-mallet** is a toolkit for transforming text into obfuscated or
-derived formats while preserving utility for downstream NLP tasks such
-as classification, retrieval, and topic modeling.
+.. list-table::
+    :widths: 65 35
+    :class: borderless
 
-The package focuses on reducing the risk of privacy or copyright
-infringement by degrading reconstructable information, while retaining task-relevant signals.
+    * - **text-mallet** is a toolkit for transforming text into obfuscated or
+        derived formats while preserving utility for downstream NLP tasks such
+        as classification, retrieval, and topic modelling.
 
-Contents
+        We primarily focus on preventing the risk of copyright infringement by
+        degrading the information content of the text sufficiently to prevent
+        reconstructability (an increasingly difficult task) while also preserving
+        some utility of the texts for model training, particularly encoder-only.
+
+
+        **What is a potential use case?**
+
+        For instance, a use case is at the Deutsche National Bibliothek (German National Library),
+        where they have a significant amount of text that is copyright protected and wish to
+        use it in an obfuscated, non-human-readable form to build open-source classification models.
+
+      - .. image:: images/text-mallet.png
+            :alt: Text Mallet Logo
+            :align: center
+
 --------
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Getting Started
-
-   installation
-   usage/basics
-   usage/configurations
-   usage/datasets
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Obfuscation Methods
-
-   methods/structural_hier
-   methods/bag_of_words
-   methods/pos_filtering
-   methods/mutual_information
-
-.. toctree::
-   :maxdepth: 2
-   :caption: API
-
-   pipeline
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Project Info
-
-   about
-
-
 Examples
 --------
 
@@ -218,44 +202,36 @@ Examples
 
     </div>
 
-
-Overview
+--------
+Contents
 --------
 
-Text can be transformed along multiple linguistic dimensions:
+    .. toctree::
+        :maxdepth: 1
+        :caption: Getting Started
 
-- **Word Forms** (surface character sequences)
-- **Syntactic and Morphological Features**
-- **Semantic Content**
-- **Grammatical Relations**
-- **Sequence Structure**
+        installation
+        usage/basics
+        usage/configurations
+        usage/datasets
 
-Each of these contributes information to the final text. ``text-mallet``
-provides mechanisms to selectively erode this information, producing
-representations that are less human-readable but still useful for
-machine learning tasks.
+    .. toctree::
+        :maxdepth: 1
+        :caption: Obfuscation Methods
 
-Different languages rely on these dimensions differently. For example,
-English depends heavily on word order, while German relies more on
-morphological variation.
+        methods/structural_hier
+        methods/bag_of_words
+        methods/pos_filtering
+        methods/mutual_information
 
+    .. toctree::
+        :maxdepth: 2
+        :caption: API
 
-Why Obfuscate Text?
--------------------
+        pipeline
 
-Many NLP tasks do not require fully reconstructable text. Tasks such as:
+    .. toctree::
+        :maxdepth: 1
+        :caption: Project Info
 
-- Text classification
-- Semantic similarity
-- Topic modeling
-- Information retrieval
-
-can often operate effectively on degraded or transformed inputs.
-
-This package enables:
-
-- Possible use of sensitive or copyrighted data without exposing raw text
-- Reduced risk of reconstruction from adversarial attacks (e.g. embedding inversion) or thorugh model outputs
-
-Rather than replacing clean data, obfuscated text is intended to
-*complement* existing datasets.
+        about
